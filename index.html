@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Smart Classroom - Final Complete System</title>
+    <title>AI Smart Classroom - Final Fixed Camera System</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -12,6 +12,7 @@
     <style>
         :root {
             --primary: #4f46e5;
+            --primary-dark: #3730a3;
             --secondary: #06b6d4;
             --bg: #f8fafc;
             --card-bg: #ffffff;
@@ -85,7 +86,7 @@
     <div id="login-screen" class="screen active">
         <div class="login-container">
             <h1>AI Smart Classroom</h1>
-            <p>પ્રીમિયમ મોબાઈલ ડેશબોર્ડ (Live Agora Stream)</p>
+            <p>રિયલ-ટાઇમ લાઈવ સ્ટ્રીમિંગ (Fixed Camera App)</p>
             
             <div class="form-group">
                 <label>ઈમેલ આઈડી</label>
@@ -113,9 +114,9 @@
         
         <div class="app-content">
             <div class="card">
-                <h3><i class="fa-solid fa-video" style="color:var(--primary)"></i> મોબાઈલ કેમેરા લાઈવ પ્રસારણ</h3>
+                <h3><i class="fa-solid fa-video" style="color:var(--primary)"></i> લાઈવ પ્રસારણ (કેમેરા અને માઇક)</h3>
                 <div class="cam-box">
-                    <div id="cam-placeholder" class="cam-placeholder"><i class="fa-solid fa-face-viewfinder" style="font-size:32px; margin-bottom:6px; color:var(--secondary)"></i><br>કેમેરા બંધ છે. શરૂ કરવા નીચે ક્લિક કરો.</div>
+                    <div id="cam-placeholder" class="cam-placeholder"><i class="fa-solid fa-face-viewfinder" style="font-size:32px; margin-bottom:6px; color:var(--secondary)"></i><br>કેમેરા બંધ છે. "Go Live" પર ક્લિક કરો.</div>
                     <div id="teacher-video"></div>
                 </div>
                 <div style="display:flex; gap:8px;">
@@ -126,9 +127,8 @@
 
             <div class="card" style="border-left: 4px solid var(--primary);">
                 <h3><i class="fa-solid fa-cloud-arrow-up" style="color:var(--primary)"></i> AI હોમવર્ક એડ & સેટઅપ</h3>
-                <p style="font-size:12px; color:var(--text-light); margin-bottom:12px;">નવું હોમવર્ક બનાવવા માટે ફોટો પાડો અથવા AI ને નિયમો (Rubrics) આપો:</p>
                 <input type="file" id="hw-file" accept="image/*" style="font-size:11px; margin-bottom:10px; width:100%;">
-                <textarea id="hw-instructions" placeholder="AI માટે સૂચનાઓ લખો (દા.ત. આ દાખલા સાચા છે કે નહીં તે 1 થી 5 માં ચકાસો)..." style="width:100%; height:60px; padding:8px; font-size:11px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:10px; outline:none; resize:none;"></textarea>
+                <textarea id="hw-instructions" placeholder="AI માટે સૂચનાઓ લખો (દા.ત. દાખલા સાચા છે કે નહીં તે ચકાસો)..." style="width:100%; height:60px; padding:8px; font-size:11px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:10px; outline:none; resize:none;"></textarea>
                 <button class="btn btn-success" onclick="publishHomework()"><i class="fa-solid fa-wand-magic-sparkles"></i> હોમવર્ક AI પર પબ્લિશ કરો</button>
             </div>
         </div>
@@ -165,21 +165,15 @@
 
             <div class="card">
                 <h3><i class="fa-solid fa-file-pen" style="color:var(--primary)"></i> હોમવર્ક સબમિટ કરો & AI ચેક</h3>
-                <p style="font-size:12px; color:var(--text-light); margin-bottom:10px;">તમારા લેસનનો ફોટો અપલોડ કરો અને ત્વરિત AI ગ્રેડ મેળવો:</p>
                 <input type="file" accept="image/*" style="font-size:11px; margin-bottom:10px; width:100%;">
                 <button class="btn" onclick="alert('AI Evaluation: હોમવર્ક સફળતાપૂર્વક ચકાસાયું! Grade: A+ (5/5)')">હોમવર્ક AI દ્વારા ચકાસો</button>
-            </div>
-
-            <div class="card" style="background:#eff6ff; border-color:#bfdbfe;">
-                <h3 style="font-size:13px; color:#1e40af;"><i class="fa-solid fa-indian-rupee-sign"></i> વાર્ષિક ખર્ચ (Annual Cost)</h3>
-                <p style="font-size:14px; font-weight:bold; color:#1e40af;">મહત્તમ ₹૧૦૦૦ / વિદ્યાર્થી / વર્ષ</p>
             </div>
         </div>
 
         <div class="bottom-nav">
             <div class="nav-item active"><i class="fa-solid fa-house"></i>હોમ</div>
-            <div class="nav-item" onclick="alert('સુરક્ષા: AES-256 Encryption & Anti-Piracy Watermark સક્રિય છે.')"><i class="fa-solid fa-shield"></i>સિક્યુરિટી</div>
-            <div class="nav-item" onclick="alert('યુનિવર્સિટી પ્રપોઝલ ડ્રાફ્ટ: મંજૂરી માટે તૈયાર.')"><i class="fa-solid fa-file-lines"></i>પ્રપોઝલ</div>
+            <div class="nav-item" onclick="alert('સુરક્ષા: AES-256 Encryption સક્રિય છે.')"><i class="fa-solid fa-shield"></i>સિક્યુરિટી</div>
+            <div class="nav-item" onclick="alert('પ્રપોઝલ ડ્રાફ્ટ: મંજૂરી માટે તૈયાર.')"><i class="fa-solid fa-file-lines"></i>પ્રપોઝલ</div>
         </div>
     </div>
 
@@ -187,10 +181,10 @@
 
 <script>
     // ==========================================
-    // AGORA SETTINGS - Your Custom App ID Added
+    // AGORA SETTINGS - Your Custom App ID 
     // ==========================================
     const APP_ID = "3344ecca2d004c64897e98dce3015b74"; // Your provided ID
-    const CHANNEL = "gtu_smart_class_final_demo"; // Unique channel name
+    const CHANNEL = "gtu_smart_class_final_demo"; 
     
     let rtc = {
         client: null,
@@ -226,8 +220,8 @@
     }
 
     async function logout() {
-        if(rtc.localAudioTrack) rtc.localAudioTrack.close();
-        if(rtc.localVideoTrack) rtc.localVideoTrack.close();
+        if(rtc.localAudioTrack) { rtc.localAudioTrack.close(); rtc.localAudioTrack = null; }
+        if(rtc.localVideoTrack) { rtc.localVideoTrack.close(); rtc.localVideoTrack = null; }
         if(rtc.client) await rtc.client.leave();
         
         localStorage.setItem('class_live_status', 'stopped');
@@ -242,38 +236,46 @@
     // ==========================================
     async function startCameraAndNotify() {
         try {
-            await rtc.client.join(APP_ID, CHANNEL, null, 1); // UID 1 for Teacher
+            // Step 1: Join the channel
+            await rtc.client.join(APP_ID, CHANNEL, null, 1);
             
-            // Create Audio and Video Tracks (Mobile Front Camera preferred)
-            rtc.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-            rtc.localVideoTrack = await AgoraRTC.createCameraVideoTrack({ encoderConfig: "360p_7" });
+            // Step 2: Request Camera & Mic Explicitly (With Error Catching)
+            try {
+                rtc.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                rtc.localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+            } catch (mediaError) {
+                alert("કેમેરા કે માઈક એક્સેસ ન મળ્યો! કારણ: " + mediaError.message + "\n\nનોંધ: બ્રાઉઝરમાં પરમિશન આપો અને લિંક https:// વાળી જ વાપરો.");
+                return; // Stop execution if camera fails
+            }
             
-            // Publish to channel
+            // Step 3: Publish to channel
             await rtc.client.publish([rtc.localAudioTrack, rtc.localVideoTrack]);
             
-            // Play in Teacher's screen
+            // Step 4: Play in Teacher's screen
             document.getElementById('cam-placeholder').style.display = 'none';
             rtc.localVideoTrack.play("teacher-video");
             
-            // Notify Student via localStorage trigger
+            // Step 5: Notify Student
             localStorage.setItem('class_live_status', 'started');
-            alert("ક્લાસ સફળતાપૂર્વક લાઈવ છે! (ઓડિયો અને વિડિયો બ્રોડકાસ્ટ થઈ રહ્યા છે)");
+            alert("સફળતા! કેમેરો અને માઈક ચાલુ થઈ ગયા છે. ક્લાસ લાઈવ છે.");
 
         } catch (error) {
             console.error(error);
-            alert("કેમેરા કે માઈક શરૂ કરવામાં ભૂલ. બ્રાઉઝર પરમિશન ચેક કરો.");
+            alert("લાઇવ સ્ટ્રીમ શરૂ કરવામાં તકલીફ: " + error.message);
         }
     }
 
     async function stopCamera() {
-        if(rtc.localAudioTrack) rtc.localAudioTrack.close();
-        if(rtc.localVideoTrack) rtc.localVideoTrack.close();
-        await rtc.client.unpublish([rtc.localAudioTrack, rtc.localVideoTrack]);
+        if(rtc.localAudioTrack) { rtc.localAudioTrack.close(); rtc.localAudioTrack = null; }
+        if(rtc.localVideoTrack) { rtc.localVideoTrack.close(); rtc.localVideoTrack = null; }
+        
+        await rtc.client.unpublish();
         await rtc.client.leave();
         
         document.getElementById('teacher-video').innerHTML = "";
         document.getElementById('cam-placeholder').style.display = 'block';
         localStorage.setItem('class_live_status', 'stopped');
+        alert("લાઇવ ક્લાસ બંધ કરી દેવાયો છે.");
     }
 
     // ==========================================
@@ -283,7 +285,6 @@
         try {
             document.getElementById('notification-toast').style.display = 'none';
             
-            // Event listener for when teacher publishes video/audio
             rtc.client.on("user-published", async (user, mediaType) => {
                 await rtc.client.subscribe(user, mediaType);
                 
@@ -291,7 +292,7 @@
                     document.getElementById('student-stream-status').style.display = 'none';
                     user.videoTrack.play("student-video");
                     
-                    // Add Anti-Piracy Watermark over video
+                    // Add Anti-Piracy Watermark
                     let watermark = document.createElement("div");
                     watermark.innerHTML = "ID: SACHUU-2026";
                     watermark.style = "position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:4px; font-size:10px; color:#ef4444; z-index:10; font-weight:bold;";
@@ -302,7 +303,6 @@
                 }
             });
 
-            // If teacher stops stream
             rtc.client.on("user-unpublished", user => {
                 document.getElementById('student-video').innerHTML = "";
                 document.getElementById('student-stream-status').style.display = 'block';
@@ -310,11 +310,11 @@
             });
 
             await rtc.client.join(APP_ID, CHANNEL, null, null);
-            alert("તમે ક્લાસમાં જોડાઈ ગયા છો. શિક્ષક લાઈવ થતાં જ વિડિયો શરૂ થશે.");
+            alert("તમે ક્લાસમાં જોડાઈ ગયા છો! શિક્ષક લાઈવ હશે તો વિડિયો દેખાશે.");
 
         } catch (error) {
             console.error(error);
-            alert("ક્લાસમાં જોડાવામાં નિષ્ફળતા.");
+            alert("ક્લાસમાં જોડાવામાં નિષ્ફળતા: " + error.message);
         }
     }
 
@@ -338,14 +338,13 @@
             let streamStatus = document.getElementById('student-stream-status');
 
             if (status === 'started') {
-                // Show notification only if video isn't playing yet
                 if(document.getElementById('student-video').innerHTML === "") {
                     if(toast) toast.style.display = 'block';
                     if(streamStatus) {
                         streamStatus.innerHTML = `<i class="fa-solid fa-video" style="font-size:32px; color:#10b981; margin-bottom:6px;"></i><br><strong style="color:#10b981;">શિક્ષક લાઈવ છે!</strong><br>નીચે 'જોડાઓ' પર ક્લિક કરો.`;
                     }
                 } else {
-                    if(toast) toast.style.display = 'none'; // hide if watching
+                    if(toast) toast.style.display = 'none'; 
                 }
             } else {
                 if(toast) toast.style.display = 'none';
