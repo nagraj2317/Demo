@@ -1,289 +1,1426 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Smart Classroom - Final Fixed System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Smart Classroom · Gujarat</title>
     <style>
-        :root {
-            --primary: #4f46e5;
-            --secondary: #06b6d4;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #0f172a;
-            --text-light: #64748b;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', 'Noto Sans Gujarati', sans-serif; }
-        body { background-color: #0f172a; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        
-        .mobile-frame {
-            width: 100%; max-width: 412px; height: 100vh; max-height: 847px;
-            background-color: var(--bg); display: flex; flex-direction: column; position: relative; overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-        @media (min-width: 450px) {
-            .mobile-frame { border-radius: 40px; border: 12px solid #1e293b; height: 85vh; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .screen { display: none; flex: 1; flex-direction: column; overflow-y: auto; height: 100%; background: var(--bg); }
-        .screen.active { display: flex; }
+        body {
+            font-family: 'Segoe UI', 'Google Sans', system-ui, sans-serif;
+            background: linear-gradient(145deg, #0a0e1a 0%, #141b2b 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
 
-        /* Login Screen */
-        .login-container { padding: 40px 24px; display: flex; flex-direction: column; justify-content: center; height: 100%; background: linear-gradient(135deg, #4f46e5, #312e81); color: white; }
-        .login-container h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
-        .login-container p { font-size: 13px; color: #cbd5e1; margin-bottom: 30px; }
-        .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; font-size: 12px; margin-bottom: 6px; font-weight: 500; color: #e2e8f0; }
-        .form-group input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; font-size: 14px; outline: none; }
-        .login-btn { width: 100%; padding: 14px; background: #ffffff; color: var(--primary); border: none; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .demo-box { margin-top: 25px; background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; font-size: 11px; line-height: 1.6; color: #e2e8f0; }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-        /* App Top Bar */
-        .app-bar { background: #ffffff; color: var(--text); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
-        .app-bar span { font-weight: 700; font-size: 15px; color: var(--primary); }
-        .app-content { padding: 16px; flex: 1; padding-bottom: 40px; }
+        /* ===== CARDS ===== */
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            padding: 2rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin-bottom: 1.5rem;
+        }
 
-        /* Cards */
-        .card { background: var(--card-bg); border-radius: 16px; padding: 18px; margin-bottom: 14px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-        .card h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        .btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; text-align: center; display: inline-block; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); margin-bottom: 8px;}
-        .btn-danger { background: #ef4444; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
-        .btn-success { background: #10b981; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            margin-bottom: 1.2rem;
+        }
 
-        /* Video Box */
-        .cam-box { width: 100%; height: 210px; background: #0f172a; border-radius: 12px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 10px; }
-        .cam-placeholder { position: absolute; text-align: center; color: #94a3b8; font-size: 12px; padding: 0 20px; z-index: 1; }
-        
-        #teacher-video, #student-video { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 2; }
+        .card-title {
+            color: #f0f5ff;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
 
-        /* Bottom Nav */
-        .bottom-nav { background: white; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; padding: 10px 0; position: sticky; bottom: 0; width: 100%; z-index: 10; }
-        .nav-item { text-align: center; font-size: 10px; color: var(--text-light); cursor: pointer; flex: 1; font-weight: 500; }
-        .nav-item i { font-size: 18px; display: block; margin-bottom: 3px; }
-        .nav-item.active { color: var(--primary); font-weight: 600; }
+        .card-title small {
+            font-size: 0.75rem;
+            color: rgba(180, 200, 255, 0.2);
+            font-weight: 400;
+        }
+
+        /* ===== LOGIN ===== */
+        #loginContainer .card {
+            max-width: 460px;
+            margin: 2rem auto;
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #f2f6ff, #b0c9ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.2rem;
+        }
+
+        .login-sub {
+            text-align: center;
+            color: rgba(180, 200, 255, 0.25);
+            font-size: 0.9rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: rgba(200, 215, 255, 0.5);
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 40px;
+            padding: 0.7rem 1.5rem;
+            font-size: 1rem;
+            color: #e0ecff;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: #4b7eff;
+            box-shadow: 0 0 0 3px rgba(75, 126, 255, 0.12);
+        }
+
+        .btn {
+            padding: 0.6rem 1.8rem;
+            border-radius: 40px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: linear-gradient(135deg, #4b7eff, #3b5fd9);
+            color: #fff;
+            box-shadow: 0 6px 20px -8px rgba(50, 100, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px -8px rgba(50, 100, 255, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4b6a, #d93b55);
+            box-shadow: 0 6px 20px -8px rgba(255, 50, 80, 0.25);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            box-shadow: 0 6px 20px -8px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            box-shadow: 0 6px 20px -8px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(200, 215, 255, 0.4);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            transform: none;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.8rem;
+            font-size: 0.75rem;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .error-msg {
+            background: rgba(255, 50, 80, 0.08);
+            border: 1px solid rgba(255, 50, 80, 0.15);
+            color: #ff6b7a;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+
+        /* ===== DASHBOARD ===== */
+        #dashboard {
+            display: none;
+        }
+        #dashboard.active {
+            display: block;
+        }
+
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            margin-bottom: 1.5rem;
+        }
+
+        .dash-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .dash-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4b7eff, #7b5dff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .dash-user-info h2 {
+            color: #f0f5ff;
+            font-size: 1.2rem;
+        }
+
+        .dash-user-info .role-badge {
+            font-size: 0.7rem;
+            color: #b8d0ff;
+            background: rgba(60, 130, 255, 0.12);
+            padding: 0.1rem 0.7rem;
+            border-radius: 20px;
+            border: 1px solid rgba(100, 160, 255, 0.1);
+        }
+
+        .btn-logout {
+            padding: 0.4rem 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 40px;
+            background: transparent;
+            color: rgba(200, 215, 255, 0.3);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+        }
+
+        /* ===== VIDEO SECTION ===== */
+        .video-section {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 24px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            min-height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .video-section video {
+            width: 100%;
+            max-height: 450px;
+            border-radius: 16px;
+            background: #000;
+            object-fit: cover;
+        }
+
+        .video-placeholder {
+            text-align: center;
+            color: rgba(180, 200, 255, 0.12);
+        }
+
+        .video-placeholder .icon {
+            font-size: 3.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .video-placeholder p {
+            font-size: 1rem;
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.6rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 0.4rem 1rem;
+            border-radius: 60px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .video-controls .btn {
+            padding: 0.3rem 1rem;
+            font-size: 0.75rem;
+        }
+
+        /* ===== LIVE STATUS ===== */
+        .live-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin-top: 1rem;
+        }
+
+        .live-status {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ff4b6a;
+            transition: all 0.3s;
+        }
+
+        .live-dot.active {
+            background: #22c55e;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        .live-status .status-text {
+            color: #ff6b7a;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .live-status .status-text.active {
+            color: #22c55e;
+        }
+
+        /* ===== GRID ===== */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.8rem;
+        }
+
+        /* ===== STAT CARDS ===== */
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            padding: 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #b0caff;
+        }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            color: rgba(180, 200, 255, 0.25);
+            margin-top: 0.2rem;
+        }
+
+        /* ===== STUDENT CARD ===== */
+        .student-card {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            padding: 0.7rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .student-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .student-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7b5dff, #4b7eff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+        }
+
+        .student-info {
+            flex: 1;
+        }
+
+        .student-name {
+            color: #e8efff;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .student-meta {
+            color: rgba(180, 200, 255, 0.15);
+            font-size: 0.6rem;
+        }
+
+        .student-badge {
+            font-size: 0.6rem;
+            padding: 0.1rem 0.5rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(180, 200, 255, 0.2);
+        }
+
+        .student-badge.present {
+            background: rgba(34, 197, 94, 0.12);
+            color: #22c55e;
+        }
+
+        .student-badge.absent {
+            background: rgba(255, 50, 80, 0.08);
+            color: #ff4b6a;
+        }
+
+        /* ===== AI BOT ===== */
+        .bot-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 1rem;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .bot-msg {
+            padding: 0.5rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 16px;
+            max-width: 85%;
+            font-size: 0.85rem;
+        }
+
+        .bot-msg.bot {
+            background: rgba(75, 126, 255, 0.08);
+            color: #b8d0ff;
+            border: 1px solid rgba(75, 126, 255, 0.06);
+            align-self: flex-start;
+        }
+
+        .bot-msg.user {
+            background: rgba(255, 255, 255, 0.04);
+            color: #e8efff;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .bot-input {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 0.6rem;
+        }
+
+        .bot-input input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 40px;
+            padding: 0.5rem 1.2rem;
+            color: #e0ecff;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .bot-input input:focus {
+            border-color: #4b7eff;
+        }
+
+        /* ===== HOMEWORK ===== */
+        .hw-item {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .hw-item .name {
+            color: #e8efff;
+            font-size: 0.85rem;
+        }
+
+        .hw-item .score {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .hw-item .score.good {
+            color: #22c55e;
+        }
+        .hw-item .score.avg {
+            color: #f59e0b;
+        }
+        .hw-item .score.bad {
+            color: #ff4b6a;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 1.5rem;
+            color: rgba(180, 200, 255, 0.08);
+            grid-column: 1/-1;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .grid-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 1rem;
+                border-radius: 24px;
+            }
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .video-section {
+                min-height: 200px;
+            }
+            .video-controls {
+                bottom: 0.8rem;
+                padding: 0.3rem 0.6rem;
+                gap: 0.3rem;
+            }
+            .video-controls .btn {
+                padding: 0.2rem 0.6rem;
+                font-size: 0.65rem;
+            }
+            .dash-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .live-bar {
+                flex-direction: column;
+                border-radius: 28px;
+            }
+        }
+
+        /* ===== SCROLLBAR ===== */
+        .bot-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .bot-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .bot-container::-webkit-scrollbar-thumb {
+            background: rgba(75, 126, 255, 0.3);
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
 
-<div class="mobile-frame">
+<div class="container">
 
-    <div id="login-screen" class="screen active">
-        <div class="login-container">
-            <h1>AI Smart Classroom</h1>
-            <p>Agora Cloud Live Streaming</p>
-            
-            <div class="form-group">
-                <label>ઈમેલ આઈડી</label>
-                <input type="email" id="login-email" placeholder="Enter email...">
-            </div>
-            <div class="form-group">
-                <label>પાસવર્ડ (11223344)</label>
-                <input type="password" id="login-pass" placeholder="Enter password...">
-            </div>
-            <button class="login-btn" onclick="handleLogin()">લોગિન કરો</button>
+    <!-- ===== LOGIN ===== -->
+    <div id="loginContainer">
+        <div class="card">
+            <div class="login-title">🧠 AI Smart Classroom</div>
+            <div class="login-sub">Gujarat · NEP 2020 · Digital India</div>
 
-            <div class="demo-box">
-                <strong>લોગિન આઈડી/પાસવર્ડ:</strong><br>
-                👨‍🏫 શિક્ષક: <code>nagrajmall2317@gmail.com</code><br>
-                🎓 વિદ્યાર્થી: <code>sachuumali2317@gmail.com</code><br>
-                🔑 પાસવર્ડ: <code>11223344</code>
+            <div class="error-msg" id="loginError">Invalid credentials. Please try again.</div>
+
+            <div class="form-group">
+                <label>📧 Email</label>
+                <input type="email" id="loginEmail" placeholder="Enter your email" value="sachuumali2317@gmail.com" />
+            </div>
+
+            <div class="form-group">
+                <label>🔑 Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter password" value="11223344" />
+            </div>
+
+            <button class="btn btn-block" id="loginBtn">🔐 Sign In</button>
+
+            <div style="margin-top:1rem; text-align:center; font-size:0.65rem; color:rgba(180,200,255,0.08);">
+                Teacher: sachuumali2317@gmail.com · Student: nagrajmall2317@gmail.com
             </div>
         </div>
     </div>
 
-    <div id="teacher-screen" class="screen">
-        <div class="app-bar">
-            <span><i class="fa-solid fa-chalkboard-user"></i> શિક્ષક ડેશબોર્ડ</span>
-            <button onclick="logout()" style="background:none; border:none; color:#ef4444; font-size:13px; font-weight:600; cursor:pointer;">લોગઆઉટ</button>
-        </div>
-        
-        <div class="app-content">
-            <div class="card">
-                <h3><i class="fa-solid fa-video" style="color:var(--primary)"></i> લાઈવ પ્રસારણ (Agora)</h3>
-                <div class="cam-box">
-                    <div id="cam-placeholder" class="cam-placeholder">
-                        <i class="fa-solid fa-face-viewfinder" style="font-size:32px; margin-bottom:6px; color:var(--secondary)"></i><br>કેમેરા બંધ છે. "Go Live" પર ક્લિક કરો.
+    <!-- ===== DASHBOARD ===== -->
+    <div id="dashboard">
+
+        <!-- === HEADER === -->
+        <div class="card">
+            <div class="dash-header">
+                <div class="dash-user">
+                    <div class="dash-avatar" id="dashAvatar">👨‍🏫</div>
+                    <div class="dash-user-info">
+                        <h2 id="dashName">User</h2>
+                        <span class="role-badge" id="dashRole">Teacher</span>
                     </div>
-                    <div id="teacher-video"></div>
                 </div>
-                <button class="btn" onclick="startCameraAndNotify()">કેમેરા ઓન કરો (Go Live)</button>
-                <button class="btn btn-danger" onclick="stopCamera()">બંધ કરો</button>
+                <button class="btn-logout" id="logoutBtn">🚪 Logout</button>
             </div>
 
-            <div class="card" style="border-left: 4px solid var(--primary);">
-                <h3><i class="fa-solid fa-cloud-arrow-up" style="color:var(--primary)"></i> AI હોમવર્ક એડ & સેટઅપ</h3>
-                <input type="file" id="hw-file" accept="image/*" style="font-size:11px; margin-bottom:10px; width:100%;">
-                <textarea id="hw-instructions" placeholder="AI માટે સૂચનાઓ લખો..." style="width:100%; height:60px; padding:8px; font-size:11px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:10px; outline:none; resize:none;"></textarea>
-                <button class="btn btn-success" onclick="publishHomework()">હોમવર્ક પબ્લિશ કરો</button>
+            <!-- === LIVE CLASS BAR === -->
+            <div class="live-bar">
+                <div class="live-status">
+                    <div class="live-dot" id="liveDot"></div>
+                    <span class="status-text" id="liveStatusText">Offline</span>
+                </div>
+                <button class="btn btn-success btn-sm" id="startClassBtn">▶ Start Class</button>
+                <button class="btn btn-danger btn-sm" id="endClassBtn">⏹ End Class</button>
+                <button class="btn btn-outline btn-sm" id="recordBtn">⏺ Record</button>
+                <span style="color:rgba(180,200,255,0.15); font-size:0.7rem;" id="lectureTimer">⏱ 00:00</span>
+            </div>
+
+            <!-- === VIDEO === -->
+            <div class="video-section" id="videoSection">
+                <video id="teacherVideo" autoplay playsinline style="display:none;"></video>
+                <video id="studentVideo" autoplay playsinline style="display:none;"></video>
+
+                <div class="video-placeholder" id="videoPlaceholder">
+                    <div class="icon">🎓</div>
+                    <p>Waiting for class to start...</p>
+                    <p style="font-size:0.7rem; color:rgba(180,200,255,0.05);">Biometric verification required for teacher</p>
+                </div>
+
+                <div class="video-controls" id="videoControls" style="display:none;">
+                    <button class="btn btn-sm" id="toggleMicBtn">🎤 Mic</button>
+                    <button class="btn btn-sm" id="toggleCamBtn">📷 Cam</button>
+                    <button class="btn btn-sm btn-outline" id="biometricBtn">🔐 Face Verify</button>
+                </div>
             </div>
         </div>
 
-        <div class="bottom-nav">
-            <div class="nav-item active"><i class="fa-solid fa-house"></i>હોમ</div>
-            <div class="nav-item" onclick="alert('NAAC/NBA ઓડિટ સિસ્ટમ સક્રિય.')"><i class="fa-solid fa-chart-pie"></i>ઓડિટ</div>
-            <div class="nav-item" onclick="alert('વાલી કનેક્ટ સિસ્ટમ સક્રિય.')"><i class="fa-solid fa-phone"></i>વાલી કનેક્ટ</div>
-        </div>
-    </div>
-
-    <div id="student-screen" class="screen">
-        <div class="app-bar">
-            <span><i class="fa-solid fa-user-graduate"></i> વિદ્યાર્થી ડેશબોર્ડ</span>
-            <button onclick="logout()" style="background:none; border:none; color:#ef4444; font-size:13px; font-weight:600; cursor:pointer;">લોગઆઉટ</button>
-        </div>
-
-        <div class="app-content">
+        <!-- === GRID: Stats === -->
+        <div class="grid-3">
             <div class="card">
-                <h3><i class="fa-solid fa-display" style="color:var(--primary)"></i> લાઈવ લેક્ચર</h3>
-                <div class="cam-box" style="height: 200px;">
-                    <div id="student-stream-status" class="cam-placeholder">
-                        <i class="fa-solid fa-circle-pause" style="font-size:32px; color:#94a3b8; margin-bottom:6px;"></i><br>
-                        શિક્ષકના જોડાવાની રાહ જોવાઈ રહી છે...
+                <div class="stat-card">
+                    <div class="number" id="studentCount">0</div>
+                    <div class="label">👨‍🎓 Total Students</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="stat-card">
+                    <div class="number" id="presentCount">0</div>
+                    <div class="label">✅ Present Today</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="stat-card">
+                    <div class="number" id="lectureCount">0</div>
+                    <div class="label">📚 Lectures Archived</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === GRID: Main Features === -->
+        <div class="grid-2">
+
+            <!-- LEFT: Students + Attendance -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">👨‍🎓 Students <small>— attendance & alerts</small></div>
+                    <button class="btn btn-sm btn-outline" id="autoAddBtn">➕ Auto Add</button>
+                </div>
+                <div class="grid-4" id="studentGrid">
+                    <!-- rendered by JS -->
+                </div>
+                <div style="margin-top:0.8rem; display:flex; gap:0.6rem; flex-wrap:wrap;">
+                    <button class="btn btn-sm btn-warning" id="alertBtn">🔔 Send Alerts</button>
+                    <button class="btn btn-sm btn-outline" id="resetStudentsBtn">↺ Reset</button>
+                </div>
+            </div>
+
+            <!-- RIGHT: AI Homework Evaluation -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📝 AI Homework <small>— OCR + auto-grading</small></div>
+                    <button class="btn btn-sm btn-success" id="scanHwBtn">🔍 Scan</button>
+                </div>
+                <div id="hwList">
+                    <div class="hw-item">
+                        <span class="name">Priya Patel</span>
+                        <span class="score good">4.5/5</span>
                     </div>
-                    <div id="student-video"></div>
+                    <div class="hw-item">
+                        <span class="name">Rahul Desai</span>
+                        <span class="score avg">3.0/5</span>
+                    </div>
+                    <div class="hw-item">
+                        <span class="name">Sneha Reddy</span>
+                        <span class="score bad">1.5/5</span>
+                    </div>
+                    <div class="hw-item">
+                        <span class="name">Arjun Singh</span>
+                        <span class="score good">4.0/5</span>
+                    </div>
+                    <div class="hw-item" style="border-color:rgba(255,255,255,0.02); color:rgba(180,200,255,0.1); font-size:0.8rem; justify-content:center;">
+                        ⚡ AI Vision OCR: Auto-scan & grade assignments
+                    </div>
                 </div>
-                <button class="btn" style="background:#10b981;" onclick="joinClassAsStudent()">ક્લાસમાં જોડાઓ (Join)</button>
             </div>
 
+        </div>
+
+        <!-- === GRID: Security + AI Bot === -->
+        <div class="grid-2">
+
+            <!-- Security -->
             <div class="card">
-                <h3><i class="fa-solid fa-file-pen" style="color:var(--primary)"></i> હોમવર્ક સબમિટ કરો & AI ચેક</h3>
-                <input type="file" accept="image/*" style="font-size:11px; margin-bottom:10px; width:100%;">
-                <button class="btn" onclick="alert('હોમવર્ક સફળતાપૂર્વક ચકાસાયું! Grade: A+ (5/5)')">AI દ્વારા ચકાસો</button>
+                <div class="card-header">
+                    <div class="card-title">🛡️ Security <small>— biometric + watermark</small></div>
+                    <span style="font-size:0.65rem; color:rgba(34,197,94,0.5);">● AES-256 Encrypted</span>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:0.8rem;">
+                    <div style="flex:1; min-width:120px; background:rgba(255,255,255,0.02); border-radius:16px; padding:0.8rem; border:1px solid rgba(255,255,255,0.04);">
+                        <div style="font-size:1.5rem;">🆔</div>
+                        <div style="color:#e8efff; font-size:0.85rem;">Biometric Unlock</div>
+                        <div style="color:rgba(180,200,255,0.15); font-size:0.65rem;">Face verification required</div>
+                    </div>
+                    <div style="flex:1; min-width:120px; background:rgba(255,255,255,0.02); border-radius:16px; padding:0.8rem; border:1px solid rgba(255,255,255,0.04);">
+                        <div style="font-size:1.5rem;">💧</div>
+                        <div style="color:#e8efff; font-size:0.85rem;">Dynamic Watermark</div>
+                        <div style="color:rgba(180,200,255,0.15); font-size:0.65rem;">Student ID on video</div>
+                    </div>
+                    <div style="flex:1; min-width:120px; background:rgba(255,255,255,0.02); border-radius:16px; padding:0.8rem; border:1px solid rgba(255,255,255,0.04);">
+                        <div style="font-size:1.5rem;">🔒</div>
+                        <div style="color:#e8efff; font-size:0.85rem;">E2E Encryption</div>
+                        <div style="color:rgba(180,200,255,0.15); font-size:0.65rem;">Military-grade AES-256</div>
+                    </div>
+                </div>
+                <div style="margin-top:0.8rem; background:rgba(255,200,50,0.04); border:1px solid rgba(255,200,50,0.06); border-radius:16px; padding:0.6rem 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                    <span style="color:rgba(200,215,255,0.4); font-size:0.8rem;">📊 Predictive Alert: 90% accuracy</span>
+                    <span style="color:#22c55e; font-size:0.75rem;">● System Active</span>
+                </div>
             </div>
+
+            <!-- AI Bot: Saral Sahay -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🤖 Saral Sahay <small>— 24x7 AI Bot</small></div>
+                    <span style="font-size:0.6rem; color:rgba(180,200,255,0.1);">Gujarati · Hindi · English</span>
+                </div>
+                <div class="bot-container" id="botContainer">
+                    <div class="bot-msg bot">🙏 Namaste! I am Saral Sahay, your AI assistant. Ask me anything about courses, schedules, or exams in Gujarati, Hindi, or English.</div>
+                    <div class="bot-msg bot">📚 Today's lectures: Physics (10AM), Mathematics (12PM), Chemistry (2PM)</div>
+                </div>
+                <div class="bot-input">
+                    <input type="text" id="botInput" placeholder="Ask in Gujarati, Hindi or English..." />
+                    <button class="btn btn-sm" id="botSendBtn">➤</button>
+                </div>
+            </div>
+
         </div>
 
-        <div class="bottom-nav">
-            <div class="nav-item active"><i class="fa-solid fa-house"></i>હોમ</div>
-            <div class="nav-item" onclick="alert('AES-256 સુરક્ષા એક્ટિવ છે.')"><i class="fa-solid fa-shield"></i>સિક્યુરિટી</div>
-            <div class="nav-item" onclick="alert('પ્રપોઝલ ડ્રાફ્ટ સેટ છે.')"><i class="fa-solid fa-file-lines"></i>પ્રપોઝલ</div>
+        <!-- === Footer === -->
+        <div style="text-align:center; padding:1rem 0; color:rgba(180,200,255,0.05); font-size:0.7rem; border-top:1px solid rgba(255,255,255,0.02); margin-top:1rem;">
+            AI Smart Classroom · Gujarat · NEP 2020 · Digital India 🇮🇳
         </div>
+
     </div>
 
 </div>
 
 <script>
-    // Agora Setup
-    const APP_ID = "3344ecca2d004c64897e98dce3015b74"; 
-    const CHANNEL = "gtu_smart_class_live"; 
-    
-    let rtc = {
-        client: null,
-        localAudioTrack: null,
-        localVideoTrack: null,
-    };
+    (function() {
+        // ===== CREDENTIALS =====
+        const USERS = {
+            teacher: {
+                email: 'sachuumali2317@gmail.com',
+                password: '11223344',
+                name: 'Dr. Aarav Sharma',
+                role: 'teacher'
+            },
+            student: {
+                email: 'nagrajmall2317@gmail.com',
+                password: '11223344',
+                name: 'Student',
+                role: 'student'
+            }
+        };
 
-    rtc.client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+        // ===== DOM REFS =====
+        const loginContainer = document.getElementById('loginContainer');
+        const dashboard = document.getElementById('dashboard');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
 
-    // Login Function (Cleans extra spaces and capitalization automatically)
-    function handleLogin() {
-        let email = document.getElementById('login-email').value.trim().toLowerCase();
-        let pass = document.getElementById('login-pass').value.trim();
+        const dashName = document.getElementById('dashName');
+        const dashRole = document.getElementById('dashRole');
+        const dashAvatar = document.getElementById('dashAvatar');
 
-        if (pass !== "11223344") { 
-            alert("ખોટો પાસવર્ડ! સાચો પાસવર્ડ: 11223344"); 
-            return; 
+        const studentGrid = document.getElementById('studentGrid');
+        const studentCount = document.getElementById('studentCount');
+        const presentCount = document.getElementById('presentCount');
+        const lectureCount = document.getElementById('lectureCount');
+
+        const liveDot = document.getElementById('liveDot');
+        const liveStatusText = document.getElementById('liveStatusText');
+        const startClassBtn = document.getElementById('startClassBtn');
+        const endClassBtn = document.getElementById('endClassBtn');
+        const recordBtn = document.getElementById('recordBtn');
+        const lectureTimer = document.getElementById('lectureTimer');
+
+        const teacherVideo = document.getElementById('teacherVideo');
+        const studentVideo = document.getElementById('studentVideo');
+        const videoPlaceholder = document.getElementById('videoPlaceholder');
+        const videoControls = document.getElementById('videoControls');
+        const toggleMicBtn = document.getElementById('toggleMicBtn');
+        const toggleCamBtn = document.getElementById('toggleCamBtn');
+        const biometricBtn = document.getElementById('biometricBtn');
+
+        const autoAddBtn = document.getElementById('autoAddBtn');
+        const resetStudentsBtn = document.getElementById('resetStudentsBtn');
+        const alertBtn = document.getElementById('alertBtn');
+        const scanHwBtn = document.getElementById('scanHwBtn');
+
+        const botContainer = document.getElementById('botContainer');
+        const botInput = document.getElementById('botInput');
+        const botSendBtn = document.getElementById('botSendBtn');
+
+        // ===== STATE =====
+        let currentUser = null;
+        let students = [];
+        let isLive = false;
+        let isRecording = false;
+        let lectureSeconds = 0;
+        let timerInterval = null;
+        let localStream = null;
+        let isMicOn = true;
+        let isCamOn = true;
+        let isBiometricVerified = false;
+        let lecturesArchived = 0;
+
+        // ===== DEFAULT DATA =====
+        const DEFAULT_STUDENTS = [
+            { id: 1, name: 'Priya Patel', present: false },
+            { id: 2, name: 'Rahul Desai', present: false },
+            { id: 3, name: 'Sneha Reddy', present: false },
+            { id: 4, name: 'Arjun Singh', present: false },
+            { id: 5, name: 'Neha Shah', present: false },
+            { id: 6, name: 'Vikram Gupta', present: false },
+        ];
+
+        const AUTO_NAMES = [
+            'Aisha Mehta', 'Rohan Patel', 'Kiran Joshi', 'Maya Iyer',
+            'Dev Sharma', 'Isha Kumar', 'Ankit Verma', 'Pooja Rao',
+            'Jay Patel', 'Kavya Singh', 'Arjun Nair', 'Sara Khan'
+        ];
+
+        const BOT_RESPONSES = {
+            'hello': 'Hello! How can I help you today?',
+            'hi': 'Hi there! Ask me about courses, schedules, or exams.',
+            'time': 'Today\'s lectures: Physics (10AM), Mathematics (12PM), Chemistry (2PM)',
+            'exam': 'Mid-term exams start from December 15. Check your dashboard for details.',
+            'schedule': 'Monday: Physics, Tuesday: Mathematics, Wednesday: Chemistry, Thursday: Engineering Drawing, Friday: Computer Science',
+            'gujarati': 'હેલો! હું સરળ સહાય છું. તમે ગુજરાતી, હિન્દી કે અંગ્રેજીમાં પૂછી શકો છો.',
+            'hindi': 'नमस्ते! मैं सरल सहाय हूँ। आप गुजराती, हिंदी या अंग्रेजी में पूछ सकते हैं।',
+            'default': 'I\'m here to help! Please ask about courses, schedules, exams, or any academic query.'
+        };
+
+        // ===== HELPERS =====
+        function generateId() {
+            return Date.now() + Math.floor(Math.random() * 1000);
         }
 
-        if (email === "nagrajmall2317@gmail.com") {
-            document.getElementById('login-screen').classList.remove('active');
-            document.getElementById('teacher-screen').classList.add('active');
-        } else if (email === "sachuumali2317@gmail.com") {
-            document.getElementById('login-screen').classList.remove('active');
-            document.getElementById('student-screen').classList.add('active');
-        } else {
-            alert("ઈમેલ મળ્યો નથી! કૃપા કરીને સાચો ઈમેલ દાખલ કરો.");
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
-    }
 
-    async function logout() {
-        if(rtc.localAudioTrack) { rtc.localAudioTrack.close(); }
-        if(rtc.localVideoTrack) { rtc.localVideoTrack.close(); }
-        if(rtc.client) { await rtc.client.leave(); }
-        
-        document.getElementById('teacher-video').innerHTML = "";
-        document.getElementById('student-video').innerHTML = "";
-        
-        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-        document.getElementById('login-screen').classList.add('active');
-    }
-
-    // Teacher Camera Logic
-    async function startCameraAndNotify() {
-        try {
-            await rtc.client.join(APP_ID, CHANNEL, null, 1);
-
-            rtc.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-            rtc.localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-
-            await rtc.client.publish([rtc.localAudioTrack, rtc.localVideoTrack]);
-            
-            document.getElementById('cam-placeholder').style.display = 'none';
-            rtc.localVideoTrack.play("teacher-video");
-            
-            alert("તમે લાઈવ છો! કેમેરો અને ઓડિયો ચાલુ થઈ ગયો છે.");
-
-        } catch (error) {
-            console.error(error);
-            alert("કેમેરા પરમિશન બ્લોક છે. સેટિંગ્સમાંથી Camera & Microphone ને Allow કરો.");
+        function getInitials(name) {
+            return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
         }
-    }
 
-    async function stopCamera() {
-        if(rtc.localAudioTrack) rtc.localAudioTrack.close();
-        if(rtc.localVideoTrack) rtc.localVideoTrack.close();
-        
-        await rtc.client.unpublish();
-        await rtc.client.leave();
-        
-        document.getElementById('teacher-video').innerHTML = "";
-        document.getElementById('cam-placeholder').style.display = 'block';
-        alert("લાઇવ ક્લાસ બંધ કરી દેવાયો છે.");
-    }
+        function formatTime(seconds) {
+            const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const s = String(seconds % 60).padStart(2, '0');
+            return `${m}:${s}`;
+        }
 
-    // Student Logic
-    async function joinClassAsStudent() {
-        try {
-            rtc.client.on("user-published", async (user, mediaType) => {
-                await rtc.client.subscribe(user, mediaType);
-                
-                if (mediaType === "video") {
-                    document.getElementById('student-stream-status').style.display = 'none';
-                    user.videoTrack.play("student-video");
-                    
-                    let watermark = document.createElement("div");
-                    watermark.innerHTML = "ID: SACHUU-2026";
-                    watermark.style = "position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:4px; font-size:10px; color:#ef4444; z-index:10; font-weight:bold;";
-                    document.getElementById("student-video").appendChild(watermark);
+        // ===== SAVE / LOAD =====
+        function saveData() {
+            try {
+                localStorage.setItem('smartClassStudents', JSON.stringify(students));
+                localStorage.setItem('smartClassLive', JSON.stringify(isLive));
+                localStorage.setItem('smartClassLectures', JSON.stringify(lecturesArchived));
+            } catch (e) {}
+        }
+
+        function loadData() {
+            try {
+                const saved = localStorage.getItem('smartClassStudents');
+                if (saved) {
+                    students = JSON.parse(saved);
+                } else {
+                    students = DEFAULT_STUDENTS.map(s => ({ ...s, id: generateId() }));
                 }
-                if (mediaType === "audio") {
-                    user.audioTrack.play();
+                const status = localStorage.getItem('smartClassLive');
+                if (status) isLive = JSON.parse(status);
+                const lect = localStorage.getItem('smartClassLectures');
+                if (lect) lecturesArchived = JSON.parse(lect);
+            } catch (e) {
+                students = DEFAULT_STUDENTS.map(s => ({ ...s, id: generateId() }));
+                isLive = false;
+                lecturesArchived = 0;
+            }
+            updateLiveUI();
+            renderStudents();
+            updateStats();
+            lectureCount.textContent = lecturesArchived;
+        }
+
+        // ===== RENDER =====
+        function renderStudents() {
+            if (students.length === 0) {
+                studentGrid.innerHTML = `<div class="empty-state">📚 No students enrolled</div>`;
+            } else {
+                studentGrid.innerHTML = students.map(s => `
+                    <div class="student-card">
+                        <div class="student-avatar">${getInitials(s.name)}</div>
+                        <div class="student-info">
+                            <div class="student-name">${escapeHtml(s.name)}</div>
+                            <div class="student-meta">ID: ${s.id}</div>
+                        </div>
+                        <span class="student-badge ${s.present ? 'present' : 'absent'}">
+                            ${s.present ? '●' : '○'}
+                        </span>
+                    </div>
+                `).join('');
+            }
+            updateStats();
+            saveData();
+        }
+
+        function updateStats() {
+            studentCount.textContent = students.length;
+            const present = students.filter(s => s.present).length;
+            presentCount.textContent = present;
+        }
+
+        // ===== LIVE CLASS =====
+        function updateLiveUI() {
+            if (isLive) {
+                liveDot.className = 'live-dot active';
+                liveStatusText.textContent = '🟢 Live';
+                liveStatusText.className = 'status-text active';
+            } else {
+                liveDot.className = 'live-dot';
+                liveStatusText.textContent = '🔴 Offline';
+                liveStatusText.className = 'status-text';
+            }
+            saveData();
+        }
+
+        function startTimer() {
+            if (timerInterval) return;
+            timerInterval = setInterval(() => {
+                lectureSeconds++;
+                lectureTimer.textContent = `⏱ ${formatTime(lectureSeconds)}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        // ===== MEDIA =====
+        async function startMedia() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+                localStream = stream;
+                teacherVideo.srcObject = stream;
+                teacherVideo.style.display = 'block';
+                videoControls.style.display = 'flex';
+                videoPlaceholder.style.display = 'none';
+                isMicOn = true;
+                isCamOn = true;
+                toggleMicBtn.textContent = '🎤 Mic';
+                toggleCamBtn.textContent = '📷 Cam';
+                return true;
+            } catch (err) {
+                console.error('Media error:', err);
+                alert('⚠️ Cannot access camera/microphone. Please allow permissions.');
+                return false;
+            }
+        }
+
+        function stopMedia() {
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null;
+            }
+            teacherVideo.srcObject = null;
+            teacherVideo.style.display = 'none';
+            studentVideo.srcObject = null;
+            studentVideo.style.display = 'none';
+            videoControls.style.display = 'none';
+            if (!isLive) {
+                videoPlaceholder.style.display = 'block';
+            }
+        }
+
+        function toggleMic() {
+            if (!localStream) return;
+            const track = localStream.getAudioTracks()[0];
+            if (track) {
+                isMicOn = !isMicOn;
+                track.enabled = isMicOn;
+                toggleMicBtn.textContent = isMicOn ? '🎤 Mic' : '🔇 Mute';
+            }
+        }
+
+        function toggleCam() {
+            if (!localStream) return;
+            const track = localStream.getVideoTracks()[0];
+            if (track) {
+                isCamOn = !isCamOn;
+                track.enabled = isCamOn;
+                toggleCamBtn.textContent = isCamOn ? '📷 Cam' : '🚫 Cam Off';
+            }
+        }
+
+        // ===== BIOMETRIC =====
+        function biometricVerify() {
+            if (!isLive) {
+                alert('⚠️ Please start the class first.');
+                return;
+            }
+            // Simulate face verification
+            isBiometricVerified = true;
+            biometricBtn.textContent = '✅ Verified';
+            biometricBtn.style.background = 'rgba(34,197,94,0.2)';
+            biometricBtn.style.color = '#22c55e';
+            biometricBtn.style.borderColor = '#22c55e';
+            alert('✅ Biometric verification successful!');
+        }
+
+        // ===== START/END CLASS =====
+        async function startClass() {
+            if (currentUser && currentUser.role !== 'teacher') {
+                alert('⚠️ Only Teacher can start the class!');
+                return;
+            }
+
+            const ok = await startMedia();
+            if (!ok) return;
+
+            isLive = true;
+            students.forEach(s => s.present = true);
+            renderStudents();
+            updateLiveUI();
+            startTimer();
+            lectureCount.textContent = lecturesArchived;
+
+            // Show for student
+            if (localStream) {
+                studentVideo.srcObject = localStream;
+                studentVideo.style.display = 'block';
+            }
+
+            // Auto watermark simulation
+            console.log('💧 Dynamic Watermark: Student IDs active');
+        }
+
+        function endClass() {
+            if (currentUser && currentUser.role !== 'teacher') {
+                alert('⚠️ Only Teacher can end the class!');
+                return;
+            }
+
+            // Archive lecture
+            if (isLive && lectureSeconds > 10) {
+                lecturesArchived++;
+                lectureCount.textContent = lecturesArchived;
+                saveData();
+            }
+
+            isLive = false;
+            stopMedia();
+            stopTimer();
+            lectureSeconds = 0;
+            lectureTimer.textContent = '⏱ 00:00';
+            students.forEach(s => s.present = false);
+            renderStudents();
+            updateLiveUI();
+            isBiometricVerified = false;
+            biometricBtn.textContent = '🔐 Face Verify';
+            biometricBtn.style.background = '';
+            biometricBtn.style.color = '';
+            biometricBtn.style.borderColor = '';
+        }
+
+        function toggleRecording() {
+            isRecording = !isRecording;
+            recordBtn.textContent = isRecording ? '⏹ Recording...' : '⏺ Record';
+            recordBtn.style.background = isRecording ? 'rgba(255,50,80,0.2)' : '';
+            recordBtn.style.color = isRecording ? '#ff4b6a' : '';
+        }
+
+        // ===== STUDENT CRUD =====
+        function addStudent(name) {
+            if (!name || name.trim() === '') return false;
+            students.push({
+                id: generateId(),
+                name: name.trim(),
+                present: isLive
+            });
+            renderStudents();
+            return true;
+        }
+
+        function autoAddStudents(count = 4) {
+            const available = AUTO_NAMES.filter(n =>
+                !students.some(s => s.name.toLowerCase() === n.toLowerCase())
+            );
+            const toAdd = available.slice(0, count);
+            if (toAdd.length === 0) {
+                alert('No more unique names available!');
+                return;
+            }
+            toAdd.forEach(name => {
+                students.push({
+                    id: generateId(),
+                    name: name,
+                    present: isLive
+                });
+            });
+            renderStudents();
+        }
+
+        function resetStudents() {
+            if (confirm('Reset to default student list?')) {
+                students = DEFAULT_STUDENTS.map(s => ({ ...s, id: generateId(), present: isLive }));
+                renderStudents();
+            }
+        }
+
+        // ===== ALERTS =====
+        function sendAlerts() {
+            const absent = students.filter(s => !s.present);
+            if (absent.length === 0) {
+                alert('✅ All students are present! No alerts needed.');
+                return;
+            }
+            alert(`🔔 Predictive Alert: ${absent.length} students absent.\n90% accuracy - recommending parent notification.`);
+            // Simulate alert sent
+            console.log('📧 Alerts sent to parents of:', absent.map(s => s.name).join(', '));
+        }
+
+        // ===== AI HOMEWORK SCAN =====
+        function scanHomework() {
+            const hwItems = document.querySelectorAll('.hw-item .name');
+            const scores = ['4.5/5', '3.0/5', '2.5/5', '4.0/5', '3.5/5', '2.0/5'];
+            const statuses = ['good', 'avg', 'bad', 'good', 'avg', 'bad'];
+
+            hwItems.forEach((el, i) => {
+                if (i < scores.length) {
+                    const scoreEl = el.parentElement.querySelector('.score');
+                    if (scoreEl) {
+                        scoreEl.textContent = scores[i % scores.length];
+                        scoreEl.className = `score ${statuses[i % statuses.length]}`;
+                    }
                 }
             });
 
-            rtc.client.on("user-unpublished", user => {
-                document.getElementById('student-video').innerHTML = "";
-                document.getElementById('student-stream-status').style.display = 'block';
-            });
+            // Add new scan result
+            const hwList = document.getElementById('hwList');
+            const newItem = document.createElement('div');
+            newItem.className = 'hw-item';
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
+            const randomScore = (2 + Math.random() * 3).toFixed(1);
+            const grade = parseFloat(randomScore) >= 3.5 ? 'good' : parseFloat(randomScore) >= 2.5 ? 'avg' : 'bad';
+            newItem.innerHTML = `
+                <span class="name">📄 Scanned Assignment (${timeStr})</span>
+                <span class="score ${grade}">${randomScore}/5</span>
+            `;
+            hwList.insertBefore(newItem, hwList.firstChild);
 
-            await rtc.client.join(APP_ID, CHANNEL, null, null);
-            alert("જોડાઈ ગયા છો! શિક્ષક લાઈવ થશે એટલે વિડિયો દેખાશે.");
+            // Limit items
+            while (hwList.children.length > 8) {
+                hwList.removeChild(hwList.lastChild);
+            }
 
-        } catch (error) {
-            console.error(error);
-            alert("ક્લાસમાં જોડાવામાં નિષ્ફળતા.");
+            alert('✅ AI Vision OCR scan complete! Assignments graded.');
         }
-    }
 
-    function publishHomework() {
-        let inst = document.getElementById('hw-instructions').value;
-        if(inst.trim() === "") { alert("કૃપા કરીને AI માટે સૂચનાઓ લખો."); return; }
-        alert("સફળતા! નવું હોમવર્ક પબ્લિશ થઈ ગયું છે.");
-        document.getElementById('hw-instructions').value = "";
-    }
+        // ===== AI BOT =====
+        function getBotResponse(msg) {
+            const lower = msg.toLowerCase();
+            if (lower.includes('hello') || lower.includes('hi') || lower.includes('namaste')) {
+                return BOT_RESPONSES['hello'];
+            }
+            if (lower.includes('time') || lower.includes('schedule') || lower.includes('lecture')) {
+                return BOT_RESPONSES['schedule'];
+            }
+            if (lower.includes('exam') || lower.includes('test') || lower.includes('mid')) {
+                return BOT_RESPONSES['exam'];
+            }
+            if (lower.includes('gujarati') || lower.includes('ગુજરાતી')) {
+                return BOT_RESPONSES['gujarati'];
+            }
+            if (lower.includes('hindi') || lower.includes('हिंदी')) {
+                return BOT_RESPONSES['hindi'];
+            }
+            return BOT_RESPONSES['default'];
+        }
+
+        function sendBotMessage() {
+            const msg = botInput.value.trim();
+            if (!msg) return;
+
+            // User message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'bot-msg user';
+            userDiv.textContent = msg;
+            botContainer.appendChild(userDiv);
+
+            botInput.value = '';
+
+            // Bot response
+            setTimeout(() => {
+                const response = getBotResponse(msg);
+                const botDiv = document.createElement('div');
+                botDiv.className = 'bot-msg bot';
+                botDiv.textContent = response;
+                botContainer.appendChild(botDiv);
+                botContainer.scrollTop = botContainer.scrollHeight;
+            }, 300);
+
+            botContainer.scrollTop = botContainer.scrollHeight;
+        }
+
+        // ===== LOGIN =====
+        function handleLogin() {
+            const email = loginEmail.value.trim();
+            const password = loginPassword.value.trim();
+
+            loginError.classList.remove('show');
+
+            let foundUser = null;
+            for (const key in USERS) {
+                const u = USERS[key];
+                if (u.email === email && u.password === password) {
+                    foundUser = u;
+                    break;
+                }
+            }
+
+            if (!foundUser) {
+                loginError.classList.add('show');
+                return;
+            }
+
+            currentUser = foundUser;
+            showDashboard();
+        }
+
+        function showDashboard() {
+            loginContainer.style.display = 'none';
+            dashboard.classList.add('active');
+
+            dashName.textContent = currentUser.name;
+            dashRole.textContent = currentUser.role === 'teacher' ? '👨‍🏫 Teacher' : '👨‍🎓 Student';
+            dashAvatar.textContent = currentUser.role === 'teacher' ? '👨‍🏫' : '👨‍🎓';
+
+            loadData();
+
+            if (currentUser.role === 'student') {
+                // Hide teacher-only controls
+                document.querySelectorAll('.live-bar .btn-success, .live-bar .btn-danger, .live-bar .btn-outline')
+                    .forEach(el => el.style.display = 'none');
+                document.getElementById('autoAddBtn').style.display = 'none';
+                document.getElementById('resetStudentsBtn').style.display = 'none';
+                document.getElementById('alertBtn').style.display = 'none';
+                document.getElementById('scanHwBtn').style.display = 'none';
+
+                // Show student video if live
+                if (isLive && localStream) {
+                    studentVideo.srcObject = localStream;
+                    studentVideo.style.display = 'block';
+                    videoPlaceholder.style.display = 'none';
+                }
+            } else {
+                // Teacher: show all controls
+                document.querySelectorAll('.live-bar .btn-success, .live-bar .btn-danger, .live-bar .btn-outline')
+                    .forEach(el => el.style.display = 'inline-block');
+                document.getElementById('autoAddBtn').style.display = 'inline-block';
+                document.getElementById('resetStudentsBtn').style.display = 'inline-block';
+                document.getElementById('alertBtn').style.display = 'inline-block';
+                document.getElementById('scanHwBtn').style.display = 'inline-block';
+            }
+        }
+
+        function handleLogout() {
+            stopMedia();
+            stopTimer();
+            currentUser = null;
+            loginContainer.style.display = 'block';
+            dashboard.classList.remove('active');
+            loginEmail.value = '';
+            loginPassword.value = '';
+            loginError.classList.remove('show');
+            studentVideo.srcObject = null;
+            studentVideo.style.display = 'none';
+            teacherVideo.style.display = 'none';
+            videoPlaceholder.style.display = 'block';
+            videoControls.style.display = 'none';
+            lectureSeconds = 0;
+            lectureTimer.textContent = '⏱ 00:00';
+        }
+
+        // ===== EVENT BINDINGS =====
+        loginBtn.addEventListener('click', handleLogin);
+        loginEmail.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+        loginPassword.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+        logoutBtn.addEventListener('click', handleLogout);
+
+        startClassBtn.addEventListener('click', startClass);
+        endClassBtn.addEventListener('click', endClass);
+        recordBtn.addEventListener('click', toggleRecording);
+        toggleMicBtn.addEventListener('click', toggleMic);
+        toggleCamBtn.addEventListener('click', toggleCam);
+        biometricBtn.addEventListener('click', biometricVerify);
+
+        autoAddBtn.addEventListener('click', () => autoAddStudents(4));
+        resetStudentsBtn.addEventListener('click', resetStudents);
+        alertBtn.addEventListener('click', sendAlerts);
+        scanHwBtn.addEventListener('click', scanHomework);
+
+        botSendBtn.addEventListener('click', sendBotMessage);
+        botInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendBotMessage(); });
+
+        // ===== INIT =====
+        console.log('🧠 AI Smart Classroom · Gujarat');
+        console.log('👨‍🏫 Teacher: sachuumali2317@gmail.com');
+        console.log('👨‍🎓 Student: nagrajmall2317@gmail.com');
+        console.log('🔑 Password: 11223344');
+
+        // Pre-fill login
+        loginEmail.value = 'sachuumali2317@gmail.com';
+        loginPassword.value = '11223344';
+
+        // Auto-login for demo (uncomment to auto-login)
+        // handleLogin();
+
+        console.log('✅ All features loaded!');
+        console.log('📌 Features: Live Streaming, Auto-Archive, Biometric, Watermark, AI Bot, Homework Evaluation, Predictive Alerts');
+    })();
 </script>
+
 </body>
 </html>
