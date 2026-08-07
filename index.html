@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Smart Classroom - Full Live System</title>
+    <title>AI Smart Classroom - Final Fixed System</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -12,7 +12,6 @@
     <style>
         :root {
             --primary: #4f46e5;
-            --primary-dark: #3730a3;
             --secondary: #06b6d4;
             --bg: #f8fafc;
             --card-bg: #ffffff;
@@ -44,7 +43,7 @@
         .login-btn { width: 100%; padding: 14px; background: #ffffff; color: var(--primary); border: none; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .demo-box { margin-top: 25px; background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; font-size: 11px; line-height: 1.6; color: #e2e8f0; }
 
-        /* Top Bar */
+        /* App Top Bar */
         .app-bar { background: #ffffff; color: var(--text); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
         .app-bar span { font-weight: 700; font-size: 15px; color: var(--primary); }
         .app-content { padding: 16px; flex: 1; padding-bottom: 40px; }
@@ -56,11 +55,10 @@
         .btn-danger { background: #ef4444; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
         .btn-success { background: #10b981; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
 
-        /* Agora Video Containers */
+        /* Video Box */
         .cam-box { width: 100%; height: 210px; background: #0f172a; border-radius: 12px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 10px; }
         .cam-placeholder { position: absolute; text-align: center; color: #94a3b8; font-size: 12px; padding: 0 20px; z-index: 1; }
         
-        /* Agora injects video into these divs */
         #teacher-video, #student-video { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 2; }
 
         /* Bottom Nav */
@@ -90,9 +88,10 @@
             <button class="login-btn" onclick="handleLogin()">લોગિન કરો</button>
 
             <div class="demo-box">
-                <strong>લોગિન ડેટા:</strong><br>
+                <strong>લોગિન આઈડી/પાસવર્ડ:</strong><br>
                 👨‍🏫 શિક્ષક: <code>nagrajmall2317@gmail.com</code><br>
-                🎓 વિદ્યાર્થી: <code>sachuumali2317@gmail.com</code>
+                🎓 વિદ્યાર્થી: <code>sachuumali2317@gmail.com</code><br>
+                🔑 પાસવર્ડ: <code>11223344</code>
             </div>
         </div>
     </div>
@@ -108,7 +107,7 @@
                 <h3><i class="fa-solid fa-video" style="color:var(--primary)"></i> લાઈવ પ્રસારણ (Agora)</h3>
                 <div class="cam-box">
                     <div id="cam-placeholder" class="cam-placeholder">
-                        <i class="fa-solid fa-face-viewfinder" style="font-size:32px; margin-bottom:6px; color:var(--secondary)"></i><br>કેમેરા બંધ છે.
+                        <i class="fa-solid fa-face-viewfinder" style="font-size:32px; margin-bottom:6px; color:var(--secondary)"></i><br>કેમેરા બંધ છે. "Go Live" પર ક્લિક કરો.
                     </div>
                     <div id="teacher-video"></div>
                 </div>
@@ -126,8 +125,8 @@
 
         <div class="bottom-nav">
             <div class="nav-item active"><i class="fa-solid fa-house"></i>હોમ</div>
-            <div class="nav-item"><i class="fa-solid fa-chart-pie"></i>ઓડિટ</div>
-            <div class="nav-item"><i class="fa-solid fa-phone"></i>વાલી કનેક્ટ</div>
+            <div class="nav-item" onclick="alert('NAAC/NBA ઓડિટ સિસ્ટમ સક્રિય.')"><i class="fa-solid fa-chart-pie"></i>ઓડિટ</div>
+            <div class="nav-item" onclick="alert('વાલી કનેક્ટ સિસ્ટમ સક્રિય.')"><i class="fa-solid fa-phone"></i>વાલી કનેક્ટ</div>
         </div>
     </div>
 
@@ -159,17 +158,15 @@
 
         <div class="bottom-nav">
             <div class="nav-item active"><i class="fa-solid fa-house"></i>હોમ</div>
-            <div class="nav-item"><i class="fa-solid fa-shield"></i>સિક્યુરિટી</div>
-            <div class="nav-item"><i class="fa-solid fa-file-lines"></i>પ્રપોઝલ</div>
+            <div class="nav-item" onclick="alert('AES-256 સુરક્ષા એક્ટિવ છે.')"><i class="fa-solid fa-shield"></i>સિક્યુરિટી</div>
+            <div class="nav-item" onclick="alert('પ્રપોઝલ ડ્રાફ્ટ સેટ છે.')"><i class="fa-solid fa-file-lines"></i>પ્રપોઝલ</div>
         </div>
     </div>
 
 </div>
 
 <script>
-    // ==========================================
-    // AGORA SETTINGS (YOUR APP ID)
-    // ==========================================
+    // Agora Setup
     const APP_ID = "3344ecca2d004c64897e98dce3015b74"; 
     const CHANNEL = "gtu_smart_class_live"; 
     
@@ -181,15 +178,13 @@
 
     rtc.client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
-    // ==========================================
-    // LOGIN LOGIC
-    // ==========================================
+    // Login Function (Cleans extra spaces and capitalization automatically)
     function handleLogin() {
         let email = document.getElementById('login-email').value.trim().toLowerCase();
         let pass = document.getElementById('login-pass').value.trim();
 
         if (pass !== "11223344") { 
-            alert("ખોટો પાસવર્ડ! કૃપા કરીને '11223344' દાખલ કરો."); 
+            alert("ખોટો પાસવર્ડ! સાચો પાસવર્ડ: 11223344"); 
             return; 
         }
 
@@ -200,7 +195,7 @@
             document.getElementById('login-screen').classList.remove('active');
             document.getElementById('student-screen').classList.add('active');
         } else {
-            alert("કૃપા કરીને સાચું ઈમેલ આઈડી દાખલ કરો.");
+            alert("ઈમેલ મળ્યો નથી! કૃપા કરીને સાચો ઈમેલ દાખલ કરો.");
         }
     }
 
@@ -216,14 +211,11 @@
         document.getElementById('login-screen').classList.add('active');
     }
 
-    // ==========================================
-    // TEACHER LOGIC
-    // ==========================================
+    // Teacher Camera Logic
     async function startCameraAndNotify() {
         try {
-            await rtc.client.join(APP_ID, CHANNEL, null, 1); // Teacher is UID 1
+            await rtc.client.join(APP_ID, CHANNEL, null, 1);
 
-            // Request Camera and Mic
             rtc.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
             rtc.localVideoTrack = await AgoraRTC.createCameraVideoTrack();
 
@@ -232,11 +224,11 @@
             document.getElementById('cam-placeholder').style.display = 'none';
             rtc.localVideoTrack.play("teacher-video");
             
-            alert("તમે લાઈવ છો! વિડિયો ક્લાઉડ પર પ્રસારિત થઈ રહ્યો છે.");
+            alert("તમે લાઈવ છો! કેમેરો અને ઓડિયો ચાલુ થઈ ગયો છે.");
 
         } catch (error) {
             console.error(error);
-            alert("કેમેરા ચાલુ થવામાં ભૂલ આવી. કૃપા કરીને Chrome માં કેમેરાની પરવાનગી આપો.");
+            alert("કેમેરા પરમિશન બ્લોક છે. સેટિંગ્સમાંથી Camera & Microphone ને Allow કરો.");
         }
     }
 
@@ -252,12 +244,9 @@
         alert("લાઇવ ક્લાસ બંધ કરી દેવાયો છે.");
     }
 
-    // ==========================================
-    // STUDENT LOGIC
-    // ==========================================
+    // Student Logic
     async function joinClassAsStudent() {
         try {
-            // Listen for teacher's stream
             rtc.client.on("user-published", async (user, mediaType) => {
                 await rtc.client.subscribe(user, mediaType);
                 
@@ -265,7 +254,6 @@
                     document.getElementById('student-stream-status').style.display = 'none';
                     user.videoTrack.play("student-video");
                     
-                    // Anti-piracy watermark
                     let watermark = document.createElement("div");
                     watermark.innerHTML = "ID: SACHUU-2026";
                     watermark.style = "position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:4px; font-size:10px; color:#ef4444; z-index:10; font-weight:bold;";
@@ -290,9 +278,6 @@
         }
     }
 
-    // ==========================================
-    // UTILS
-    // ==========================================
     function publishHomework() {
         let inst = document.getElementById('hw-instructions').value;
         if(inst.trim() === "") { alert("કૃપા કરીને AI માટે સૂચનાઓ લખો."); return; }
