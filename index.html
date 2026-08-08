@@ -24,7 +24,7 @@
     </script>
 
     <style>
-        /* ===== Same styles as before (omitted for brevity – included in final code) ===== */
+        /* ===== GLOBAL (same as before) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -283,70 +283,202 @@
             color: #fff;
             border: 2px solid rgba(15, 23, 42, 0.6);
         }
-        .video-wrapper {
-            flex: 1;
-            min-height: 280px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 28px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
-            position: relative;
+
+        /* ===== LIVE UI ===== */
+        .live-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: 100%;
         }
-        .video-wrapper #videoContainer {
+        .video-main {
+            flex: 1;
+            background: #0a0f1a;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            min-height: 250px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .video-main video {
             width: 100%;
             height: 100%;
+            object-fit: cover;
+        }
+        .video-thumbnails {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 8px 4px;
+            min-height: 120px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+        }
+        .video-thumb {
+            flex: 0 0 160px;
             background: #0a0f1a;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 12px;
-            overflow-y: auto;
-            position: relative;
-        }
-        .video-wrapper .remote-player {
-            width: 45%;
-            min-width: 180px;
-            height: 45%;
-            min-height: 140px;
-            background: #1a1f2e;
             border-radius: 16px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .video-wrapper .local-player {
-            width: 30%;
-            min-width: 150px;
-            height: 30%;
-            min-height: 110px;
-            background: #1a1f2e;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 2px solid rgba(167, 139, 250, 0.4);
             position: relative;
+            border: 2px solid transparent;
+            transition: border 0.3s;
+            aspect-ratio: 4/3;
         }
-        .video-overlay-badge {
+        .video-thumb.active {
+            border-color: #34d399;
+        }
+        .video-thumb video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .video-thumb .label {
             position: absolute;
-            bottom: 16px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
-            padding: 6px 16px 6px 12px;
-            border-radius: 40px;
-            font-size: 11px;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            bottom: 4px;
+            left: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            color: #fff;
             pointer-events: none;
         }
-        .video-overlay-badge i {
-            font-size: 8px;
+        .video-thumb .mic-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: #fff;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
         }
+        .video-thumb .mic-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .video-thumb .mic-btn.muted {
+            color: #f87171;
+        }
+        .video-thumb .mic-btn.unmuted {
+            color: #34d399;
+        }
+
+        /* ===== CHAT ===== */
+        .chat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            height: 160px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding-right: 4px;
+        }
+        .chat-messages .msg {
+            font-size: 13px;
+            padding: 4px 12px;
+            border-radius: 16px;
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+        .chat-messages .msg.teacher {
+            background: rgba(167, 139, 250, 0.2);
+            align-self: flex-end;
+            color: #e2e8f0;
+        }
+        .chat-messages .msg.student {
+            background: rgba(255, 255, 255, 0.06);
+            align-self: flex-start;
+            color: #cbd5e1;
+        }
+        .chat-messages .msg .sender {
+            font-weight: 600;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            display: block;
+        }
+        .chat-input {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+        }
+        .chat-input button {
+            background: linear-gradient(135deg, #818cf8, #a78bfa);
+            border: none;
+            color: #fff;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== WARNING OVERLAY (student) ===== */
+        .warning-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .warning-overlay.active {
+            opacity: 1;
+        }
+        .warning-overlay .content {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px 40px;
+            border-radius: 30px;
+            text-align: center;
+            border: 2px solid #f87171;
+        }
+        .warning-overlay .content i {
+            font-size: 60px;
+            color: #f87171;
+            display: block;
+            margin-bottom: 12px;
+        }
+        .warning-overlay .content h2 {
+            color: #f87171;
+            font-size: 24px;
+        }
+        .warning-overlay .content p {
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 8px;
+        }
+
         .right-panel {
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(12px);
@@ -485,13 +617,6 @@
             color: rgba(255, 255, 255, 0.35);
             font-size: 13px;
         }
-        .grade-big {
-            font-size: 48px;
-            font-weight: 700;
-            color: #a78bfa;
-            text-align: center;
-            padding: 10px 0;
-        }
         .class-item {
             display: flex;
             justify-content: space-between;
@@ -512,6 +637,8 @@
         .class-item .status.active {
             color: #34d399;
         }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 1100px) {
             #appContainer {
                 grid-template-columns: 64px 1fr 260px;
@@ -571,12 +698,18 @@
             .main-area {
                 padding: 14px;
             }
-            .video-wrapper {
-                min-height: 200px;
+            .video-thumbnails {
+                min-height: 100px;
+            }
+            .video-thumb {
+                flex: 0 0 120px;
             }
             .login-box {
                 padding: 28px 20px;
                 margin: 16px;
+            }
+            .chat-box {
+                height: 130px;
             }
         }
         @media (max-width: 480px) {
@@ -599,10 +732,25 @@
             .card {
                 padding: 10px 12px;
             }
+            .video-thumbnails {
+                min-height: 80px;
+            }
+            .video-thumb {
+                flex: 0 0 100px;
+            }
         }
     </style>
 </head>
 <body>
+
+    <!-- ===== WARNING OVERLAY (for student) ===== -->
+    <div id="warningOverlay" class="warning-overlay">
+        <div class="content">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h2>⚠️ Attention!</h2>
+            <p>Your face is not visible. Please sit in front of the camera.</p>
+        </div>
+    </div>
 
     <!-- ===== LOGIN OVERLAY ===== -->
     <div id="loginOverlay">
@@ -661,7 +809,7 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT – FIREBASE + PEERJS (Debug Version)              -->
+    <!-- JAVASCRIPT – FIREBASE + PEERJS                              -->
     <!-- ============================================================ -->
     <script>
         // ================================================================
@@ -677,28 +825,12 @@
             appId: "1:851078707703:web:656731ca0310ba878e56f2",
             measurementId: "G-R57HXZ4EK4"
         };
-
-        console.log('🔥 Firebase config loaded.');
-
-        // Initialize Firebase
-        try {
-            firebase.initializeApp(firebaseConfig);
-            console.log('✅ Firebase initialized successfully.');
-        } catch (err) {
-            console.error('❌ Firebase init error:', err);
-            alert('Firebase initialization failed: ' + err.message);
-        }
-
+        firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // Check if auth is ready
-        auth.onAuthStateChanged((user) => {
-            console.log('🔄 Auth state changed:', user ? user.email : 'null');
-        });
-
         // ================================================================
-        //  2. DOM REFS
+        //  2. DOM REFS & AUTH
         // ================================================================
         const loginOverlay = document.getElementById('loginOverlay');
         const loginForm = document.getElementById('loginForm');
@@ -729,50 +861,35 @@
         let currentBranch = null;
         let currentSemester = null;
 
-        // ================================================================
-        //  3. AUTH LISTENERS (with debug)
-        // ================================================================
+        // Auth toggles
         showSignup.addEventListener('click', () => {
-            console.log('Show signup form');
             loginForm.style.display = 'none';
             signupForm.style.display = 'block';
             loginMsg.textContent = '';
             signupMsg.textContent = '';
         });
         showLogin.addEventListener('click', () => {
-            console.log('Show login form');
             loginForm.style.display = 'block';
             signupForm.style.display = 'none';
             loginMsg.textContent = '';
             signupMsg.textContent = '';
         });
 
-        // --- Login ---
         loginBtn.addEventListener('click', async () => {
-            console.log('Login button clicked');
             const email = loginEmail.value.trim();
             const pass = loginPassword.value.trim();
-            if (!email || !pass) {
-                loginMsg.textContent = 'Please enter email and password.';
-                return;
-            }
+            if (!email || !pass) { loginMsg.textContent = 'Please enter email and password.'; return; }
             loginMsg.textContent = '⏳ Signing in...';
             loginMsg.style.color = 'rgba(255,255,255,0.5)';
             try {
-                console.log('Attempting signInWithEmailAndPassword...');
                 await auth.signInWithEmailAndPassword(email, pass);
-                console.log('Sign-in successful (should redirect via listener)');
             } catch (err) {
-                console.error('Login error:', err);
                 loginMsg.textContent = '❌ ' + err.message;
                 loginMsg.style.color = '#f87171';
-                alert('Login failed: ' + err.message);
             }
         });
 
-        // --- Signup ---
         signupBtn.addEventListener('click', async () => {
-            console.log('Signup button clicked');
             const email = signupEmail.value.trim();
             const pass = signupPassword.value.trim();
             const role = signupRole.value;
@@ -782,27 +899,19 @@
                 signupMsg.textContent = 'Please fill all fields correctly.';
                 return;
             }
-            if (pass.length < 6) {
-                signupMsg.textContent = 'Password must be at least 6 characters.';
-                return;
-            }
+            if (pass.length < 6) { signupMsg.textContent = 'Password must be at least 6 characters.'; return; }
             signupMsg.textContent = '⏳ Creating account...';
             signupMsg.style.color = 'rgba(255,255,255,0.5)';
             try {
-                console.log('Attempting createUserWithEmailAndPassword...');
                 const cred = await auth.createUserWithEmailAndPassword(email, pass);
-                console.log('User created, UID:', cred.user.uid);
-                // Save user data
                 await db.ref('users/' + cred.user.uid).set({
                     email,
                     role,
                     branch,
                     semester: role === 'student' ? semester : 0
                 });
-                console.log('User data saved.');
                 signupMsg.textContent = '✅ Account created! Please sign in.';
                 signupMsg.style.color = '#34d399';
-                // Switch to login
                 loginForm.style.display = 'block';
                 signupForm.style.display = 'none';
                 loginEmail.value = email;
@@ -810,46 +919,36 @@
                 loginMsg.textContent = 'Account created, please sign in.';
                 loginMsg.style.color = '#34d399';
             } catch (err) {
-                console.error('Signup error:', err);
                 signupMsg.textContent = '❌ ' + err.message;
                 signupMsg.style.color = '#f87171';
-                alert('Signup failed: ' + err.message);
             }
         });
 
-        // --- Auth state listener ---
         auth.onAuthStateChanged(async (user) => {
-            console.log('Auth state changed:', user ? 'User logged in: ' + user.email : 'No user');
             if (user) {
                 try {
                     const snap = await db.ref('users/' + user.uid).once('value');
-                    console.log('User data snapshot exists?', snap.exists());
                     if (snap.exists()) {
                         const data = snap.val();
-                        console.log('User data:', data);
                         currentRole = data.role;
                         currentBranch = data.branch || '';
                         currentSemester = data.semester || 0;
                         currentUser = { uid: user.uid, email: user.email, ...data };
-                        // Show app
                         loginOverlay.style.display = 'none';
                         appContainer.style.display = 'grid';
                         roleBadge.textContent = currentRole.charAt(0).toUpperCase() + currentRole.slice(1);
                         avatarLetter.textContent = user.email.charAt(0).toUpperCase();
-                        console.log('Building dashboard...');
                         buildDashboard();
                     } else {
-                        console.warn('User data not found in DB. Signing out.');
                         await auth.signOut();
                         alert('User role not found. Please sign up again.');
                     }
                 } catch (err) {
-                    console.error('Error loading user data:', err);
-                    alert('Error loading user data: ' + err.message);
+                    console.error(err);
+                    alert('Error loading user data.');
                     await auth.signOut();
                 }
             } else {
-                // Show login
                 loginOverlay.style.display = 'flex';
                 appContainer.style.display = 'none';
                 loginMsg.textContent = '';
@@ -857,10 +956,9 @@
         });
 
         // ================================================================
-        //  4. DASHBOARD BUILDER (same as before)
+        //  3. DASHBOARD BUILDER
         // ================================================================
         function buildDashboard() {
-            console.log('buildDashboard called');
             sidebar.innerHTML = '';
             const brand = document.createElement('div');
             brand.className = 'brand';
@@ -908,7 +1006,6 @@
         }
 
         function loadPage(pageId) {
-            console.log('loadPage:', pageId);
             document.querySelectorAll('#sidebar nav a').forEach(a => a.classList.remove('active'));
             const activeLink = document.getElementById(pageId);
             if (activeLink) activeLink.classList.add('active');
@@ -961,7 +1058,7 @@
         }
 
         // ================================================================
-        //  5. HELPER: IMAGE COMPARE (for homework)
+        //  4. HELPER: IMAGE COMPARE (for homework)
         // ================================================================
         function compareImagesBase64(base64_1, base64_2) {
             return new Promise((resolve) => {
@@ -1000,25 +1097,23 @@
         }
 
         // ================================================================
-        //  6. TEACHER PAGES (same as before, but with debug logs)
+        //  5. TEACHER PAGES
         // ================================================================
 
+        // --- Teacher Live Class ---
         function renderTeacherLive() {
-            console.log('renderTeacherLive');
             dynamicContent.innerHTML = `
                 <div class="page-content">
                     <h2>Live Class</h2>
                     <div class="card">
                         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-                            <input type="text" id="newBranch" class="input-field" placeholder="Branch (e.g. Computer Engineering)" style="flex:1;min-width:120px;" value="${currentBranch || ''}" />
-                            <input type="number" id="newSemester" class="input-field" placeholder="Semester" style="width:120px;" value="${currentSemester || 1}" />
-                            <input type="text" id="newSubject" class="input-field" placeholder="Subject (e.g. Mathematics)" style="flex:1;min-width:120px;" />
+                            <input type="text" id="newBranch" class="input-field" placeholder="Branch" style="flex:1;min-width:100px;" value="${currentBranch || ''}" />
+                            <input type="number" id="newSemester" class="input-field" placeholder="Semester" style="width:100px;" value="${currentSemester || 1}" />
+                            <input type="text" id="newSubject" class="input-field" placeholder="Subject" style="flex:1;min-width:100px;" />
                             <input type="text" id="newClassName" class="input-field" placeholder="Class Name (e.g. Math-101)" style="flex:1;min-width:120px;" />
-                            <button id="createClassBtn" class="btn btn-primary">Create Class</button>
+                            <button id="createClassBtn" class="btn btn-primary">Create</button>
                         </div>
-                        <div id="classListContainer">
-                            <div class="text-muted">Loading classes...</div>
-                        </div>
+                        <div id="classListContainer"><div class="text-muted">Loading...</div></div>
                     </div>
                     <div id="liveSessionContainer"></div>
                 </div>
@@ -1032,11 +1127,12 @@
             const createBtn = document.getElementById('createClassBtn');
             const liveContainer = document.getElementById('liveSessionContainer');
 
+            // PeerJS state
             let peer = null;
-            let currentCall = null;
             let localStream = null;
             let currentClassKey = null;
             let isTeacherLive = false;
+            let studentCalls = {}; // key: studentId, value: { call, stream }
 
             const classesRef = db.ref('classes');
 
@@ -1064,20 +1160,20 @@
                         classListContainer.innerHTML = html;
 
                         document.querySelectorAll('.startClassBtn').forEach(btn => {
-                            btn.addEventListener('click', async (e) => {
+                            btn.addEventListener('click', () => {
                                 const key = btn.dataset.key;
                                 const name = btn.dataset.name;
-                                await startClass(key, name);
+                                startClass(key, name);
                             });
                         });
                         document.querySelectorAll('.endClassBtn').forEach(btn => {
-                            btn.addEventListener('click', async (e) => {
+                            btn.addEventListener('click', () => {
                                 const key = btn.dataset.key;
-                                await endClass(key);
+                                endClass(key);
                             });
                         });
                         document.querySelectorAll('.deleteClassBtn').forEach(btn => {
-                            btn.addEventListener('click', async (e) => {
+                            btn.addEventListener('click', async () => {
                                 if (confirm('Delete this class?')) {
                                     await classesRef.child(btn.dataset.key).remove();
                                 }
@@ -1101,7 +1197,7 @@
                 }
                 const snap = await classesRef.orderByChild('className').equalTo(className).once('value');
                 if (snap.exists()) {
-                    alert('A class with this name already exists.');
+                    alert('Class with this name already exists.');
                     return;
                 }
                 const newRef = classesRef.push();
@@ -1118,73 +1214,166 @@
                 newSubject.value = '';
             });
 
+            // ----- Start Class -----
             async function startClass(classKey, className) {
                 if (isTeacherLive) {
                     await endClass(currentClassKey);
                 }
                 try {
-                    if (peer) {
-                        peer.destroy();
-                        peer = null;
-                    }
+                    if (peer) { peer.destroy();
+                        peer = null; }
                     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                    console.log('Got local stream');
-
                     peer = new Peer(className, { debug: 2 });
-                    peer.on('open', (id) => {
-                        console.log('PeerJS open, id:', id);
+
+                    peer.on('open', () => {
                         isTeacherLive = true;
                         currentClassKey = classKey;
                         classesRef.child(classKey).update({ active: true });
                         loadClasses();
 
+                        // Build UI
                         liveContainer.innerHTML = `
                             <div class="card" style="margin-top:12px;">
                                 <h3 style="font-size:17px;margin-bottom:8px;">🟢 Live: ${className}</h3>
-                                <div class="video-wrapper" style="min-height:300px;position:relative;">
-                                    <div id="videoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:12px;padding:12px;overflow-y:auto;">
-                                        <div class="local-player" style="width:40%;min-width:150px;height:40%;min-height:120px;"></div>
+                                <div class="live-container">
+                                    <div class="video-main" id="teacher-main-video"></div>
+                                    <div class="video-thumbnails" id="student-thumbnails"></div>
+                                    <div class="chat-box">
+                                        <div class="chat-messages" id="teacher-chat-messages"></div>
+                                        <div class="chat-input">
+                                            <input type="text" id="teacher-chat-input" placeholder="Reply..." />
+                                            <button id="teacher-chat-send"><i class="fas fa-paper-plane"></i></button>
+                                        </div>
                                     </div>
-                                    <div class="video-overlay-badge">
-                                        <i class="fas fa-circle" style="color:#34d399;"></i>
-                                        <span>Live (PeerJS)</span>
-                                    </div>
+                                    <button id="stopLiveBtn" class="btn btn-danger" style="margin-top:10px;">Stop Class</button>
                                 </div>
-                                <button id="stopLiveBtn" class="btn btn-danger" style="margin-top:10px;">Stop Class</button>
                             </div>
                         `;
-                        const videoContainer = document.getElementById('videoContainer');
-                        const localDiv = videoContainer.querySelector('.local-player');
-                        const videoElement = document.createElement('video');
-                        videoElement.srcObject = localStream;
-                        videoElement.autoplay = true;
-                        videoElement.muted = true;
-                        videoElement.style.width = '100%';
-                        videoElement.style.height = '100%';
-                        videoElement.style.objectFit = 'cover';
-                        localDiv.appendChild(videoElement);
 
-                        peer.on('call', (call) => {
-                            call.answer(localStream);
-                            call.on('stream', (remoteStream) => {
-                                const remoteDiv = document.createElement('div');
-                                remoteDiv.className = 'remote-player';
-                                videoContainer.appendChild(remoteDiv);
-                                const remoteVideo = document.createElement('video');
-                                remoteVideo.srcObject = remoteStream;
-                                remoteVideo.autoplay = true;
-                                remoteVideo.style.width = '100%';
-                                remoteVideo.style.height = '100%';
-                                remoteVideo.style.objectFit = 'cover';
-                                remoteDiv.appendChild(remoteVideo);
-                            });
-                            call.on('close', () => {
-                                const remoteDiv = videoContainer.querySelector('.remote-player');
-                                if (remoteDiv) remoteDiv.remove();
-                            });
-                            currentCall = call;
+                        // Teacher's own video
+                        const mainVideo = document.createElement('video');
+                        mainVideo.srcObject = localStream;
+                        mainVideo.autoplay = true;
+                        mainVideo.muted = true;
+                        mainVideo.style.width = '100%';
+                        mainVideo.style.height = '100%';
+                        mainVideo.style.objectFit = 'cover';
+                        document.getElementById('teacher-main-video').appendChild(mainVideo);
+
+                        // Clear thumbnails
+                        const thumbContainer = document.getElementById('student-thumbnails');
+                        thumbContainer.innerHTML = '<div style="padding:6px;color:rgba(255,255,255,0.3);font-size:13px;">Waiting for students...</div>';
+
+                        // Chat listener
+                        const chatRef = db.ref('chat/' + className);
+                        chatRef.on('child_added', (snap) => {
+                            const data = snap.val();
+                            const msgDiv = document.createElement('div');
+                            msgDiv.className = 'msg ' + (data.role === 'teacher' ? 'teacher' : 'student');
+                            msgDiv.innerHTML =
+                                `<span class="sender">${data.sender}</span> ${data.text}`;
+                            const container = document.getElementById('teacher-chat-messages');
+                            container.appendChild(msgDiv);
+                            container.scrollTop = container.scrollHeight;
                         });
 
+                        // Send chat (teacher)
+                        document.getElementById('teacher-chat-send').addEventListener('click', () => {
+                            const input = document.getElementById('teacher-chat-input');
+                            const text = input.value.trim();
+                            if (!text) return;
+                            chatRef.push({
+                                sender: currentUser.email,
+                                role: 'teacher',
+                                text: text,
+                                timestamp: Date.now()
+                            });
+                            input.value = '';
+                        });
+
+                        // Listen for student calls
+                        peer.on('call', (call) => {
+                            const studentId = call.peer;
+                            if (studentCalls[studentId]) {
+                                call.close();
+                                return;
+                            }
+                            // Answer with teacher's stream
+                            call.answer(localStream);
+                            // Store call
+                            studentCalls[studentId] = { call, stream: null };
+
+                            // Add thumbnail for this student
+                            const thumbDiv = document.createElement('div');
+                            thumbDiv.className = 'video-thumb';
+                            thumbDiv.id = 'thumb-' + studentId;
+                            thumbDiv.innerHTML = `
+                                <div class="label">${studentId}</div>
+                                <button class="mic-btn muted" data-student="${studentId}" title="Unmute student"><i class="fas fa-microphone-slash"></i></button>
+                            `;
+                            thumbContainer.appendChild(thumbDiv);
+                            // Remove placeholder if any
+                            const placeholder = thumbContainer.querySelector('div[style]');
+                            if (placeholder) placeholder.remove();
+
+                            // Handle remote stream
+                            call.on('stream', (remoteStream) => {
+                                const video = document.createElement('video');
+                                video.srcObject = remoteStream;
+                                video.autoplay = true;
+                                video.style.width = '100%';
+                                video.style.height = '100%';
+                                video.style.objectFit = 'cover';
+                                thumbDiv.appendChild(video);
+                                // Store stream for later mute/unmute
+                                studentCalls[studentId].stream = remoteStream;
+                                // Initially mute audio
+                                remoteStream.getAudioTracks().forEach(t => t.enabled = false);
+                                // Listen to Firebase for unmute command
+                                const controlRef = db.ref(`classControl/${className}/students/${studentId}/unmute`);
+                                controlRef.on('value', (snap) => {
+                                    const unmute = snap.val() === true;
+                                    remoteStream.getAudioTracks().forEach(t => t.enabled = unmute);
+                                    const btn = thumbDiv.querySelector('.mic-btn');
+                                    if (unmute) {
+                                        btn.className = 'mic-btn unmuted';
+                                        btn.innerHTML = '<i class="fas fa-microphone"></i>';
+                                        btn.title = 'Mute student';
+                                    } else {
+                                        btn.className = 'mic-btn muted';
+                                        btn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+                                        btn.title = 'Unmute student';
+                                    }
+                                });
+                                // Also listen for student disconnection
+                            });
+
+                            // Mute/unmute button on thumbnail
+                            const micBtn = thumbDiv.querySelector('.mic-btn');
+                            micBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                const student = micBtn.dataset.student;
+                                // Toggle unmute state in Firebase
+                                const controlRef = db.ref(`classControl/${className}/students/${student}/unmute`);
+                                controlRef.once('value').then(snap => {
+                                    const current = snap.val() === true;
+                                    controlRef.set(!current);
+                                });
+                            });
+
+                            // Remove on close
+                            call.on('close', () => {
+                                delete studentCalls[studentId];
+                                const el = document.getElementById('thumb-' + studentId);
+                                if (el) el.remove();
+                                if (Object.keys(studentCalls).length === 0) {
+                                    thumbContainer.innerHTML =
+                                        '<div style="padding:6px;color:rgba(255,255,255,0.3);font-size:13px;">Waiting for students...</div>';
+                                }
+                            });
+                        });
+
+                        // Stop button
                         document.getElementById('stopLiveBtn').addEventListener('click', () => {
                             endClass(classKey);
                         });
@@ -1203,10 +1392,9 @@
             }
 
             async function endClass(classKey) {
-                if (currentCall) {
-                    currentCall.close();
-                    currentCall = null;
-                }
+                // Close all calls
+                Object.values(studentCalls).forEach(({ call }) => call.close());
+                studentCalls = {};
                 if (localStream) {
                     localStream.getTracks().forEach(t => t.stop());
                     localStream = null;
@@ -1220,10 +1408,12 @@
                 await classesRef.child(classKey).update({ active: false });
                 loadClasses();
                 currentClassKey = null;
+                // Cleanup Firebase control node
+                await db.ref(`classControl/${currentClassKey}`).remove();
             }
         }
 
-        // --- Other teacher functions (same as before, I'll keep them short) ---
+        // --- Teacher other pages (unchanged) ---
         function renderTeacherStudents() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
@@ -1434,7 +1624,7 @@
         }
 
         // ================================================================
-        //  7. STUDENT PAGES
+        //  6. STUDENT PAGES
         // ================================================================
 
         function renderStudentLive() {
@@ -1474,9 +1664,9 @@
                     }
                     classListDiv.innerHTML = html;
                     document.querySelectorAll('.joinClassBtn').forEach(btn => {
-                        btn.addEventListener('click', async (e) => {
+                        btn.addEventListener('click', () => {
                             const name = btn.dataset.name;
-                            await joinStudentClass(name);
+                            joinStudentClass(name);
                         });
                     });
                 } else {
@@ -1487,9 +1677,105 @@
             let studentPeer = null;
             let studentCall = null;
             let studentStream = null;
+            let faceDetector = null;
+            let faceCheckInterval = null;
+            let noFaceCount = 0;
+            const warningOverlay = document.getElementById('warningOverlay');
+            let sirenAudio = null;
+
+            // Function to play siren sound using Web Audio API
+            function playSiren() {
+                if (sirenAudio) return; // already playing
+                try {
+                    const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    oscillator.type = 'sawtooth';
+                    let freq = 200;
+                    const startTime = audioCtx.currentTime;
+                    oscillator.frequency.setValueAtTime(freq, startTime);
+                    // Sweep frequency up and down
+                    oscillator.frequency.linearRampToValueAtTime(600, startTime + 0.3);
+                    oscillator.frequency.linearRampToValueAtTime(200, startTime + 0.6);
+                    oscillator.frequency.linearRampToValueAtTime(600, startTime + 0.9);
+                    oscillator.frequency.linearRampToValueAtTime(200, startTime + 1.2);
+                    gainNode.gain.setValueAtTime(0.3, startTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 1.5);
+                    oscillator.start(startTime);
+                    oscillator.stop(startTime + 1.5);
+                    // Keep reference
+                    sirenAudio = { oscillator, gainNode, audioCtx };
+                    setTimeout(() => {
+                        if (sirenAudio) {
+                            sirenAudio = null;
+                        }
+                    }, 1600);
+                } catch (e) {
+                    console.warn('Siren not supported:', e);
+                }
+            }
+
+            // Face detection using FaceDetector API (Chrome/Edge)
+            async function initFaceDetection(videoElement) {
+                if (!window.FaceDetector) {
+                    console.warn('FaceDetector not supported. Face tracking disabled.');
+                    return;
+                }
+                try {
+                    faceDetector = new FaceDetector({
+                        maxDetectedFaces: 1,
+                        fastMode: true
+                    });
+                    // Start periodic check
+                    faceCheckInterval = setInterval(async () => {
+                        if (!videoElement || videoElement.readyState < 2) return;
+                        try {
+                            const faces = await faceDetector.detect(videoElement);
+                            if (faces.length > 0) {
+                                // Face detected
+                                noFaceCount = 0;
+                                warningOverlay.classList.remove('active');
+                            } else {
+                                noFaceCount++;
+                                if (noFaceCount > 5) { // ~5 seconds (check every 1s)
+                                    warningOverlay.classList.add('active');
+                                    playSiren();
+                                }
+                            }
+                        } catch (err) {
+                            // If detection fails, assume face present? We'll set noFaceCount high
+                            console.warn('Face detection error:', err);
+                        }
+                    }, 1000);
+                } catch (err) {
+                    console.warn('FaceDetector init error:', err);
+                }
+            }
+
+            function stopFaceDetection() {
+                if (faceCheckInterval) {
+                    clearInterval(faceCheckInterval);
+                    faceCheckInterval = null;
+                }
+                if (faceDetector) {
+                    faceDetector = null;
+                }
+                warningOverlay.classList.remove('active');
+                if (sirenAudio) {
+                    try {
+                        sirenAudio.oscillator.stop();
+                        sirenAudio.audioCtx.close();
+                    } catch (e) {}
+                    sirenAudio = null;
+                }
+                noFaceCount = 0;
+            }
 
             async function joinStudentClass(className) {
                 if (studentCall) {
+                    // Leave
                     studentCall.close();
                     studentCall = null;
                     if (studentStream) {
@@ -1501,88 +1787,145 @@
                         studentPeer = null;
                     }
                     liveContainer.innerHTML = '';
-                    alert('Left class.');
+                    stopFaceDetection();
                     return;
                 }
 
                 try {
                     studentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    // Initially mute audio (teacher will unmute)
+                    studentStream.getAudioTracks().forEach(t => t.enabled = false);
+
                     studentPeer = new Peer();
 
-                    studentPeer.on('open', (id) => {
+                    studentPeer.on('open', () => {
                         const call = studentPeer.call(className, studentStream);
                         studentCall = call;
 
                         call.on('stream', (remoteStream) => {
+                            // Build UI
                             liveContainer.innerHTML = `
                                 <div class="card" style="margin-top:12px;">
                                     <h3 style="font-size:17px;margin-bottom:8px;">🟢 Joined: ${className}</h3>
-                                    <div class="video-wrapper" style="min-height:300px;position:relative;">
-                                        <div id="studentVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:12px;padding:12px;overflow-y:auto;">
-                                            <div class="local-player" style="width:40%;min-width:150px;height:40%;min-height:120px;"></div>
-                                            <div class="remote-player" style="width:45%;min-width:180px;height:40%;min-height:120px;"></div>
+                                    <div class="live-container">
+                                        <div class="video-main" id="student-main-video"></div>
+                                        <div class="video-thumbnails" style="max-width:200px;">
+                                            <div class="video-thumb active" id="student-self-thumb"></div>
                                         </div>
-                                        <div class="video-overlay-badge">
-                                            <i class="fas fa-circle" style="color:#34d399;"></i>
-                                            <span>Connected</span>
+                                        <div class="chat-box">
+                                            <div class="chat-messages" id="student-chat-messages"></div>
+                                            <div class="chat-input">
+                                                <input type="text" id="student-chat-input" placeholder="Ask question..." />
+                                                <button id="student-chat-send"><i class="fas fa-paper-plane"></i></button>
+                                            </div>
                                         </div>
+                                        <button id="leaveClassBtn" class="btn btn-danger" style="margin-top:10px;">Leave Class</button>
                                     </div>
-                                    <button id="leaveClassBtn" class="btn btn-danger" style="margin-top:10px;">Leave Class</button>
                                 </div>
                             `;
-                            const container = document.getElementById('studentVideoContainer');
-                            const localDiv = container.querySelector('.local-player');
-                            const remoteDiv = container.querySelector('.remote-player');
 
-                            const localVideo = document.createElement('video');
-                            localVideo.srcObject = studentStream;
-                            localVideo.autoplay = true;
-                            localVideo.muted = true;
-                            localVideo.style.width = '100%';
-                            localVideo.style.height = '100%';
-                            localVideo.style.objectFit = 'cover';
-                            localDiv.appendChild(localVideo);
+                            // Teacher video (remote) in main
+                            const mainVideo = document.createElement('video');
+                            mainVideo.srcObject = remoteStream;
+                            mainVideo.autoplay = true;
+                            mainVideo.style.width = '100%';
+                            mainVideo.style.height = '100%';
+                            mainVideo.style.objectFit = 'cover';
+                            document.getElementById('student-main-video').appendChild(mainVideo);
 
-                            const remoteVideo = document.createElement('video');
-                            remoteVideo.srcObject = remoteStream;
-                            remoteVideo.autoplay = true;
-                            remoteVideo.style.width = '100%';
-                            remoteVideo.style.height = '100%';
-                            remoteVideo.style.objectFit = 'cover';
-                            remoteDiv.appendChild(remoteVideo);
+                            // Student's own video in thumbnail
+                            const selfThumb = document.getElementById('student-self-thumb');
+                            const selfVideo = document.createElement('video');
+                            selfVideo.srcObject = studentStream;
+                            selfVideo.autoplay = true;
+                            selfVideo.muted = true;
+                            selfVideo.style.width = '100%';
+                            selfVideo.style.height = '100%';
+                            selfVideo.style.objectFit = 'cover';
+                            selfThumb.appendChild(selfVideo);
 
+                            // Chat listener
+                            const chatRef = db.ref('chat/' + className);
+                            chatRef.on('child_added', (snap) => {
+                                const data = snap.val();
+                                const msgDiv = document.createElement('div');
+                                msgDiv.className = 'msg ' + (data.role === 'teacher' ? 'teacher' :
+                                    'student');
+                                msgDiv.innerHTML =
+                                    `<span class="sender">${data.sender}</span> ${data.text}`;
+                                const container = document.getElementById('student-chat-messages');
+                                container.appendChild(msgDiv);
+                                container.scrollTop = container.scrollHeight;
+                            });
+
+                            // Send chat (student)
+                            document.getElementById('student-chat-send').addEventListener('click', () => {
+                                const input = document.getElementById('student-chat-input');
+                                const text = input.value.trim();
+                                if (!text) return;
+                                chatRef.push({
+                                    sender: currentUser.email,
+                                    role: 'student',
+                                    text: text,
+                                    timestamp: Date.now()
+                                });
+                                input.value = '';
+                            });
+
+                            // Leave button
+                            document.getElementById('leaveClassBtn').addEventListener('click', () => {
+                                joinStudentClass(className);
+                            });
+
+                            // Record attendance
                             db.ref('attendance/' + className + '/' + currentUser.uid).set({
                                 joined: Date.now()
                             });
 
-                            document.getElementById('leaveClassBtn').addEventListener('click', () => {
-                                joinStudentClass(className);
+                            // Start face detection on student's own video
+                            initFaceDetection(selfVideo);
+
+                            // Listen for teacher's unmute command
+                            const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/unmute`);
+                            controlRef.on('value', (snap) => {
+                                const unmute = snap.val() === true;
+                                if (studentStream) {
+                                    studentStream.getAudioTracks().forEach(t => t.enabled = unmute);
+                                }
                             });
                         });
 
                         call.on('close', () => {
                             liveContainer.innerHTML = '';
-                            alert('Teacher ended the class.');
+                            stopFaceDetection();
                             if (studentPeer) studentPeer.destroy();
                             studentPeer = null;
                             studentCall = null;
+                            // Remove control listener
+                            const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/unmute`);
+                            controlRef.off();
                         });
                     });
 
                     studentPeer.on('error', (err) => {
-                        console.error('PeerJS error:', err);
                         alert('Error: ' + err.message);
+                        stopFaceDetection();
                         if (studentPeer) studentPeer.destroy();
                         studentPeer = null;
                     });
 
                 } catch (err) {
                     alert('Error joining class: ' + err.message);
-                    console.error(err);
                 }
             }
+
+            // Cleanup when page unloads
+            window.addEventListener('beforeunload', () => {
+                stopFaceDetection();
+            });
         }
 
+        // --- Other student pages (unchanged) ---
         function renderStudentAttendance() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
@@ -1758,12 +2101,10 @@
         // ================================================================
         //  INIT
         // ================================================================
-        console.log('✅ Smart Classroom with PeerJS (Debug version) loaded.');
-        console.log('📌 Use accounts:');
-        console.log('   Teacher: nagrajmall2317@gmail.com / 11223344');
-        console.log('   Student: sachuumali2317@gmail.com / 11223344');
-        console.log('💡 Signup with Branch & Semester for filtering.');
-        console.log('🔍 Open browser console (F12) to see detailed logs.');
+        console.log('✅ Smart Classroom with microphone control & face tracking ready.');
+        console.log('📌 Accounts: Teacher: nagrajmall2317@gmail.com, Student: sachuumali2317@gmail.com');
+        console.log('💡 Face tracking uses FaceDetector API (Chrome/Edge).');
     </script>
+
 </body>
 </html>
