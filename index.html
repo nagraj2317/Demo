@@ -20,7 +20,7 @@
     </script>
 
     <style>
-        /* ===== COMPLETE CSS (included) ===== */
+        /* ===== COMPLETE CSS ===== */
         * {
             margin: 0;
             padding: 0;
@@ -1269,7 +1269,7 @@
         }
 
         // ================================================================
-        //  7. TEACHER LIVE CLASS
+        //  7. TEACHER LIVE CLASS (with notifications)
         // ================================================================
         function renderTeacherLive() {
             dynamicContent.innerHTML = `
@@ -1303,6 +1303,7 @@
             let isTeacherLive = false;
             let studentCalls = {};
             let cameraFacing = 'user';
+            let notifRef = null;
 
             const classesRef = db.ref('classes');
 
@@ -1431,6 +1432,9 @@
                                 <div class="video-wrapper" style="min-height:280px;position:relative;">
                                     <div id="teacherVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-direction:column;gap:8px;padding:8px;overflow-y:auto;position:relative;">
                                         <div class="local-player" style="flex:0 0 30%;min-width:120px;height:35%;min-height:80px;align-self:flex-start;"></div>
+                                        <div id="notificationContainer" style="max-height:80px;overflow-y:auto;margin-bottom:6px;background:rgba(0,0,0,0.2);border-radius:8px;padding:4px 8px;">
+                                            <div style="color:rgba(255,255,255,0.3);font-size:11px;text-align:center;">Notifications</div>
+                                        </div>
                                         <div id="studentListContainer" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding:4px;background:rgba(0,0,0,0.2);border-radius:12px;min-height:100px;">
                                             <div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:8px;">No students connected</div>
                                         </div>
@@ -1488,6 +1492,31 @@
                                 timestamp: Date.now()
                             });
                             input.value = '';
+                        });
+
+                        // Notification listener
+                        if (notifRef) notifRef.off();
+                        notifRef = db.ref(`notifications/${className}`);
+                        notifRef.on('child_added', (snap) => {
+                            const data = snap.val();
+                            if (!data.seen) {
+                                snap.ref.update({ seen: true });
+                                const notifContainer = document.getElementById('notificationContainer');
+                                if (notifContainer) {
+                                    const notifDiv = document.createElement('div');
+                                    notifDiv.style.cssText =
+                                        'background:rgba(248,113,113,0.15);border:1px solid #f87171;border-radius:10px;padding:8px 12px;margin-bottom:6px;color:#f1f5f9;font-size:13px;';
+                                    notifDiv.innerHTML = `
+                                        <span style="color:#f87171;">⚠️</span> 
+                                        <span>${data.message}</span>
+                                        <span style="font-size:11px;color:rgba(255,255,255,0.3);margin-left:8px;">${new Date(data.timestamp).toLocaleTimeString()}</span>
+                                    `;
+                                    notifContainer.prepend(notifDiv);
+                                    while (notifContainer.children.length > 10) {
+                                        notifContainer.removeChild(notifContainer.lastChild);
+                                    }
+                                }
+                            }
                         });
 
                         // Handle incoming student calls
@@ -1666,6 +1695,10 @@
                     peer.destroy();
                     peer = null;
                 }
+                if (notifRef) {
+                    notifRef.off();
+                    notifRef = null;
+                }
                 isTeacherLive = false;
                 liveContainer.innerHTML = '';
                 await classesRef.child(classKey).update({ active: false });
@@ -1676,7 +1709,7 @@
         }
 
         // ================================================================
-        //  8. ATTENDANCE SYSTEM (FIXED)
+        //  8. ATTENDANCE SYSTEM
         // ================================================================
         function renderTeacherAttendance() {
             const today = new Date().toISOString().split('T')[0];
@@ -1741,7 +1774,6 @@
                                         status: newStatus,
                                         timestamp: Date.now()
                                     }).then(() => {
-                                        // Reload page
                                         renderTeacherAttendance();
                                     });
                                 });
@@ -2035,10 +2067,9 @@
         }
 
         // ================================================================
-        //  10. STUDENT PAGES
+        //  10. STUDENT LIVE CLASS (with notification instead of siren)
         // ================================================================
         function renderStudentLive() {
-            // Same as before, with updated UI
             dynamicContent.innerHTML = `
                 <div class="page-content">
                     <h2>Live Class</h2>
@@ -2097,77 +2128,15 @@
             let faceDetector = null;
             let faceCheckInterval = null;
             let noFaceCount = 0;
-            const warningOverlay = document.getElementById('warningOverlay');
-            let sirenAudio = null;
-            let audioCtx = null;
-            let sirenTriggered = false;
+            let notificationSent = false;
+            let currentClassName = '';
 
-            function resumeAudioContext() {
-                if (!audioCtx) {
-                    try {
-                        audioCtx = new(window.AudioContext || window.webkitAudioContext)();
-                    } catch (e) {}
-                }
-                if (audioCtx && audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-            }
-
-            function stopSiren() {
-                if (sirenAudio) {
-                    try {
-                        sirenAudio.oscillator.stop();
-                        sirenAudio.oscillator.disconnect();
-                        sirenAudio.gainNode.disconnect();
-                        if (audioCtx && audioCtx.state !== 'closed') {
-                            audioCtx.close();
-                        }
-                    } catch (e) {}
-                    sirenAudio = null;
-                    audioCtx = null;
-                }
-                sirenTriggered = false;
-            }
-
-            function playSiren() {
-                if (sirenAudio || sirenTriggered) return;
-                resumeAudioContext();
-                if (!audioCtx) return;
-                try {
-                    const oscillator = audioCtx.createOscillator();
-                    const gainNode = audioCtx.createGain();
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
-                    oscillator.type = 'sawtooth';
-                    let freq = 200;
-                    const startTime = audioCtx.currentTime;
-                    oscillator.frequency.setValueAtTime(freq, startTime);
-                    oscillator.frequency.linearRampToValueAtTime(600, startTime + 0.3);
-                    oscillator.frequency.linearRampToValueAtTime(200, startTime + 0.6);
-                    oscillator.frequency.linearRampToValueAtTime(600, startTime + 0.9);
-                    oscillator.frequency.linearRampToValueAtTime(200, startTime + 1.2);
-                    gainNode.gain.setValueAtTime(0.3, startTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 1.5);
-                    oscillator.start(startTime);
-                    oscillator.stop(startTime + 1.5);
-                    sirenAudio = { oscillator, gainNode };
-                    sirenTriggered = true;
-                    setTimeout(() => {
-                        if (sirenAudio) {
-                            sirenAudio = null;
-                            sirenTriggered = false;
-                        }
-                    }, 1600);
-                } catch (e) {
-                    console.warn('Siren not supported:', e);
-                }
-            }
-
-            async function initFaceDetection(videoElement) {
+            async function initFaceDetection(videoElement, className) {
                 if (!window.FaceDetector) {
                     console.warn('FaceDetector not supported. Face tracking disabled.');
                     return;
                 }
+                currentClassName = className;
                 try {
                     faceDetector = new FaceDetector({
                         maxDetectedFaces: 1,
@@ -2179,14 +2148,27 @@
                             const faces = await faceDetector.detect(videoElement);
                             if (faces.length > 0) {
                                 noFaceCount = 0;
-                                warningOverlay.classList.remove('active');
-                                if (sirenAudio) stopSiren();
-                                sirenTriggered = false;
+                                notificationSent = false;
                             } else {
                                 noFaceCount++;
-                                if (noFaceCount > 5 && !sirenTriggered) {
-                                    warningOverlay.classList.add('active');
-                                    playSiren();
+                                if (noFaceCount > 5 && !notificationSent) {
+                                    notificationSent = true;
+                                    // Send notification to teacher
+                                    const notificationRef = db.ref(`notifications/${className}`);
+                                    notificationRef.push({
+                                        studentName: currentName || currentUser.email,
+                                        studentEmail: currentUser.email,
+                                        message: `${currentName || currentUser.email} is not visible on camera!`,
+                                        timestamp: Date.now(),
+                                        seen: false
+                                    });
+                                    // Local alert on student's screen
+                                    const statusDiv = document.createElement('div');
+                                    statusDiv.style.cssText =
+                                        'position:fixed;bottom:20px;right:20px;background:#f87171;color:#fff;padding:10px 20px;border-radius:10px;z-index:999;font-size:14px;box-shadow:0 4px 15px rgba(0,0,0,0.3);';
+                                    statusDiv.textContent = '⚠️ Your face is not visible. Please sit in front of the camera.';
+                                    document.body.appendChild(statusDiv);
+                                    setTimeout(() => statusDiv.remove(), 5000);
                                 }
                             }
                         } catch (err) {
@@ -2206,10 +2188,8 @@
                 if (faceDetector) {
                     faceDetector = null;
                 }
-                warningOverlay.classList.remove('active');
-                stopSiren();
                 noFaceCount = 0;
-                sirenTriggered = false;
+                notificationSent = false;
             }
 
             async function joinStudentClass(className) {
@@ -2230,8 +2210,6 @@
                 }
 
                 try {
-                    resumeAudioContext();
-
                     studentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                     studentStream.getAudioTracks().forEach(t => t.enabled = false);
 
@@ -2334,7 +2312,7 @@
                         });
 
                         // Start face detection on local video
-                        initFaceDetection(localVideo);
+                        initFaceDetection(localVideo, className);
 
                         // Listen for teacher's audio command
                         const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/audio`);
@@ -2583,13 +2561,13 @@
         // ================================================================
         //  INIT
         // ================================================================
-        console.log('✅ Smart Classroom fully functional with all features.');
+        console.log('✅ Smart Classroom 100% working with all features.');
         console.log('📌 Click avatar for profile.');
         console.log('📊 Attendance system works per day.');
         console.log('👥 Student list shows names and total count.');
         console.log('🎤 Teacher can control mic and camera for each student.');
         console.log('📹 Student video appears under their name when enabled.');
-        console.log('✅ All 3 bugs fixed: attendance save, attendance listener, peer open await.');
+        console.log('🔔 Face detection sends notification to teacher (no siren).');
     </script>
 </body>
 </html>
