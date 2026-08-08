@@ -10,14 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
-    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-database-compat.js">
-    </script>
-    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js">
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-database-compat.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
 
     <style>
         /* ===== COMPLETE CSS ===== */
@@ -851,7 +847,6 @@
 </head>
 <body>
 
-    <!-- ===== PROFILE MODAL ===== -->
     <div id="profileModal" class="profile-modal">
         <div class="profile-box">
             <button class="profile-close" id="profileClose">&times;</button>
@@ -885,7 +880,6 @@
         </div>
     </div>
 
-    <!-- ===== LOGIN OVERLAY ===== -->
     <div id="loginOverlay">
         <div class="login-box">
             <h2>Smart Classroom</h2>
@@ -913,7 +907,6 @@
         </div>
     </div>
 
-    <!-- ===== APP CONTAINER ===== -->
     <div id="appContainer">
         <aside id="sidebar" class="sidebar"></aside>
         <main class="main-area">
@@ -961,6 +954,11 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
+
+        // Helper to fix Firebase Keys (Cannot contain '.')
+        function sanitizeEmail(email) {
+            return email.replace(/\./g, ',');
+        }
 
         // ================================================================
         //  2. DOM REFS
@@ -1247,35 +1245,16 @@
             pageSubtitle.textContent = currentRole === 'teacher' ? 'Teacher Panel' : 'Student Panel';
 
             switch (pageId) {
-                case 't-live':
-                    renderTeacherLive();
-                    break;
-                case 't-students':
-                    renderTeacherStudents();
-                    break;
-                case 't-attendance':
-                    renderTeacherAttendance();
-                    break;
-                case 't-homework':
-                    renderTeacherHomework();
-                    break;
-                case 't-ratings':
-                    renderTeacherRatings();
-                    break;
-                case 's-live':
-                    renderStudentLive();
-                    break;
-                case 's-attendance':
-                    renderStudentAttendance();
-                    break;
-                case 's-homework':
-                    renderStudentHomework();
-                    break;
-                case 's-rating':
-                    renderStudentRating();
-                    break;
-                default:
-                    dynamicContent.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center;">Page not found.</div>';
+                case 't-live': renderTeacherLive(); break;
+                case 't-students': renderTeacherStudents(); break;
+                case 't-attendance': renderTeacherAttendance(); break;
+                case 't-homework': renderTeacherHomework(); break;
+                case 't-ratings': renderTeacherRatings(); break;
+                case 's-live': renderStudentLive(); break;
+                case 's-attendance': renderStudentAttendance(); break;
+                case 's-homework': renderStudentHomework(); break;
+                case 's-rating': renderStudentRating(); break;
+                default: dynamicContent.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center;">Page not found.</div>';
             }
         }
 
@@ -1309,12 +1288,9 @@
                         resolve(similarity);
                     }
                 }
-                img1.onload = checkDone;
-                img2.onload = checkDone;
-                img1.onerror = () => { resolve(0); };
-                img2.onerror = () => { resolve(0); };
-                img1.src = base64_1;
-                img2.src = base64_2;
+                img1.onload = checkDone; img2.onload = checkDone;
+                img1.onerror = () => { resolve(0); }; img2.onerror = () => { resolve(0); };
+                img1.src = base64_1; img2.src = base64_2;
             });
         }
 
@@ -1382,15 +1358,12 @@
 
                         document.querySelectorAll('.startClassBtn').forEach(btn => {
                             btn.addEventListener('click', () => {
-                                const key = btn.dataset.key;
-                                const name = btn.dataset.name;
-                                startClass(key, name);
+                                startClass(btn.dataset.key, btn.dataset.name);
                             });
                         });
                         document.querySelectorAll('.endClassBtn').forEach(btn => {
                             btn.addEventListener('click', () => {
-                                const key = btn.dataset.key;
-                                endClass(key);
+                                endClass(btn.dataset.key);
                             });
                         });
                         document.querySelectorAll('.deleteClassBtn').forEach(btn => {
@@ -1413,27 +1386,16 @@
                 const subject = newSubject.value.trim();
                 let className = newClassName.value.trim();
                 if (!branch || !semester || !subject || !className) {
-                    alert('Please fill all fields.');
-                    return;
+                    alert('Please fill all fields.'); return;
                 }
                 className = className.replace(/\s+/g, '-');
                 const snap = await classesRef.orderByChild('className').equalTo(className).once('value');
-                if (snap.exists()) {
-                    alert('A class with this name already exists.');
-                    return;
-                }
+                if (snap.exists()) { alert('A class with this name already exists.'); return; }
                 const newRef = classesRef.push();
                 await newRef.set({
-                    branch,
-                    semester,
-                    subject,
-                    className,
-                    teacher: currentUser.uid,
-                    createdAt: Date.now(),
-                    active: false
+                    branch, semester, subject, className, teacher: currentUser.uid, createdAt: Date.now(), active: false
                 });
-                newClassName.value = '';
-                newSubject.value = '';
+                newClassName.value = ''; newSubject.value = '';
             });
 
             async function switchCamera() {
@@ -1441,10 +1403,7 @@
                 const newFacing = cameraFacing === 'user' ? 'environment' : 'user';
                 try {
                     localStream.getVideoTracks().forEach(t => t.stop());
-                    const newStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: newFacing },
-                        audio: true
-                    });
+                    const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newFacing }, audio: true });
                     const newVideoTrack = newStream.getVideoTracks()[0];
                     const oldVideoTrack = localStream.getVideoTracks()[0];
                     localStream.removeTrack(oldVideoTrack);
@@ -1458,12 +1417,9 @@
             }
 
             async function startClass(classKey, className) {
-                if (isTeacherLive) {
-                    await endClass(currentClassKey);
-                }
+                if (isTeacherLive) await endClass(currentClassKey);
                 try {
-                    if (peer) { peer.destroy();
-                        peer = null; }
+                    if (peer) { peer.destroy(); peer = null; }
                     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                     peer = new Peer(className, { debug: 2 });
 
@@ -1489,10 +1445,7 @@
                                             <div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:8px;">No students connected</div>
                                         </div>
                                     </div>
-                                    <div class="video-overlay-badge">
-                                        <i class="fas fa-circle" style="color:#34d399;"></i>
-                                        <span>Live (Teacher)</span>
-                                    </div>
+                                    <div class="video-overlay-badge"><i class="fas fa-circle" style="color:#34d399;"></i><span>Live (Teacher)</span></div>
                                 </div>
                                 <div class="chat-box" style="margin-top:8px;height:120px;">
                                     <div class="chat-messages" id="teacher-chat-messages"></div>
@@ -1512,11 +1465,8 @@
                         const localDiv = videoContainer.querySelector('.local-player');
                         const localVideo = document.createElement('video');
                         localVideo.srcObject = localStream;
-                        localVideo.autoplay = true;
-                        localVideo.muted = true;
-                        localVideo.style.width = '100%';
-                        localVideo.style.height = '100%';
-                        localVideo.style.objectFit = 'cover';
+                        localVideo.autoplay = true; localVideo.muted = true;
+                        localVideo.style.width = '100%'; localVideo.style.height = '100%'; localVideo.style.objectFit = 'cover';
                         localDiv.appendChild(localVideo);
 
                         // Chat
@@ -1530,253 +1480,165 @@
                             container.appendChild(msgDiv);
                             container.scrollTop = container.scrollHeight;
                         });
-
                         document.getElementById('teacher-chat-send').addEventListener('click', () => {
                             const input = document.getElementById('teacher-chat-input');
                             const text = input.value.trim();
                             if (!text) return;
-                            chatRef.push({
-                                sender: currentUser.email,
-                                role: 'teacher',
-                                text: text,
-                                timestamp: Date.now()
-                            });
+                            chatRef.push({ sender: currentUser.email, role: 'teacher', text: text, timestamp: Date.now() });
                             input.value = '';
                         });
 
-                        // Notification listener
-                        if (notifRef) notifRef.off();
-                        notifRef = db.ref(`notifications/${className}`);
-                        notifRef.on('child_added', (snap) => {
-                            const data = snap.val();
-                            if (!data.seen) {
-                                snap.ref.update({ seen: true });
-                                const notifContainer = document.getElementById('notificationContainer');
-                                if (notifContainer) {
-                                    const placeholder = notifContainer.querySelector('div[style]');
-                                    if (placeholder && notifContainer.children.length === 1) {
-                                        notifContainer.innerHTML = '';
-                                    }
-                                    const notifDiv = document.createElement('div');
-                                    notifDiv.style.cssText =
-                                        'background:rgba(248,113,113,0.15);border:1px solid #f87171;border-radius:10px;padding:6px 10px;margin-bottom:4px;color:#f1f5f9;font-size:12px;display:flex;justify-content:space-between;align-items:center;';
-                                    notifDiv.innerHTML = `
-                                        <span style="color:#f87171;">⚠️</span>
-                                        <span>${data.message}</span>
-                                        <span style="font-size:10px;color:rgba(255,255,255,0.3);">${new Date(data.timestamp).toLocaleTimeString()}</span>
-                                    `;
-                                    notifContainer.prepend(notifDiv);
-                                    while (notifContainer.children.length > 10) {
-                                        notifContainer.removeChild(notifContainer.lastChild);
-                                    }
-                                }
-                            }
-                        });
-
-                        // Handle student calls
+                        // Handle student calls (Student PeerID is their UID)
                         peer.on('call', (call) => {
-                            const studentId = call.peer;
-                            if (studentCalls[studentId]) {
-                                call.close();
-                                return;
-                            }
+                            const studentUid = call.peer; 
+                            if (studentCalls[studentUid]) { call.close(); return; }
                             call.answer(localStream);
-                            studentCalls[studentId] = { call, stream: null, element: null };
+                            studentCalls[studentUid] = { call, stream: null, element: null };
 
-                            // Get student name
-                            db.ref('users').orderByChild('email').equalTo(studentId).once('value').then(snap => {
-                                let displayName = studentId;
+                            // Fetch Student Details via UID
+                            db.ref('users/' + studentUid).once('value').then(snap => {
+                                let displayName = "Student";
                                 if (snap.exists()) {
-                                    const users = snap.val();
-                                    for (const key in users) {
-                                        if (users[key].email === studentId) {
-                                            displayName = users[key].name || studentId;
-                                            break;
-                                        }
-                                    }
+                                    displayName = snap.val().name || snap.val().email;
                                 }
+                                
                                 const studentList = document.getElementById('studentListContainer');
                                 const placeholder = studentList.querySelector('div[style]');
                                 if (placeholder) placeholder.remove();
 
                                 const studentDiv = document.createElement('div');
-                                studentDiv.id = 'student-' + studentId;
+                                studentDiv.id = 'student-' + studentUid;
                                 studentDiv.className = 'student-item';
-                                studentDiv.style.cssText =
-                                    'display:flex;justify-content:space-between;align-items:center;padding:4px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.05);margin-bottom:4px;flex-wrap:wrap;gap:4px;';
+                                studentDiv.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:4px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.05);margin-bottom:4px;flex-wrap:wrap;gap:4px;';
                                 studentDiv.innerHTML = `
                                     <span style="font-size:13px;color:rgba(255,255,255,0.7);">${displayName}</span>
                                     <div style="display:flex;gap:8px;">
-                                        <button class="micToggleBtn" data-student="${studentId}" data-class="${className}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
+                                        <button class="micToggleBtn" data-uid="${studentUid}" data-class="${className}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
                                             <i class="fas fa-microphone-slash"></i>
                                         </button>
-                                        <button class="videoToggleBtn" data-student="${studentId}" data-class="${className}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
+                                        <button class="videoToggleBtn" data-uid="${studentUid}" data-class="${className}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
                                             <i class="fas fa-video-slash"></i>
                                         </button>
                                     </div>
                                 `;
                                 studentList.appendChild(studentDiv);
-                                studentCalls[studentId].element = studentDiv;
+                                studentCalls[studentUid].element = studentDiv;
                                 updateStudentCount();
 
-                                // --- Mic toggle ---
                                 const micBtn = studentDiv.querySelector('.micToggleBtn');
                                 const vidBtn = studentDiv.querySelector('.videoToggleBtn');
 
+                                // Firebase Control Update
                                 micBtn.addEventListener('click', function(e) {
                                     e.stopPropagation();
-                                    const student = this.dataset.student;
+                                    const uid = this.dataset.uid;
                                     const cls = this.dataset.class;
-                                    const ref = db.ref(`classControl/${cls}/students/${student}/audio`);
-                                    ref.once('value').then(snap => {
-                                        ref.set(!(snap.val() === true));
-                                    });
+                                    const ref = db.ref(`classControl/${cls}/students/${uid}/audio`);
+                                    ref.once('value').then(snap => ref.set(!(snap.val() === true)));
                                 });
 
                                 vidBtn.addEventListener('click', function(e) {
                                     e.stopPropagation();
-                                    const student = this.dataset.student;
+                                    const uid = this.dataset.uid;
                                     const cls = this.dataset.class;
-                                    const ref = db.ref(`classControl/${cls}/students/${student}/video`);
-                                    ref.once('value').then(snap => {
-                                        ref.set(!(snap.val() === true));
-                                    });
+                                    const ref = db.ref(`classControl/${cls}/students/${uid}/video`);
+                                    ref.once('value').then(snap => ref.set(!(snap.val() === true)));
                                 });
 
-                                // --- Stream handling ---
+                                // Stream Handling
                                 call.on('stream', (remoteStream) => {
-                                    studentCalls[studentId].stream = remoteStream;
+                                    studentCalls[studentUid].stream = remoteStream;
                                     remoteStream.getAudioTracks().forEach(t => t.enabled = false);
                                     remoteStream.getVideoTracks().forEach(t => t.enabled = false);
 
-                                    const controlRef = db.ref(`classControl/${className}/students/${studentId}`);
+                                    const controlRef = db.ref(`classControl/${className}/students/${studentUid}`);
                                     controlRef.on('value', (snap) => {
                                         if (!snap.exists()) return;
                                         const data = snap.val();
-                                        // Audio
+                                        
+                                        // Update Audio Status on Teacher Screen
                                         const audioOn = data.audio === true;
                                         remoteStream.getAudioTracks().forEach(t => t.enabled = audioOn);
-                                        const micBtn = studentDiv.querySelector('.micToggleBtn');
-                                        if (audioOn) {
-                                            micBtn.style.color = '#34d399';
-                                            micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-                                        } else {
-                                            micBtn.style.color = '#f87171';
-                                            micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
-                                        }
-                                        // Video
+                                        const mBtn = studentDiv.querySelector('.micToggleBtn');
+                                        if (audioOn) { mBtn.style.color = '#34d399'; mBtn.innerHTML = '<i class="fas fa-microphone"></i>'; } 
+                                        else { mBtn.style.color = '#f87171'; mBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>'; }
+                                        
+                                        // Update Video Status on Teacher Screen
                                         const videoOn = data.video === true;
                                         remoteStream.getVideoTracks().forEach(t => t.enabled = videoOn);
-                                        const vidBtn = studentDiv.querySelector('.videoToggleBtn');
-                                        if (videoOn) {
-                                            vidBtn.style.color = '#34d399';
-                                            vidBtn.innerHTML = '<i class="fas fa-video"></i>';
-                                        } else {
-                                            vidBtn.style.color = '#f87171';
-                                            vidBtn.innerHTML = '<i class="fas fa-video-slash"></i>';
-                                        }
-                                        // Show video under name
-                                        let vidContainer = document.getElementById('vid-' + studentId);
+                                        const vBtn = studentDiv.querySelector('.videoToggleBtn');
+                                        if (videoOn) { vBtn.style.color = '#34d399'; vBtn.innerHTML = '<i class="fas fa-video"></i>'; } 
+                                        else { vBtn.style.color = '#f87171'; vBtn.innerHTML = '<i class="fas fa-video-slash"></i>'; }
+                                        
+                                        let vidContainer = document.getElementById('vid-' + studentUid);
                                         if (videoOn) {
                                             if (!vidContainer) {
                                                 vidContainer = document.createElement('div');
-                                                vidContainer.id = 'vid-' + studentId;
-                                                vidContainer.style.cssText =
-                                                    'width:100%;max-width:200px;height:150px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);margin-top:4px;background:#0a0f1a;';
+                                                vidContainer.id = 'vid-' + studentUid;
+                                                vidContainer.style.cssText = 'width:100%;max-width:200px;height:150px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);margin-top:4px;background:#0a0f1a;';
                                                 studentDiv.appendChild(vidContainer);
                                             }
                                             let vidEl = vidContainer.querySelector('video');
                                             if (!vidEl) {
                                                 vidEl = document.createElement('video');
-                                                vidEl.autoplay = true;
-                                                vidEl.style.width = '100%';
-                                                vidEl.style.height = '100%';
-                                                vidEl.style.objectFit = 'cover';
+                                                vidEl.autoplay = true; vidEl.style.width = '100%'; vidEl.style.height = '100%'; vidEl.style.objectFit = 'cover';
                                                 vidContainer.appendChild(vidEl);
                                             }
                                             vidEl.srcObject = remoteStream;
                                             vidContainer.style.display = 'block';
-                                        } else {
-                                            if (vidContainer) {
-                                                vidContainer.style.display = 'none';
-                                            }
+                                        } else if (vidContainer) {
+                                            vidContainer.style.display = 'none';
                                         }
                                     });
                                 });
 
-                                // --- Student leaves ---
                                 call.on('close', () => {
-                                    const el = document.getElementById('student-' + studentId);
+                                    const el = document.getElementById('student-' + studentUid);
                                     if (el) el.remove();
-                                    delete studentCalls[studentId];
+                                    delete studentCalls[studentUid];
                                     updateStudentCount();
-                                    const vidCont = document.getElementById('vid-' + studentId);
+                                    const vidCont = document.getElementById('vid-' + studentUid);
                                     if (vidCont) vidCont.remove();
                                     const studentList = document.getElementById('studentListContainer');
-                                    if (studentList.children.length === 0) {
-                                        studentList.innerHTML =
-                                            '<div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:8px;">No students connected</div>';
-                                    }
+                                    if (studentList.children.length === 0) studentList.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:8px;">No students connected</div>';
                                 });
                             });
                         });
 
-                        document.getElementById('stopLiveBtn').addEventListener('click', () => {
-                            endClass(classKey);
-                        });
+                        document.getElementById('stopLiveBtn').addEventListener('click', () => { endClass(classKey); });
 
                         function updateStudentCount() {
                             const container = document.getElementById('studentListContainer');
                             const count = container.querySelectorAll('.student-item').length;
                             let header = container.querySelector('.student-count');
-                            if (header) {
-                                header.textContent = `Students: ${count}`;
-                            } else {
+                            if (header) { header.textContent = `Students: ${count}`; } 
+                            else {
                                 const h = document.createElement('div');
                                 h.className = 'student-count';
-                                h.style.cssText =
-                                    'font-weight:600;font-size:14px;padding:4px 8px;color:rgba(255,255,255,0.6);';
+                                h.style.cssText = 'font-weight:600;font-size:14px;padding:4px 8px;color:rgba(255,255,255,0.6);';
                                 h.textContent = `Students: ${count}`;
                                 container.prepend(h);
                             }
                         }
                     });
 
-                    peer.on('error', (err) => {
-                        alert('PeerJS error: ' + err.message);
-                        endClass(classKey);
-                    });
+                    peer.on('error', (err) => { alert('PeerJS error: ' + err.message); endClass(classKey); });
 
-                } catch (err) {
-                    alert('Error starting class: ' + err.message);
-                }
+                } catch (err) { alert('Error starting class: ' + err.message); }
             }
 
             async function endClass(classKey) {
-                Object.values(studentCalls).forEach(({ call }) => {
-                    if (call) call.close();
-                });
+                Object.values(studentCalls).forEach(({ call }) => { if (call) call.close(); });
                 studentCalls = {};
-                if (localStream) {
-                    localStream.getTracks().forEach(t => t.stop());
-                    localStream = null;
-                }
-                if (peer) {
-                    peer.destroy();
-                    peer = null;
-                }
-                if (notifRef) {
-                    notifRef.off();
-                    notifRef = null;
-                }
+                if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+                if (peer) { peer.destroy(); peer = null; }
+                if (notifRef) { notifRef.off(); notifRef = null; }
                 isTeacherLive = false;
                 liveContainer.innerHTML = '';
                 await classesRef.child(classKey).update({ active: false });
                 loadClasses();
                 currentClassKey = null;
-                if (currentClassKey) {
-                    await db.ref(`classControl/${currentClassKey}`).remove();
-                }
+                if (currentClassKey) await db.ref(`classControl/${currentClassKey}`).remove();
             }
         }
 
@@ -1784,59 +1646,34 @@
         //  8. TEACHER STUDENTS LIST
         // ================================================================
         function renderTeacherStudents() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>Students</h2>
-                    <div id="studentList"></div>
-                </div>
-            `;
+            dynamicContent.innerHTML = `<div class="page-content"><h2>Students</h2><div id="studentList"></div></div>`;
             const list = document.getElementById('studentList');
-            const branch = currentBranch || '';
-            const semester = currentSemester || 0;
-
             db.ref('users').orderByChild('role').equalTo('student').on('value', (snap) => {
                 list.innerHTML = '';
                 if (snap.exists()) {
                     const users = snap.val();
-                    let html = '<div class="card">';
-                    let count = 0;
+                    let html = '<div class="card">'; let count = 0;
                     for (const key in users) {
                         const user = users[key];
-                        if (user.branch === branch && user.semester === semester) {
+                        if (user.branch === (currentBranch || '') && user.semester === (currentSemester || 0)) {
                             count++;
-                            html += `
-                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
-                                    <span>${user.name || user.email}</span>
-                                    <span style="color:rgba(255,255,255,0.4);">${user.email}</span>
-                                </div>
-                            `;
+                            html += `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);"><span>${user.name || user.email}</span><span style="color:rgba(255,255,255,0.4);">${user.email}</span></div>`;
                         }
                     }
-                    html += `<div style="margin-top:8px;font-weight:600;color:#a78bfa;">Total Students: ${count}</div>`;
-                    html += '</div>';
+                    html += `<div style="margin-top:8px;font-weight:600;color:#a78bfa;">Total Students: ${count}</div></div>`;
                     list.innerHTML = html;
-                } else {
-                    list.innerHTML = '<div class="text-muted">No students found.</div>';
-                }
+                } else { list.innerHTML = '<div class="text-muted">No students found.</div>'; }
             });
         }
 
         // ================================================================
-        //  9. TEACHER ATTENDANCE (FIXED)
+        //  9. TEACHER ATTENDANCE (Updated Key Formatting)
         // ================================================================
         function renderTeacherAttendance() {
             const today = new Date().toISOString().split('T')[0];
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>Attendance</h2>
-                    <div id="attendanceContainer"></div>
-                </div>
-            `;
+            dynamicContent.innerHTML = `<div class="page-content"><h2>Attendance</h2><div id="attendanceContainer"></div></div>`;
             const container = document.getElementById('attendanceContainer');
-
-            const branch = currentBranch || '';
-            const semester = currentSemester || 0;
-
+            
             db.ref('users').orderByChild('role').equalTo('student').on('value', (snap) => {
                 container.innerHTML = '';
                 if (snap.exists()) {
@@ -1845,61 +1682,45 @@
                         <div class="card">
                             <div style="display:flex;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:4px;">
                                 <span><strong>Date:</strong> ${today}</span>
-                                <span><strong>Branch:</strong> ${branch} | <strong>Semester:</strong> ${semester}</span>
+                                <span><strong>Branch:</strong> ${currentBranch} | <strong>Sem:</strong> ${currentSemester}</span>
                             </div>
                             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-weight:600;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <div>Student</div>
-                                <div>Status</div>
-                                <div>Action</div>
+                                <div>Student</div><div>Status</div><div>Action</div>
                             </div>
                     `;
                     let found = false;
-                    let studentDivs = [];
                     for (const key in users) {
                         const user = users[key];
-                        if (user.branch === branch && user.semester === semester) {
+                        if (user.branch === (currentBranch || '') && user.semester === (currentSemester || 0)) {
                             found = true;
-                            const studentEmail = user.email;
-                            const studentName = user.name || studentEmail;
-                            const attRef = db.ref(`attendance/${today}/${studentEmail}`);
+                            const safeEmail = sanitizeEmail(user.email);
+                            const attRef = db.ref(`attendance/${today}/${safeEmail}`);
                             attRef.once('value').then(snap2 => {
                                 const status = snap2.exists() ? snap2.val().status : 'Absent';
                                 const isPresent = status === 'Present';
                                 const studentDiv = document.createElement('div');
-                                studentDiv.style.cssText =
-                                    'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);align-items:center;';
+                                studentDiv.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);align-items:center;';
                                 studentDiv.innerHTML = `
-                                    <div>${studentName}</div>
+                                    <div>${user.name || user.email}</div>
                                     <div style="color:${isPresent ? '#34d399' : '#f87171'};">${status}</div>
                                     <div>
-                                        <button class="attendanceToggle" data-email="${studentEmail}" style="padding:2px 12px;border-radius:20px;border:none;background:${isPresent ? '#f87171' : '#34d399'};color:#fff;cursor:pointer;font-size:11px;">
+                                        <button class="attendanceToggle" data-email="${safeEmail}" style="padding:2px 12px;border-radius:20px;border:none;background:${isPresent ? '#f87171' : '#34d399'};color:#fff;cursor:pointer;font-size:11px;">
                                             ${isPresent ? 'Mark Absent' : 'Mark Present'}
                                         </button>
                                     </div>
                                 `;
                                 container.appendChild(studentDiv);
 
-                                const toggleBtn = studentDiv.querySelector('.attendanceToggle');
-                                toggleBtn.addEventListener('click', function() {
-                                    const email = this.dataset.email;
+                                studentDiv.querySelector('.attendanceToggle').addEventListener('click', function() {
+                                    const emailKey = this.dataset.email;
                                     const newStatus = isPresent ? 'Absent' : 'Present';
-                                    db.ref(`attendance/${today}/${email}`).set({
-                                        status: newStatus,
-                                        timestamp: Date.now()
-                                    }).then(() => {
-                                        renderTeacherAttendance();
-                                    });
+                                    db.ref(`attendance/${today}/${emailKey}`).set({ status: newStatus, timestamp: Date.now() }).then(() => renderTeacherAttendance());
                                 });
                             });
                         }
                     }
-                    if (!found) {
-                        container.innerHTML =
-                            '<div class="text-muted">No students found for your branch & semester.</div>';
-                    }
-                } else {
-                    container.innerHTML = '<div class="text-muted">No students registered.</div>';
-                }
+                    if (!found) container.innerHTML = '<div class="text-muted">No students found for your branch & semester.</div>';
+                } else { container.innerHTML = '<div class="text-muted">No students registered.</div>'; }
             });
         }
 
@@ -1907,168 +1728,115 @@
         //  10. STUDENT ATTENDANCE
         // ================================================================
         function renderStudentAttendance() {
-            const today = new Date().toISOString().split('T')[0];
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>My Attendance</h2>
-                    <div id="attendanceContainer"></div>
-                </div>
-            `;
+            dynamicContent.innerHTML = `<div class="page-content"><h2>My Attendance</h2><div id="attendanceContainer"></div></div>`;
             const container = document.getElementById('attendanceContainer');
+            const safeEmail = sanitizeEmail(currentUser.email);
 
-            const email = currentUser.email;
             db.ref('attendance').on('value', (snap) => {
                 container.innerHTML = '';
                 if (snap.exists()) {
                     const data = snap.val();
-                    let totalDays = 0;
-                    let presentDays = 0;
+                    let totalDays = 0, presentDays = 0;
                     let html = '<div class="card">';
                     for (const date in data) {
-                        if (data[date][email]) {
+                        if (data[date][safeEmail]) {
                             totalDays++;
-                            if (data[date][email].status === 'Present') presentDays++;
+                            if (data[date][safeEmail].status === 'Present') presentDays++;
                         }
                     }
                     const percent = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
                     html += `
                         <div style="display:flex;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:4px;">
-                            <span><strong>Total Days:</strong> ${totalDays}</span>
-                            <span><strong>Present:</strong> ${presentDays}</span>
-                            <span><strong>Absent:</strong> ${totalDays - presentDays}</span>
-                            <span><strong>Attendance %:</strong> ${percent}%</span>
+                            <span><strong>Total Days:</strong> ${totalDays}</span><span><strong>Present:</strong> ${presentDays}</span>
+                            <span><strong>Absent:</strong> ${totalDays - presentDays}</span><span><strong>Attendance %:</strong> ${percent}%</span>
                         </div>
                         <div style="margin-top:8px;max-height:200px;overflow-y:auto;">
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-weight:600;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <div>Date</div>
-                                <div>Status</div>
+                                <div>Date</div><div>Status</div>
                             </div>
                     `;
                     const dates = Object.keys(data).sort((a, b) => b.localeCompare(a));
                     for (const date of dates) {
-                        if (data[date][email]) {
-                            const status = data[date][email].status;
-                            html += `
-                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
-                                    <div>${date}</div>
-                                    <div style="color:${status === 'Present' ? '#34d399' : '#f87171'};">${status}</div>
-                                </div>
-                            `;
+                        if (data[date][safeEmail]) {
+                            const status = data[date][safeEmail].status;
+                            html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);"><div>${date}</div><div style="color:${status === 'Present' ? '#34d399' : '#f87171'};">${status}</div></div>`;
                         }
                     }
                     html += '</div></div>';
                     container.innerHTML = html;
-                } else {
-                    container.innerHTML = '<div class="text-muted">No attendance records found.</div>';
-                }
+                } else { container.innerHTML = '<div class="text-muted">No attendance records found.</div>'; }
             });
         }
 
         // ================================================================
-        //  11. TEACHER RATINGS
+        //  11. TEACHER RATINGS (Dynamic Central Update)
         // ================================================================
         function renderTeacherRatings() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>Ratings</h2>
-                    <div id="ratingList"></div>
-                </div>
-            `;
+            dynamicContent.innerHTML = `<div class="page-content"><h2>Ratings</h2><div id="ratingList"></div></div>`;
             const list = document.getElementById('ratingList');
-            const branch = currentBranch || '';
-            const semester = currentSemester || 0;
 
             db.ref('users').orderByChild('role').equalTo('student').on('value', (snap) => {
                 list.innerHTML = '';
                 if (snap.exists()) {
                     const users = snap.val();
-                    let html = '';
-                    let count = 0;
+                    let html = ''; let count = 0;
                     for (const key in users) {
                         const user = users[key];
-                        if (user.branch === branch && user.semester === semester) {
+                        if (user.branch === (currentBranch || '') && user.semester === (currentSemester || 0)) {
                             count++;
+                            const safeEmail = sanitizeEmail(user.email);
                             html += `
                                 <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
                                     <span>${user.name || user.email}</span>
                                     <div>
-                                        <select class="ratingSelect" data-email="${user.email}" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px 10px;color:#fff;font-size:12px;">
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4" selected>4</option>
-                                            <option value="5">5</option>
+                                        <select class="ratingSelect" data-email="${safeEmail}" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px 10px;color:#fff;font-size:12px;">
+                                            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option>
                                         </select>
-                                        <button class="btn btn-primary btn-sm saveRating" data-email="${user.email}" style="margin-left:4px;">Save</button>
+                                        <button class="btn btn-primary btn-sm saveRating" data-email="${safeEmail}" style="margin-left:4px;">Save</button>
                                     </div>
                                 </div>
                             `;
                         }
                     }
-                    if (count === 0) {
-                        list.innerHTML = '<div class="text-muted">No students found for your branch & semester.</div>';
-                    } else {
+                    if (count === 0) { list.innerHTML = '<div class="text-muted">No students found for your branch & semester.</div>'; } 
+                    else {
                         list.innerHTML = html;
-                        // Load saved ratings
-                        db.ref('ratings/' + currentUser.uid).once('value').then(snap2 => {
+                        // Load central saved ratings
+                        db.ref('studentRatings').once('value').then(snap2 => {
                             if (snap2.exists()) {
                                 const ratings = snap2.val();
                                 document.querySelectorAll('.ratingSelect').forEach(sel => {
-                                    const email = sel.dataset.email;
-                                    if (ratings[email]) sel.value = ratings[email];
+                                    const emailKey = sel.dataset.email;
+                                    if (ratings[emailKey]) sel.value = ratings[emailKey].rating;
                                 });
                             }
                         });
                         document.querySelectorAll('.saveRating').forEach(btn => {
                             btn.addEventListener('click', async () => {
-                                const email = btn.dataset.email;
-                                const sel = document.querySelector(`.ratingSelect[data-email="${email}"]`);
-                                await db.ref('ratings/' + currentUser.uid + '/' + email).set(parseInt(sel
-                                .value));
-                                alert('✅ Rating saved!');
+                                const emailKey = btn.dataset.email;
+                                const sel = document.querySelector(`.ratingSelect[data-email="${emailKey}"]`);
+                                await db.ref('studentRatings/' + emailKey).set({ rating: parseInt(sel.value), teacherUid: currentUser.uid, timestamp: Date.now() });
+                                alert('✅ Rating saved successfully!');
                             });
                         });
                     }
-                } else {
-                    list.innerHTML = '<div class="text-muted">No students.</div>';
-                }
+                } else { list.innerHTML = '<div class="text-muted">No students.</div>'; }
             });
         }
 
         // ================================================================
-        //  12. STUDENT RATING
+        //  12. STUDENT RATING (Fetch Central Rating)
         // ================================================================
         function renderStudentRating() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>My Rating</h2>
-                    <div id="studentRatingDisplay"></div>
-                </div>
-            `;
+            dynamicContent.innerHTML = `<div class="page-content"><h2>My Rating</h2><div id="studentRatingDisplay"></div></div>`;
             const display = document.getElementById('studentRatingDisplay');
-            const teacherEmail = 'nagrajmall2317@gmail.com';
-            db.ref('users').once('value').then(snap => {
+            const safeEmail = sanitizeEmail(currentUser.email);
+            
+            db.ref('studentRatings/' + safeEmail).on('value', (snap) => {
                 if (snap.exists()) {
-                    const users = snap.val();
-                    let teacherUid = null;
-                    for (const [uid, data] of Object.entries(users)) {
-                        if (data.email === teacherEmail && data.role === 'teacher') {
-                            teacherUid = uid;
-                            break;
-                        }
-                    }
-                    if (teacherUid) {
-                        db.ref('ratings/' + teacherUid + '/' + currentUser.email).on('value', (snap2) => {
-                            if (snap2.exists()) {
-                                display.innerHTML =
-                                    `<div style="font-size:40px;font-weight:700;color:#a78bfa;">${snap2.val()} / 5</div>`;
-                            } else {
-                                display.innerHTML = '<div class="text-muted">No rating given yet.</div>';
-                            }
-                        });
-                    } else {
-                        display.innerHTML = '<div class="text-muted">Teacher not found.</div>';
-                    }
+                    display.innerHTML = `<div style="font-size:40px;font-weight:700;color:#a78bfa;">${snap.val().rating} / 5</div>`;
+                } else {
+                    display.innerHTML = '<div class="text-muted">No rating given yet.</div>';
                 }
             });
         }
@@ -2098,91 +1866,44 @@
             const fileInput = document.getElementById('hwTeacherFile');
             const uploadBtn = document.getElementById('uploadHwBtn');
             const status = document.getElementById('hwUploadStatus');
-            const subsDiv = document.getElementById('hwSubmissions');
-            const subject = document.getElementById('hwSubject');
-            const topic = document.getElementById('hwTopic');
-            const chapter = document.getElementById('hwChapter');
-            const dueDate = document.getElementById('hwDueDate');
 
             uploadBtn.addEventListener('click', async () => {
-                const file = fileInput.files[0];
-                const subj = subject.value.trim();
-                const top = topic.value.trim();
-                const chap = chapter.value.trim();
-                const due = dueDate.value;
-                if (!file || !subj || !top || !chap || !due) {
-                    status.textContent = 'Please fill all fields and select an image.';
-                    return;
-                }
-                status.textContent = '⏳ Converting...';
+                const subj = document.getElementById('hwSubject').value.trim();
+                const top = document.getElementById('hwTopic').value.trim();
+                const chap = document.getElementById('hwChapter').value.trim();
+                const due = document.getElementById('hwDueDate').value;
+                if (!fileInput.files[0] || !subj || !top || !chap || !due) { status.textContent = 'Please fill all fields.'; return; }
+                status.textContent = '⏳ Uploading...';
                 try {
                     const reader = new FileReader();
-                    const base64 = await new Promise((resolve) => {
-                        reader.onload = (e) => resolve(e.target.result);
-                        reader.readAsDataURL(file);
-                    });
-                    const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(base64));
-                    const hashArray = Array.from(new Uint8Array(hashBuffer));
-                    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-                    const hwRef = db.ref('homework/' + currentUser.uid).push();
-                    await hwRef.set({
-                        teacher: currentUser.uid,
-                        subject: subj,
-                        topic: top,
-                        chapter: chap,
-                        dueDate: due,
-                        imageBase64: base64,
-                        imageHash: hashHex,
-                        timestamp: Date.now(),
-                        branch: currentBranch || '',
-                        semester: currentSemester || 0
-                    });
+                    const base64 = await new Promise((resolve) => { reader.onload = (e) => resolve(e.target.result); reader.readAsDataURL(fileInput.files[0]); });
+                    await db.ref('homework/' + currentUser.uid).push().set({ teacher: currentUser.uid, subject: subj, topic: top, chapter: chap, dueDate: due, imageBase64: base64, timestamp: Date.now(), branch: currentBranch || '', semester: currentSemester || 0 });
                     status.textContent = '✅ Assignment uploaded!';
-                    fileInput.value = '';
-                    subject.value = '';
-                    topic.value = '';
-                    chapter.value = '';
-                    dueDate.value = '';
                     loadSubmissions();
-                } catch (err) {
-                    status.textContent = '❌ Error: ' + err.message;
-                }
+                } catch (err) { status.textContent = '❌ Error: ' + err.message; }
             });
 
             function loadSubmissions() {
                 db.ref('homework/' + currentUser.uid).on('value', (snap) => {
+                    const subsDiv = document.getElementById('hwSubmissions');
                     subsDiv.innerHTML = '';
                     if (snap.exists()) {
-                        const data = snap.val();
                         let html = '<h3 style="font-size:16px;margin:12px 0 8px;">📋 All Assignments</h3>';
-                        for (const [hwId, hw] of Object.entries(data)) {
+                        for (const [hwId, hw] of Object.entries(snap.val())) {
                             html += `<div class="card">
-                                <div><strong>${hw.subject}</strong> — ${hw.topic} (Ch. ${hw.chapter})</div>
-                                <div style="font-size:12px;color:rgba(255,255,255,0.5);">Due: ${new Date(hw.dueDate).toLocaleString()}</div>
-                                <div><strong>Assignment:</strong> <img src="${hw.imageBase64}" style="max-width:80px;max-height:80px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);" /></div>
+                                <div><strong>${hw.subject}</strong> — ${hw.topic}</div>
                                 <div><strong>Submissions:</strong> ${hw.submissions ? Object.keys(hw.submissions).length : 0}</div>`;
                             if (hw.submissions) {
-                                html += '<div style="margin-top:6px;">';
                                 for (const [sid, sub] of Object.entries(hw.submissions)) {
-                                    const sim = sub.similarity || 0;
-                                    const grade = sub.grade || 'N/A';
-                                    const warning = sim > 70 ? ' ⚠️ Possible Cheating' : '';
-                                    html += `<div style="display:flex;gap:10px;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px;flex-wrap:wrap;">
-                                        <span style="color:rgba(255,255,255,0.5);">${sid}</span>
-                                        <span style="color:#a78bfa;">Grade: ${grade}</span>
-                                        <span style="color:rgba(255,255,255,0.3);">Sim: ${sim.toFixed(1)}%</span>
-                                        ${warning}
+                                    html += `<div style="display:flex;gap:10px;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px;">
+                                        <span style="color:#a78bfa;">Grade: ${sub.grade}</span><span style="color:rgba(255,255,255,0.3);">Sim: ${sub.similarity.toFixed(1)}%</span>
                                         <img src="${sub.imageBase64}" style="max-width:30px;max-height:30px;border-radius:4px;border:1px solid rgba(255,255,255,0.05);" />
                                     </div>`;
                                 }
-                                html += '</div>';
                             }
                             html += '</div>';
                         }
                         subsDiv.innerHTML = html;
-                    } else {
-                        subsDiv.innerHTML = '<div class="text-muted">No assignments yet.</div>';
                     }
                 });
             }
@@ -2193,71 +1914,42 @@
         //  14. STUDENT HOMEWORK
         // ================================================================
         function renderStudentHomework() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>Homework</h2>
-                    <div id="studentHomeworkList"></div>
-                    <div id="studentHomeworkDetail" style="margin-top:12px;"></div>
-                </div>
-            `;
-
+            dynamicContent.innerHTML = `<div class="page-content"><h2>Homework</h2><div id="studentHomeworkList"></div><div id="studentHomeworkDetail" style="margin-top:12px;"></div></div>`;
             const listDiv = document.getElementById('studentHomeworkList');
-            const detailDiv = document.getElementById('studentHomeworkDetail');
-
-            const teacherEmail = 'nagrajmall2317@gmail.com';
-            db.ref('users').once('value').then(snap => {
+            // Look for any teacher's homework
+            db.ref('homework').on('value', (snap) => {
+                listDiv.innerHTML = '';
                 if (snap.exists()) {
-                    const users = snap.val();
-                    let teacherUid = null;
-                    for (const [uid, data] of Object.entries(users)) {
-                        if (data.email === teacherEmail && data.role === 'teacher') {
-                            teacherUid = uid;
-                            break;
+                    let html = '<div style="display:flex;flex-wrap:wrap;gap:10px;">';
+                    const allTeachers = snap.val();
+                    for (const [teacherUid, hws] of Object.entries(allTeachers)) {
+                        for (const [hwId, hw] of Object.entries(hws)) {
+                            html += `<div class="card" style="cursor:pointer;max-width:200px;">
+                                        <div><strong>${hw.subject}</strong></div><div style="font-size:12px;">${hw.topic}</div>
+                                        <button class="btn btn-primary btn-sm selectHwBtn" data-hwid="${hwId}" data-tuid="${teacherUid}">Select</button>
+                                    </div>`;
                         }
                     }
-                    if (teacherUid) {
-                        db.ref('homework/' + teacherUid).on('value', (snap2) => {
-                            listDiv.innerHTML = '';
-                            if (snap2.exists()) {
-                                const hws = snap2.val();
-                                let html = '<div style="display:flex;flex-wrap:wrap;gap:10px;">';
-                                for (const [hwId, hw] of Object.entries(hws)) {
-                                    html += `
-                                        <div class="card" style="cursor:pointer;max-width:200px;" data-hwid="${hwId}">
-                                            <div><strong>${hw.subject}</strong></div>
-                                            <div style="font-size:12px;">${hw.topic}</div>
-                                            <div style="font-size:11px;color:rgba(255,255,255,0.4);">Ch. ${hw.chapter}</div>
-                                            <div style="font-size:11px;color:rgba(255,255,255,0.4);">Due: ${new Date(hw.dueDate).toLocaleDateString()}</div>
-                                            <button class="btn btn-primary btn-sm selectHwBtn" data-hwid="${hwId}">Select</button>
-                                        </div>
-                                    `;
-                                }
-                                html += '</div>';
-                                listDiv.innerHTML = html;
+                    html += '</div>';
+                    listDiv.innerHTML = html;
 
-                                document.querySelectorAll('.selectHwBtn').forEach(btn => {
-                                    btn.addEventListener('click', (e) => {
-                                        const hwId = btn.dataset.hwid;
-                                        showHomeworkDetail(hwId, hws[hwId]);
-                                    });
-                                });
-                            } else {
-                                listDiv.innerHTML = '<div class="text-muted">No assignments posted.</div>';
-                            }
+                    document.querySelectorAll('.selectHwBtn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const hwId = btn.dataset.hwid;
+                            const tuid = btn.dataset.tuid;
+                            showHomeworkDetail(hwId, allTeachers[tuid][hwId], tuid);
                         });
-                    }
-                }
+                    });
+                } else { listDiv.innerHTML = '<div class="text-muted">No assignments posted.</div>'; }
             });
 
-            function showHomeworkDetail(hwId, hw) {
+            function showHomeworkDetail(hwId, hw, tuid) {
+                const detailDiv = document.getElementById('studentHomeworkDetail');
                 detailDiv.innerHTML = `
                     <div class="card">
                         <h3 style="font-size:16px;">${hw.subject} — ${hw.topic}</h3>
-                        <p style="font-size:13px;">Chapter: ${hw.chapter}</p>
-                        <p style="font-size:13px;color:rgba(255,255,255,0.5);">Due: ${new Date(hw.dueDate).toLocaleString()}</p>
-                        <div><strong>Assignment Image:</strong> <img src="${hw.imageBase64}" style="max-width:120px;max-height:120px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);" /></div>
+                        <div><img src="${hw.imageBase64}" style="max-width:120px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);" /></div>
                         <div style="margin-top:10px;">
-                            <h4 style="font-size:14px;">Submit Your Work</h4>
                             <input type="file" id="studentHwFile" accept="image/*" class="input-field" style="margin-bottom:6px;" />
                             <button id="submitHwBtn" class="btn btn-primary">Submit</button>
                             <div id="studentHwStatus" class="text-muted mt-10"></div>
@@ -2268,85 +1960,22 @@
 
                 const fileInput = document.getElementById('studentHwFile');
                 const submitBtn = document.getElementById('submitHwBtn');
-                const status = document.getElementById('studentHwStatus');
-                const resultDiv = document.getElementById('studentHwResult');
-
-                db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once('value').then(snap => {
-                    if (snap.exists()) {
-                        status.textContent = '✅ You already submitted this assignment.';
-                        status.style.color = '#34d399';
-                        submitBtn.disabled = true;
-                    }
-                });
+                const safeEmail = sanitizeEmail(currentUser.email);
 
                 submitBtn.addEventListener('click', async () => {
-                    const file = fileInput.files[0];
-                    if (!file) { status.textContent = 'Select an image first.'; return; }
-                    const snap = await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once(
-                        'value');
-                    if (snap.exists()) {
-                        status.textContent = 'You already submitted this assignment.';
-                        return;
-                    }
+                    if (!fileInput.files[0]) return;
+                    const status = document.getElementById('studentHwStatus');
                     status.textContent = '⏳ Processing...';
                     try {
                         const reader = new FileReader();
-                        const studentBase64 = await new Promise((resolve) => {
-                            reader.onload = (e) => resolve(e.target.result);
-                            reader.readAsDataURL(file);
-                        });
-                        const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(
-                            studentBase64));
-                        const hashArray = Array.from(new Uint8Array(hashBuffer));
-                        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-                        const existing = await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`)
-                            .once('value');
-                        if (existing.exists()) {
-                            status.textContent = 'You already submitted this assignment.';
-                            return;
-                        }
-
-                        const teacherBase64 = hw.imageBase64;
-                        const similarity = await compareImagesBase64(teacherBase64, studentBase64);
-                        let grade;
-                        if (similarity >= 50) grade = 5;
-                        else if (similarity >= 40) grade = 4;
-                        else if (similarity >= 30) grade = 3;
-                        else if (similarity >= 20) grade = 2;
-                        else grade = 1;
-
-                        const finalGrade = Math.min(5, Math.max(1, grade));
-
-                        await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).set({
-                            imageBase64: studentBase64,
-                            hash: hashHex,
-                            similarity: similarity,
-                            grade: finalGrade,
-                            timestamp: Date.now()
-                        });
-
-                        await db.ref(`homework/${hw.teacher}/${hwId}/submissions/${currentUser.email}`).set({
-                            imageBase64: studentBase64,
-                            hash: hashHex,
-                            similarity: similarity,
-                            grade: finalGrade,
-                            timestamp: Date.now()
-                        });
-
-                        status.textContent = '✅ Submitted! Grade: ' + finalGrade + '/5';
-                        resultDiv.innerHTML = `
-                            <div style="background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.1);border-radius:14px;padding:14px;text-align:center;">
-                                <div style="font-size:13px;color:rgba(255,255,255,0.5);">Similarity: ${similarity.toFixed(1)}%</div>
-                                <div style="font-size:32px;font-weight:700;color:#a78bfa;">${finalGrade} / 5</div>
-                                ${similarity > 70 ? '<div style="color:#f87171;margin-top:4px;font-size:12px;">⚠️ High similarity detected. Your submission may be flagged.</div>' : ''}
-                            </div>
-                        `;
+                        const studentBase64 = await new Promise((resolve) => { reader.onload = (e) => resolve(e.target.result); reader.readAsDataURL(fileInput.files[0]); });
+                        const similarity = await compareImagesBase64(hw.imageBase64, studentBase64);
+                        let grade = similarity >= 50 ? 5 : similarity >= 40 ? 4 : similarity >= 30 ? 3 : similarity >= 20 ? 2 : 1;
+                        
+                        await db.ref(`homework/${tuid}/${hwId}/submissions/${safeEmail}`).set({ imageBase64: studentBase64, similarity: similarity, grade: grade, timestamp: Date.now() });
+                        status.textContent = `✅ Submitted! Grade: ${grade}/5`;
                         submitBtn.disabled = true;
-                    } catch (err) {
-                        status.textContent = '❌ Error: ' + err.message;
-                        console.error(err);
-                    }
+                    } catch (err) { status.textContent = '❌ Error: ' + err.message; }
                 });
             }
         }
@@ -2355,167 +1984,47 @@
         //  15. STUDENT LIVE CLASS
         // ================================================================
         function renderStudentLive() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>Live Class</h2>
-                    <div id="studentClassList"></div>
-                    <div id="studentLiveContainer"></div>
-                </div>
-            `;
+            dynamicContent.innerHTML = `<div class="page-content"><h2>Live Class</h2><div id="studentClassList"></div><div id="studentLiveContainer"></div></div>`;
             const classListDiv = document.getElementById('studentClassList');
             const liveContainer = document.getElementById('studentLiveContainer');
-
-            const userBranch = (currentBranch || '').trim().toLowerCase();
-            const userSemester = currentSemester || 0;
 
             db.ref('classes').orderByChild('active').equalTo(true).on('value', (snap) => {
                 classListDiv.innerHTML = '';
                 if (snap.exists()) {
-                    const classes = snap.val();
-                    let found = false;
+                    const classes = snap.val(); let found = false;
                     let html = '<div style="margin-bottom:10px;">Available Live Classes:</div>';
-
                     Object.keys(classes).forEach(key => {
                         const cls = classes[key];
-                        const clsBranch = (cls.branch || '').trim().toLowerCase();
-                        const clsSemester = cls.semester || 0;
-
-                        if (clsBranch === userBranch && clsSemester === userSemester) {
+                        if ((cls.branch || '').trim().toLowerCase() === (currentBranch || '').trim().toLowerCase() && cls.semester === (currentSemester || 0)) {
                             found = true;
-                            html += `
-                                <div class="class-item" data-key="${key}">
-                                    <span class="name">${cls.className} (${cls.subject})</span>
-                                    <button class="btn btn-success btn-sm joinClassBtn" data-name="${cls.className}">Join</button>
-                                </div>
-                            `;
+                            html += `<div class="class-item" data-key="${key}"><span class="name">${cls.className}</span><button class="btn btn-success btn-sm joinClassBtn" data-name="${cls.className}">Join</button></div>`;
                         }
                     });
-
-                    if (!found) {
-                        html += `<div class="text-muted">No live classes for your branch & semester.</div>`;
-                    }
+                    if (!found) html += `<div class="text-muted">No live classes for your branch & semester.</div>`;
                     classListDiv.innerHTML = html;
-
-                    document.querySelectorAll('.joinClassBtn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const name = btn.dataset.name;
-                            joinStudentClass(name);
-                        });
-                    });
-                } else {
-                    classListDiv.innerHTML = '<div class="text-muted">No live classes at the moment.</div>';
-                }
+                    document.querySelectorAll('.joinClassBtn').forEach(btn => btn.addEventListener('click', () => joinStudentClass(btn.dataset.name)));
+                } else { classListDiv.innerHTML = '<div class="text-muted">No live classes at the moment.</div>'; }
             });
 
-            let studentPeer = null;
-            let studentCall = null;
-            let studentStream = null;
-            let faceDetector = null;
-            let faceCheckInterval = null;
-            let noFaceCount = 0;
-            let notificationSent = false;
-            let currentClassName = '';
-            let toastTimeout = null;
-
-            async function initFaceDetection(videoElement, className) {
-                if (!window.FaceDetector) {
-                    console.warn('FaceDetector not supported. Face tracking disabled.');
-                    return;
-                }
-                currentClassName = className;
-                try {
-                    faceDetector = new FaceDetector({
-                        maxDetectedFaces: 1,
-                        fastMode: true
-                    });
-                    faceCheckInterval = setInterval(async () => {
-                        if (!videoElement || videoElement.readyState < 2) return;
-                        try {
-                            const faces = await faceDetector.detect(videoElement);
-                            if (faces.length > 0) {
-                                noFaceCount = 0;
-                                notificationSent = false;
-                                toast.style.display = 'none';
-                                if (toastTimeout) {
-                                    clearTimeout(toastTimeout);
-                                    toastTimeout = null;
-                                }
-                            } else {
-                                noFaceCount++;
-                                if (noFaceCount > 5 && !notificationSent) {
-                                    notificationSent = true;
-                                    const notificationRef = db.ref(`notifications/${className}`);
-                                    notificationRef.push({
-                                        studentName: currentName || currentUser.email,
-                                        studentEmail: currentUser.email,
-                                        message: `${currentName || currentUser.email} is not visible on camera!`,
-                                        timestamp: Date.now(),
-                                        seen: false
-                                    });
-                                    toast.textContent = '⚠️ Your face is not visible. Please sit in front of the camera.';
-                                    toast.style.display = 'block';
-                                    if (toastTimeout) clearTimeout(toastTimeout);
-                                    toastTimeout = setTimeout(() => {
-                                        toast.style.display = 'none';
-                                    }, 5000);
-                                }
-                            }
-                        } catch (err) {
-                            console.warn('Face detection error:', err);
-                        }
-                    }, 1000);
-                } catch (err) {
-                    console.warn('FaceDetector error:', err);
-                }
-            }
-
-            function stopFaceDetection() {
-                if (faceCheckInterval) {
-                    clearInterval(faceCheckInterval);
-                    faceCheckInterval = null;
-                }
-                if (faceDetector) {
-                    faceDetector = null;
-                }
-                noFaceCount = 0;
-                notificationSent = false;
-                toast.style.display = 'none';
-                if (toastTimeout) {
-                    clearTimeout(toastTimeout);
-                    toastTimeout = null;
-                }
-            }
+            let studentPeer = null; let studentCall = null; let studentStream = null;
 
             async function joinStudentClass(className) {
                 if (studentCall) {
-                    studentCall.close();
-                    studentCall = null;
-                    if (studentStream) {
-                        studentStream.getTracks().forEach(t => t.stop());
-                        studentStream = null;
-                    }
-                    if (studentPeer) {
-                        studentPeer.destroy();
-                        studentPeer = null;
-                    }
+                    studentCall.close(); studentCall = null;
+                    if (studentStream) { studentStream.getTracks().forEach(t => t.stop()); studentStream = null; }
+                    if (studentPeer) { studentPeer.destroy(); studentPeer = null; }
                     liveContainer.innerHTML = '';
-                    stopFaceDetection();
                     return;
                 }
 
                 try {
                     studentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                    studentStream.getAudioTracks().forEach(t => t.enabled = false);
-
-                    const randomId = 'student-' + Date.now();
-                    studentPeer = new Peer(randomId, { debug: 2 });
+                    
+                    studentPeer = new Peer(currentUser.uid, { debug: 2 });
 
                     await new Promise((resolve, reject) => {
                         const timeout = setTimeout(() => reject(new Error('Peer connection timeout')), 10000);
-                        studentPeer.on('open', () => {
-                            clearTimeout(timeout);
-                            resolve();
-                        });
+                        studentPeer.on('open', () => { clearTimeout(timeout); resolve(); });
                         studentPeer.on('error', reject);
                     });
 
@@ -2531,10 +2040,7 @@
                                         <div class="remote-player" style="flex:2 1 60%;min-width:180px;height:60%;min-height:140px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.05);"></div>
                                         <div class="local-player" style="flex:0 0 25%;min-width:100px;height:30%;min-height:70px;border-radius:10px;overflow:hidden;border:2px solid rgba(167,139,250,0.4);"></div>
                                     </div>
-                                    <div class="video-overlay-badge">
-                                        <i class="fas fa-circle" style="color:#34d399;"></i>
-                                        <span>Connected</span>
-                                    </div>
+                                    <div class="video-overlay-badge"><i class="fas fa-circle" style="color:#34d399;"></i><span>Connected</span></div>
                                 </div>
                                 <div class="chat-box" style="margin-top:8px;height:120px;">
                                     <div class="chat-messages" id="student-chat-messages"></div>
@@ -2548,37 +2054,18 @@
                         `;
 
                         const videoContainer = document.getElementById('studentVideoContainer');
-                        const remoteDiv = videoContainer.querySelector('.remote-player');
-                        const localDiv = videoContainer.querySelector('.local-player');
+                        const remoteVideo = document.createElement('video'); remoteVideo.srcObject = remoteStream; remoteVideo.autoplay = true; remoteVideo.style.width = '100%'; remoteVideo.style.height = '100%'; remoteVideo.style.objectFit = 'cover';
+                        videoContainer.querySelector('.remote-player').appendChild(remoteVideo);
 
-                        // Remote (teacher) video
-                        const remoteVideo = document.createElement('video');
-                        remoteVideo.srcObject = remoteStream;
-                        remoteVideo.autoplay = true;
-                        remoteVideo.style.width = '100%';
-                        remoteVideo.style.height = '100%';
-                        remoteVideo.style.objectFit = 'cover';
-                        remoteDiv.appendChild(remoteVideo);
-
-                        // Local (student) video
-                        const localVideo = document.createElement('video');
-                        localVideo.srcObject = studentStream;
-                        localVideo.autoplay = true;
-                        localVideo.muted = true;
-                        localVideo.style.width = '100%';
-                        localVideo.style.height = '100%';
-                        localVideo.style.objectFit = 'cover';
-                        localDiv.appendChild(localVideo);
-
-                        // Chat
+                        const localVideo = document.createElement('video'); localVideo.srcObject = studentStream; localVideo.autoplay = true; localVideo.muted = true; localVideo.style.width = '100%'; localVideo.style.height = '100%'; localVideo.style.objectFit = 'cover';
+                        videoContainer.querySelector('.local-player').appendChild(localVideo);
+                        
                         const chatRef = db.ref('chat/' + className);
                         chatRef.on('child_added', (snap) => {
                             const data = snap.val();
                             const msgDiv = document.createElement('div');
-                            msgDiv.className = 'msg ' + (data.role === 'teacher' ? 'teacher' :
-                            'student');
-                            msgDiv.innerHTML =
-                                `<span class="sender">${data.sender}</span> ${data.text}`;
+                            msgDiv.className = 'msg ' + (data.role === 'teacher' ? 'teacher' : 'student');
+                            msgDiv.innerHTML = `<span class="sender">${data.sender}</span> ${data.text}`;
                             const container = document.getElementById('student-chat-messages');
                             container.appendChild(msgDiv);
                             container.scrollTop = container.scrollHeight;
@@ -2588,86 +2075,40 @@
                             const input = document.getElementById('student-chat-input');
                             const text = input.value.trim();
                             if (!text) return;
-                            chatRef.push({
-                                sender: currentUser.email,
-                                role: 'student',
-                                text: text,
-                                timestamp: Date.now()
-                            });
+                            chatRef.push({ sender: currentUser.email, role: 'student', text: text, timestamp: Date.now() });
                             input.value = '';
                         });
 
-                        document.getElementById('leaveClassBtn').addEventListener('click', () => {
-                            joinStudentClass(className);
+                        document.getElementById('leaveClassBtn').addEventListener('click', () => joinStudentClass(className));
+
+                        // 💡 ઓટોમેટિક એટેન્ડન્સ
+                        const today = new Date().toISOString().split('T')[0];
+                        const safeEmail = sanitizeEmail(currentUser.email);
+                        db.ref(`attendance/${today}/${safeEmail}`).update({
+                            status: 'Present',
+                            timestamp: Date.now()
                         });
 
-                        db.ref('attendance/' + className + '/' + currentUser.uid).set({
-                            joined: Date.now()
-                        });
-
-                        initFaceDetection(localVideo, className);
-
-                        const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/audio`);
+                        // 💡 વિડીયો અને માઈક કંટ્રોલ લિસનર 
+                        const controlRef = db.ref(`classControl/${className}/students/${currentUser.uid}`);
                         controlRef.on('value', (snap) => {
-                            const audioOn = snap.val() === true;
-                            if (studentStream) {
-                                studentStream.getAudioTracks().forEach(t => t.enabled = audioOn);
+                            if (snap.exists() && studentStream) {
+                                const data = snap.val();
+                                studentStream.getAudioTracks().forEach(t => t.enabled = (data.audio === true));
+                                studentStream.getVideoTracks().forEach(t => t.enabled = (data.video === true));
                             }
                         });
                     });
 
                     call.on('close', () => {
                         liveContainer.innerHTML = '';
-                        stopFaceDetection();
-                        if (studentPeer) studentPeer.destroy();
-                        studentPeer = null;
-                        studentCall = null;
-                        const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/audio`);
-                        controlRef.off();
+                        if (studentPeer) studentPeer.destroy(); studentPeer = null; studentCall = null;
+                        db.ref(`classControl/${className}/students/${currentUser.uid}`).off();
                     });
 
-                    call.on('error', (err) => {
-                        alert('❌ Connection error: ' + err.message);
-                        stopFaceDetection();
-                        if (studentPeer) studentPeer.destroy();
-                        studentPeer = null;
-                        if (studentStream) {
-                            studentStream.getTracks().forEach(t => t.stop());
-                            studentStream = null;
-                        }
-                        liveContainer.innerHTML = '';
-                    });
-
-                } catch (err) {
-                    alert('❌ Join error: ' + err.message);
-                    stopFaceDetection();
-                    if (studentPeer) {
-                        studentPeer.destroy();
-                        studentPeer = null;
-                    }
-                    if (studentStream) {
-                        studentStream.getTracks().forEach(t => t.stop());
-                        studentStream = null;
-                    }
-                    liveContainer.innerHTML = '';
-                }
+                } catch (err) { alert('❌ Join error: ' + err.message); liveContainer.innerHTML = ''; }
             }
-
-            window.addEventListener('beforeunload', () => {
-                stopFaceDetection();
-            });
         }
-
-        // ================================================================
-        //  16. INIT
-        // ================================================================
-        console.log('✅ Smart Classroom FINAL with all fixes applied.');
-        console.log('📌 Attendance: teacher can mark, student can view.');
-        console.log('📌 Ratings: default 4, teacher can save, student can view.');
-        console.log('📌 All buttons (mic/video) work.');
-        console.log('📌 Face detection sends notification to teacher and toast to student.');
-        console.log('📌 Homework with image similarity and grading.');
-        console.log('📌 Profile management with branch, semester, mobile.');
     </script>
 </body>
 </html>
