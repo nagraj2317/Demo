@@ -24,8 +24,7 @@
     </script>
 
     <style>
-        /* ===== SAME STYLES AS BEFORE (full code below) ===== */
-        /* (I have included the complete CSS from previous version) */
+        /* ===== SAME STYLES (fully included) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -831,7 +830,7 @@
         const db = firebase.database();
 
         // ================================================================
-        //  2. DOM REFS & AUTH (UPDATED with better error handling)
+        //  2. DOM REFS & AUTH (with trim & better error)
         // ================================================================
         const loginOverlay = document.getElementById('loginOverlay');
         const loginForm = document.getElementById('loginForm');
@@ -876,7 +875,7 @@
             signupMsg.textContent = '';
         });
 
-        // --- LOGIN (with detailed error) ---
+        // --- LOGIN ---
         loginBtn.addEventListener('click', async () => {
             const email = loginEmail.value.trim();
             const pass = loginPassword.value.trim();
@@ -888,10 +887,8 @@
             loginMsg.style.color = 'rgba(255,255,255,0.5)';
             try {
                 await auth.signInWithEmailAndPassword(email, pass);
-                // Success – auth state listener will handle
             } catch (err) {
                 console.error('Login error:', err);
-                // Show user-friendly message
                 let msg = '❌ ' + err.message;
                 if (err.code === 'auth/user-not-found') {
                     msg = '❌ No account found with this email. Please sign up.';
@@ -902,7 +899,7 @@
                 }
                 loginMsg.textContent = msg;
                 loginMsg.style.color = '#f87171';
-                alert(msg); // Also show alert for clarity
+                alert(msg);
             }
         });
 
@@ -925,7 +922,7 @@
             signupMsg.style.color = 'rgba(255,255,255,0.5)';
             try {
                 const cred = await auth.createUserWithEmailAndPassword(email, pass);
-                // Save user data
+                // Save user data with trimmed values
                 await db.ref('users/' + cred.user.uid).set({
                     email,
                     role,
@@ -934,7 +931,6 @@
                 });
                 signupMsg.textContent = '✅ Account created! You are now signed in.';
                 signupMsg.style.color = '#34d399';
-                // Auto redirect via auth state listener
             } catch (err) {
                 console.error('Signup error:', err);
                 let msg = '❌ ' + err.message;
@@ -954,8 +950,9 @@
                     const snap = await db.ref('users/' + user.uid).once('value');
                     if (snap.exists()) {
                         const data = snap.val();
+                        // Trim values from DB as well
                         currentRole = data.role;
-                        currentBranch = data.branch || '';
+                        currentBranch = (data.branch || '').trim();
                         currentSemester = data.semester || 0;
                         currentUser = { uid: user.uid, email: user.email, ...data };
                         loginOverlay.style.display = 'none';
@@ -964,7 +961,6 @@
                         avatarLetter.textContent = user.email.charAt(0).toUpperCase();
                         buildDashboard();
                     } else {
-                        // User exists in Auth but not in DB – sign out
                         await auth.signOut();
                         alert('User data not found. Please sign up again.');
                     }
@@ -974,7 +970,6 @@
                     await auth.signOut();
                 }
             } else {
-                // Show login
                 loginOverlay.style.display = 'flex';
                 appContainer.style.display = 'none';
                 loginMsg.textContent = '';
@@ -982,7 +977,7 @@
         });
 
         // ================================================================
-        //  3. DASHBOARD BUILDER (same as before)
+        //  3. DASHBOARD BUILDER
         // ================================================================
         function buildDashboard() {
             sidebar.innerHTML = '';
@@ -1123,7 +1118,7 @@
         }
 
         // ================================================================
-        //  5. TEACHER PAGES (same as earlier, with latest improvements)
+        //  5. TEACHER PAGES
         // ================================================================
 
         // --- Teacher Live Class ---
@@ -1673,7 +1668,7 @@
         //  7. STUDENT PAGES
         // ================================================================
 
-        // --- Student Live Class (with fixed join) ---
+        // --- Student Live Class (fixed filtering and join) ---
         function renderStudentLive() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
@@ -1685,10 +1680,15 @@
             const classListDiv = document.getElementById('studentClassList');
             const liveContainer = document.getElementById('studentLiveContainer');
 
-            const branch = currentBranch || '';
+            // Ensure branch and semester are trimmed
+            const branch = (currentBranch || '').trim();
             const semester = currentSemester || 0;
 
+            console.log('Student branch:', branch, 'semester:', semester);
+
+            // Listen to active classes and filter by branch & semester
             db.ref('classes').orderByChild('active').equalTo(true).on('value', (snap) => {
+                console.log('Active classes snapshot:', snap.val());
                 classListDiv.innerHTML = '';
                 if (snap.exists()) {
                     const classes = snap.val();
@@ -1696,7 +1696,11 @@
                     let html = '<div style="margin-bottom:12px;">Available Live Classes:</div>';
                     Object.keys(classes).forEach(key => {
                         const cls = classes[key];
-                        if (cls.branch === branch && cls.semester === semester) {
+                        // Compare trimmed strings
+                        const clsBranch = (cls.branch || '').trim();
+                        const clsSemester = cls.semester || 0;
+                        console.log('Comparing:', clsBranch, '===', branch, '&&', clsSemester, '===', semester);
+                        if (clsBranch === branch && clsSemester === semester) {
                             found = true;
                             html += `
                                 <div class="class-item" data-key="${key}">
@@ -1721,6 +1725,7 @@
                 }
             });
 
+            // PeerJS and face tracking state
             let studentPeer = null;
             let studentCall = null;
             let studentStream = null;
@@ -2227,9 +2232,9 @@
         // ================================================================
         //  INIT
         // ================================================================
-        console.log('✅ Smart Classroom with fixed login, join, and siren ready.');
+        console.log('✅ Smart Classroom fully functional with class filtering fixed.');
         console.log('📌 Use any email to sign up first, then login.');
-        console.log('💡 If login fails, check console for detailed error.');
+        console.log('💡 Student will see only classes matching his branch & semester.');
     </script>
 </body>
 </html>
