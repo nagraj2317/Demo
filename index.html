@@ -1624,7 +1624,7 @@
                                 studentCalls[studentUid].element = studentDiv;
                                 updateStudentCount();
 
-                                // --- Mic & Video Firebase Toggle (Teacher to Student) ---
+                                // --- Mic & Video Firebase Toggle (Teacher Controls) ---
                                 const micBtn = studentDiv.querySelector('.micToggleBtn');
                                 const vidBtn = studentDiv.querySelector('.videoToggleBtn');
 
@@ -1648,7 +1648,7 @@
                                     });
                                 });
 
-                                // --- Stream handling ---
+                                // --- Stream handling (Teacher Receives) ---
                                 call.on('stream', (remoteStream) => {
                                     studentCalls[studentUid].stream = remoteStream;
                                     
@@ -1658,8 +1658,10 @@
                                         if (!snap.exists()) return;
                                         const data = snap.val();
                                         
-                                        // Audio
                                         const audioOn = data.audio === true;
+                                        const videoOn = data.video === true;
+                                        
+                                        // Update Teacher Buttons
                                         const micBtn = studentDiv.querySelector('.micToggleBtn');
                                         if (audioOn) {
                                             micBtn.style.color = '#34d399';
@@ -1669,8 +1671,6 @@
                                             micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
                                         }
                                         
-                                        // Video
-                                        const videoOn = data.video === true;
                                         const vidBtn = studentDiv.querySelector('.videoToggleBtn');
                                         if (videoOn) {
                                             vidBtn.style.color = '#34d399';
@@ -1680,30 +1680,39 @@
                                             vidBtn.innerHTML = '<i class="fas fa-video-slash"></i>';
                                         }
                                         
-                                        // Show video under name IF video is allowed
+                                        // 💡 Show Video / Audio if AT LEAST ONE is ON
                                         let vidContainer = document.getElementById('vid-' + studentUid);
-                                        if (videoOn) {
+                                        if (videoOn || audioOn) {
                                             if (!vidContainer) {
                                                 vidContainer = document.createElement('div');
                                                 vidContainer.id = 'vid-' + studentUid;
                                                 vidContainer.style.cssText =
-                                                    'width:100%;max-width:200px;height:150px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);margin-top:4px;background:#0a0f1a;';
+                                                    'width:100%;max-width:200px;height:150px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);margin-top:4px;background:#0a0f1a;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.3);font-size:12px;';
                                                 studentDiv.appendChild(vidContainer);
                                             }
                                             let vidEl = vidContainer.querySelector('video');
                                             if (!vidEl) {
                                                 vidEl = document.createElement('video');
                                                 vidEl.autoplay = true;
+                                                vidEl.playsInline = true;
                                                 vidEl.style.width = '100%';
                                                 vidEl.style.height = '100%';
                                                 vidEl.style.objectFit = 'cover';
                                                 vidContainer.appendChild(vidEl);
                                             }
-                                            vidEl.srcObject = remoteStream;
-                                            vidContainer.style.display = 'block';
+                                            if (vidEl.srcObject !== remoteStream) {
+                                                vidEl.srcObject = remoteStream;
+                                            }
+                                            // ખાસ: ટીચરના સ્ક્રીન પર સ્ટુડન્ટનો અવાજ મ્યુટ ના હોવો જોઈએ!
+                                            vidEl.muted = false; 
+                                            vidContainer.style.display = 'flex';
+                                            
                                         } else {
+                                            // બંને બંધ હોય તો છુપાવી દેવું
                                             if (vidContainer) {
                                                 vidContainer.style.display = 'none';
+                                                let vidEl = vidContainer.querySelector('video');
+                                                if(vidEl) vidEl.muted = true;
                                             }
                                         }
                                     });
@@ -1865,7 +1874,7 @@
                             found = true;
                             const studentEmail = user.email;
                             const studentName = user.name || studentEmail;
-                            const safeEmail = sanitizeEmail(studentEmail); // Firebase error રોકવા
+                            const safeEmail = sanitizeEmail(studentEmail);
                             
                             const attRef = db.ref(`attendance/${today}/${safeEmail}`);
                             attRef.once('value').then(snap2 => {
@@ -2316,7 +2325,7 @@
         }
 
         // ================================================================
-        //  15. STUDENT LIVE CLASS (Face Detection & Stream Controls Fix)
+        //  15. STUDENT LIVE CLASS (100% Fixed Media Controls)
         // ================================================================
         function renderStudentLive() {
             dynamicContent.innerHTML = `
@@ -2374,7 +2383,7 @@
             let studentPeer = null;
             let studentCall = null;
             let studentStream = null;
-            let sendStream = null;
+            let sendStream = null; // ટીચરને મોકલવાની અલગ સ્ટ્રીમ
             let faceDetector = null;
             let faceCheckInterval = null;
             let noFaceCount = 0;
@@ -2382,7 +2391,7 @@
             let currentClassName = '';
             let toastTimeout = null;
 
-            // 💡 Face Detection Function (Restored Perfectly)
+            // ફેસ ડિટેક્શન
             async function initFaceDetection(videoElement, className) {
                 if (!window.FaceDetector) {
                     console.warn('FaceDetector not supported. Face tracking disabled.');
@@ -2447,15 +2456,15 @@
                 }
 
                 try {
-                    // Local Stream for Face Detection (Always Active)
+                    // મૂળ લોકલ કેમેરા સ્ટ્રીમ (જેનાથી ફેસ ડિટેક્શન થશે)
                     studentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                     
-                    // 💡 Clone Stream for Network (Can be Disabled by Teacher)
+                    // 💡 ટીચરને મોકલવા માટે ક્લોન સ્ટ્રીમ બનાવી છે. શરૂઆતમાં બંને બંધ. 
                     sendStream = studentStream.clone();
                     sendStream.getAudioTracks().forEach(t => t.enabled = false);
                     sendStream.getVideoTracks().forEach(t => t.enabled = false);
 
-                    // Peer ID is UID to match exactly on Teacher side
+                    // Peer ID 
                     studentPeer = new Peer(currentUser.uid, { debug: 2 });
 
                     await new Promise((resolve, reject) => {
@@ -2467,7 +2476,7 @@
                         studentPeer.on('error', reject);
                     });
 
-                    // Send the muted Clone Stream
+                    // 💡 ટીચરને ક્લોન કરેલી સ્ટ્રીમ જશે, જેનું કંટ્રોલ ફાયરબેઝ દ્વારા થશે.
                     const call = studentPeer.call(className, sendStream);
                     studentCall = call;
 
@@ -2500,7 +2509,7 @@
                         const remoteDiv = videoContainer.querySelector('.remote-player');
                         const localDiv = videoContainer.querySelector('.local-player');
 
-                        // Remote (teacher) video
+                        // ટીચરનો વિડીયો
                         const remoteVideo = document.createElement('video');
                         remoteVideo.srcObject = remoteStream;
                         remoteVideo.autoplay = true;
@@ -2509,7 +2518,7 @@
                         remoteVideo.style.objectFit = 'cover';
                         remoteDiv.appendChild(remoteVideo);
 
-                        // Local (student) video - Uses original UNMUTED stream for Face Detection
+                        // લોકલ (સ્ટુડન્ટ) વિડીયો - આના પર ફેસ ડિટેક્શન થશે
                         const localVideo = document.createElement('video');
                         localVideo.srcObject = studentStream;
                         localVideo.autoplay = true;
@@ -2519,7 +2528,7 @@
                         localVideo.style.objectFit = 'cover';
                         localDiv.appendChild(localVideo);
 
-                        // Chat
+                        // ચેટ
                         const chatRef = db.ref('chat/' + className);
                         chatRef.on('child_added', (snap) => {
                             const data = snap.val();
@@ -2548,7 +2557,7 @@
                             joinStudentClass(className);
                         });
 
-                        // 💡 Automatic Attendance Entry (Real-time Date)
+                        // 💡 ઓટોમેટિક એટેન્ડન્સ
                         const today = new Date().toISOString().split('T')[0];
                         const safeEmail = sanitizeEmail(currentUser.email);
                         db.ref(`attendance/${today}/${safeEmail}`).update({
@@ -2556,15 +2565,17 @@
                             timestamp: Date.now()
                         });
 
-                        // Start Face Detection on Local Original Video
+                        // 💡 ફેસ ડિટેક્શન હંમેશાં ચાલુ રહેશે (કારણ કે મૂળ studentStream ચાલુ છે)
                         initFaceDetection(localVideo, className);
 
-                        // 💡 Listen to Teacher Controls for Mute/Unmute network sending
+                        // 💡 100% FIXED: ટીચર જે બટન દબાવશે એ ફાયરબેઝમાં અપડેટ થશે, અને એના આધારે ટીચરને જતો ડેટા ચાલુ/બંધ થશે
                         const controlRef = db.ref(`classControl/${className}/students/${currentUser.uid}`);
                         controlRef.on('value', (snap) => {
                             if (snap.exists() && sendStream) {
                                 const data = snap.val();
+                                // સ્ટુડન્ટથી ટીચરને અવાજ મોકલવાનું ચાલુ/બંધ
                                 sendStream.getAudioTracks().forEach(t => t.enabled = (data.audio === true));
+                                // સ્ટુડન્ટથી ટીચરને વિડીયો મોકલવાનું ચાલુ/બંધ
                                 sendStream.getVideoTracks().forEach(t => t.enabled = (data.video === true));
                             }
                         });
@@ -2608,3 +2619,4 @@
     </script>
 </body>
 </html>
+ 
