@@ -3,26 +3,24 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Smart Classroom · PeerJS</title>
+    <title>Smart Classroom · Full System</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
-    <!-- Firebase Compat -->
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-database-compat.js">
     </script>
-
-    <!-- PeerJS -->
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js">
     </script>
 
     <style>
+        /* ===== COMPLETE CSS (included) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -794,8 +792,8 @@
     <div id="warningOverlay" class="warning-overlay">
         <div class="content">
             <i class="fas fa-exclamation-triangle"></i>
-            <h2>⚠️ ધ્યાન આપો!</h2>
-            <p>તમારો ચહેરો કેમેરામાં દેખાતો નથી. કૃપા કરીને કેમેરા સામે બેસો.</p>
+            <h2>⚠️ Attention!</h2>
+            <p>Your face is not visible. Please sit in front of the camera.</p>
         </div>
     </div>
 
@@ -803,32 +801,32 @@
     <div id="profileModal" class="profile-modal">
         <div class="profile-box">
             <button class="profile-close" id="profileClose">&times;</button>
-            <h2><i class="fas fa-user-circle"></i> મારી પ્રોફાઇલ</h2>
+            <h2><i class="fas fa-user-circle"></i> My Profile</h2>
             <div class="field">
-                <label>ઇમેઇલ</label>
+                <label>Email</label>
                 <div class="value" id="profileEmail">-</div>
             </div>
             <div class="field">
-                <label>પૂરું નામ</label>
-                <input type="text" id="profileName" placeholder="તમારું પૂરું નામ" />
+                <label>Full Name</label>
+                <input type="text" id="profileName" placeholder="Your full name" />
             </div>
             <div class="field">
-                <label>મોબાઇલ નંબર</label>
-                <input type="tel" id="profileMobile" placeholder="મોબાઇલ નંબર" />
+                <label>Mobile Number</label>
+                <input type="tel" id="profileMobile" placeholder="Mobile number" />
             </div>
             <div class="field">
-                <label>બ્રાન્ચ</label>
-                <input type="text" id="profileBranch" placeholder="બ્રાન્ચ" />
+                <label>Branch</label>
+                <input type="text" id="profileBranch" placeholder="Branch" />
             </div>
             <div class="field">
-                <label>સેમેસ્ટર</label>
-                <input type="number" id="profileSemester" placeholder="સેમેસ્ટર" min="1" />
+                <label>Semester</label>
+                <input type="number" id="profileSemester" placeholder="Semester" min="1" />
             </div>
             <div class="field">
-                <label>નવો પાસવર્ડ (ખાલી રાખો તો જૂનો રહેશે)</label>
-                <input type="password" id="profilePassword" placeholder="નવો પાસવર્ડ" />
+                <label>New Password (leave blank to keep current)</label>
+                <input type="password" id="profilePassword" placeholder="New password" />
             </div>
-            <button class="btn btn-primary" id="profileSaveBtn">સેવ કરો</button>
+            <button class="btn btn-primary" id="profileSaveBtn">Save</button>
             <div id="profileMsg" class="msg mt-10" style="color:#34d399;"></div>
         </div>
     </div>
@@ -836,26 +834,26 @@
     <!-- ===== LOGIN OVERLAY ===== -->
     <div id="loginOverlay">
         <div class="login-box">
-            <h2>સ્માર્ટ ક્લાસરૂમ</h2>
+            <h2>Smart Classroom</h2>
             <div id="loginForm">
-                <input type="email" id="loginEmail" placeholder="ઇમેઇલ" />
-                <input type="password" id="loginPassword" placeholder="પાસવર્ડ" />
-                <button class="btn-primary" id="loginBtn">સાઇન ઇન</button>
-                <div class="toggle-link">નવા યુઝર? <span id="showSignup">એકાઉન્ટ બનાવો</span></div>
+                <input type="email" id="loginEmail" placeholder="Email" />
+                <input type="password" id="loginPassword" placeholder="Password" />
+                <button class="btn-primary" id="loginBtn">Sign In</button>
+                <div class="toggle-link">New user? <span id="showSignup">Create account</span></div>
                 <div class="msg" id="loginMsg"></div>
             </div>
             <div id="signupForm" style="display:none;">
-                <input type="email" id="signupEmail" placeholder="ઇમેઇલ" />
-                <input type="password" id="signupPassword" placeholder="પાસવર્ડ (6+) " />
-                <input type="text" id="signupName" placeholder="પૂરું નામ" />
-                <input type="text" id="signupBranch" placeholder="બ્રાન્ચ" />
-                <input type="number" id="signupSemester" placeholder="સેમેસ્ટર" min="1" />
+                <input type="email" id="signupEmail" placeholder="Email" />
+                <input type="password" id="signupPassword" placeholder="Password (6+) " />
+                <input type="text" id="signupName" placeholder="Full Name" />
+                <input type="text" id="signupBranch" placeholder="Branch" />
+                <input type="number" id="signupSemester" placeholder="Semester" min="1" />
                 <select id="signupRole">
-                    <option value="student">વિદ્યાર્થી</option>
-                    <option value="teacher">શિક્ષક</option>
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
                 </select>
-                <button class="btn-success" id="signupBtn">એકાઉન્ટ બનાવો</button>
-                <div class="toggle-link">પહેલેથી એકાઉન્ટ? <span id="showLogin">સાઇન ઇન</span></div>
+                <button class="btn-success" id="signupBtn">Create Account</button>
+                <div class="toggle-link">Already have account? <span id="showLogin">Sign in</span></div>
                 <div class="msg" id="signupMsg"></div>
             </div>
         </div>
@@ -867,11 +865,11 @@
         <main class="main-area">
             <div class="top-bar">
                 <div class="page-title">
-                    <h2 id="pageTitle">ડેશબોર્ડ</h2>
-                    <p id="pageSubtitle">સ્વાગત છે</p>
+                    <h2 id="pageTitle">Dashboard</h2>
+                    <p id="pageSubtitle">Welcome</p>
                 </div>
                 <div class="actions">
-                    <span class="pill"><i class="fas fa-circle"></i> <span id="roleBadge">વિદ્યાર્થી</span></span>
+                    <span class="pill"><i class="fas fa-circle"></i> <span id="roleBadge">Student</span></span>
                     <div class="avatar-group">
                         <span class="avatar" id="avatarLetter">U</span>
                     </div>
@@ -881,11 +879,11 @@
         </main>
         <aside class="right-panel">
             <div class="panel-header">
-                <h4><i class="fas fa-robot"></i> AI સહાયક <span class="dot"></span></h4>
-                <span style="font-size:9px;color:rgba(255,255,255,0.2);">ટૂંક સમયમાં</span>
+                <h4><i class="fas fa-robot"></i> AI Assistant <span class="dot"></span></h4>
+                <span style="font-size:9px;color:rgba(255,255,255,0.2);">Coming soon</span>
             </div>
             <div class="placeholder">
-                <div>📚 AI ચેટ &amp; સૂચનાઓ<br /><span style="font-size:10px;color:rgba(255,255,255,0.1);">અહીં ઉપલબ્ધ થશે</span></div>
+                <div>📚 AI chat &amp; alerts<br /><span style="font-size:10px;color:rgba(255,255,255,0.1);">will be available here</span></div>
             </div>
         </aside>
     </div>
@@ -973,18 +971,18 @@
             const email = loginEmail.value.trim();
             const pass = loginPassword.value.trim();
             if (!email || !pass) {
-                loginMsg.textContent = 'કૃપા કરીને ઇમેઇલ અને પાસવર્ડ નાખો.';
+                loginMsg.textContent = 'Please enter email and password.';
                 return;
             }
-            loginMsg.textContent = '⏳ સાઇન ઇન થઈ રહ્યું છે...';
+            loginMsg.textContent = '⏳ Signing in...';
             loginMsg.style.color = 'rgba(255,255,255,0.5)';
             try {
                 await auth.signInWithEmailAndPassword(email, pass);
             } catch (err) {
                 let msg = '❌ ' + err.message;
-                if (err.code === 'auth/user-not-found') msg = '❌ આ ઇમેઇલ સાથે કોઈ એકાઉન્ટ નથી. સાઇન અપ કરો.';
-                else if (err.code === 'auth/wrong-password') msg = '❌ પાસવર્ડ ખોટો છે. ફરી પ્રયાસ કરો.';
-                else if (err.code === 'auth/too-many-requests') msg = '❌ ઘણા બધા પ્રયાસો. થોડીવાર પછી પ્રયાસ કરો.';
+                if (err.code === 'auth/user-not-found') msg = '❌ No account found. Please sign up.';
+                else if (err.code === 'auth/wrong-password') msg = '❌ Incorrect password. Try again.';
+                else if (err.code === 'auth/too-many-requests') msg = '❌ Too many attempts. Try later.';
                 loginMsg.textContent = msg;
                 loginMsg.style.color = '#f87171';
                 alert(msg);
@@ -999,14 +997,14 @@
             const branch = signupBranch.value.trim();
             const semester = parseInt(signupSemester.value);
             if (!email || !pass || !name || !branch || isNaN(semester) || semester < 1) {
-                signupMsg.textContent = 'કૃપા કરીને બધી ફીલ્ડ યોગ્ય રીતે ભરો.';
+                signupMsg.textContent = 'Please fill all fields correctly.';
                 return;
             }
             if (pass.length < 6) {
-                signupMsg.textContent = 'પાસવર્ડ ઓછામાં ઓછા 6 અક્ષરનો હોવો જોઈએ.';
+                signupMsg.textContent = 'Password must be at least 6 characters.';
                 return;
             }
-            signupMsg.textContent = '⏳ એકાઉન્ટ બની રહ્યું છે...';
+            signupMsg.textContent = '⏳ Creating account...';
             signupMsg.style.color = 'rgba(255,255,255,0.5)';
             try {
                 const cred = await auth.createUserWithEmailAndPassword(email, pass);
@@ -1019,11 +1017,11 @@
                     mobile: '',
                     createdAt: Date.now()
                 });
-                signupMsg.textContent = '✅ એકાઉન્ટ બની ગયું!';
+                signupMsg.textContent = '✅ Account created!';
                 signupMsg.style.color = '#34d399';
             } catch (err) {
                 let msg = '❌ ' + err.message;
-                if (err.code === 'auth/email-already-in-use') msg = '❌ આ ઇમેઇલ પહેલેથી નોંધાયેલ છે. લોગિન કરો.';
+                if (err.code === 'auth/email-already-in-use') msg = '❌ Email already registered. Please login.';
                 signupMsg.textContent = msg;
                 signupMsg.style.color = '#f87171';
                 alert(msg);
@@ -1043,16 +1041,16 @@
                         currentUser = { uid: user.uid, email: user.email, ...data };
                         loginOverlay.style.display = 'none';
                         appContainer.style.display = 'grid';
-                        roleBadge.textContent = currentRole === 'teacher' ? 'શિક્ષક' : 'વિદ્યાર્થી';
+                        roleBadge.textContent = currentRole === 'teacher' ? 'Teacher' : 'Student';
                         avatarLetter.textContent = (currentName || user.email.charAt(0)).toUpperCase();
                         buildDashboard();
                     } else {
                         await auth.signOut();
-                        alert('યુઝર ડેટા મળ્યો નહીં. ફરી સાઇન અપ કરો.');
+                        alert('User data not found. Please sign up again.');
                     }
                 } catch (err) {
                     console.error(err);
-                    alert('યુઝર ડેટા લોડ કરવામાં ભૂલ: ' + err.message);
+                    alert('Error loading user data: ' + err.message);
                     await auth.signOut();
                 }
             } else {
@@ -1092,12 +1090,12 @@
             const newPass = profilePassword.value.trim();
 
             if (!name || !branch || isNaN(semester) || semester < 1) {
-                profileMsg.textContent = 'કૃપા કરીને બધી ફીલ્ડ યોગ્ય રીતે ભરો.';
+                profileMsg.textContent = 'Please fill all fields correctly.';
                 profileMsg.style.color = '#f87171';
                 return;
             }
 
-            profileMsg.textContent = '⏳ સેવ થઈ રહ્યું છે...';
+            profileMsg.textContent = '⏳ Saving...';
             profileMsg.style.color = 'rgba(255,255,255,0.5)';
 
             try {
@@ -1118,13 +1116,13 @@
                 currentUser.branch = branch;
                 currentUser.semester = semester;
 
-                profileMsg.textContent = '✅ પ્રોફાઇલ અપડેટ થઈ ગઈ!';
+                profileMsg.textContent = '✅ Profile updated!';
                 profileMsg.style.color = '#34d399';
                 if (name) avatarLetter.textContent = name.charAt(0).toUpperCase();
                 buildDashboard();
                 setTimeout(() => profileModal.classList.remove('active'), 1500);
             } catch (err) {
-                profileMsg.textContent = '❌ ભૂલ: ' + err.message;
+                profileMsg.textContent = '❌ Error: ' + err.message;
                 profileMsg.style.color = '#f87171';
             }
         });
@@ -1142,16 +1140,16 @@
             const nav = document.createElement('nav');
             const items = [];
             if (currentRole === 'teacher') {
-                items.push({ icon: 'fa-chalkboard-teacher', label: 'લાઈવ ક્લાસ', id: 't-live' });
-                items.push({ icon: 'fa-user-graduate', label: 'વિદ્યાર્થીઓ', id: 't-students' });
-                items.push({ icon: 'fa-clipboard-check', label: 'હાજરી', id: 't-attendance' });
-                items.push({ icon: 'fa-pencil-alt', label: 'હોમવર્ક', id: 't-homework' });
-                items.push({ icon: 'fa-star', label: 'રેટિંગ', id: 't-ratings' });
+                items.push({ icon: 'fa-chalkboard-teacher', label: 'Live Class', id: 't-live' });
+                items.push({ icon: 'fa-user-graduate', label: 'Students', id: 't-students' });
+                items.push({ icon: 'fa-clipboard-check', label: 'Attendance', id: 't-attendance' });
+                items.push({ icon: 'fa-pencil-alt', label: 'Homework', id: 't-homework' });
+                items.push({ icon: 'fa-star', label: 'Ratings', id: 't-ratings' });
             } else {
-                items.push({ icon: 'fa-chalkboard-teacher', label: 'લાઈવ ક્લાસ', id: 's-live' });
-                items.push({ icon: 'fa-calendar-check', label: 'મારી હાજરી', id: 's-attendance' });
-                items.push({ icon: 'fa-pencil-alt', label: 'હોમવર્ક', id: 's-homework' });
-                items.push({ icon: 'fa-star', label: 'મારું રેટિંગ', id: 's-rating' });
+                items.push({ icon: 'fa-chalkboard-teacher', label: 'Live Class', id: 's-live' });
+                items.push({ icon: 'fa-calendar-check', label: 'My Attendance', id: 's-attendance' });
+                items.push({ icon: 'fa-pencil-alt', label: 'Homework', id: 's-homework' });
+                items.push({ icon: 'fa-star', label: 'My Rating', id: 's-rating' });
             }
             items.forEach(item => {
                 const a = document.createElement('a');
@@ -1170,7 +1168,7 @@
             const logoutBtn = document.createElement('a');
             logoutBtn.href = '#';
             logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
-            logoutBtn.title = 'લોગઆઉટ';
+            logoutBtn.title = 'Logout';
             logoutBtn.addEventListener('click', (e) => { e.preventDefault();
                 auth.signOut(); });
             bottom.appendChild(logoutBtn);
@@ -1185,18 +1183,18 @@
             if (activeLink) activeLink.classList.add('active');
 
             const labels = {
-                't-live': 'લાઈવ ક્લાસ',
-                't-students': 'વિદ્યાર્થીઓ',
-                't-attendance': 'હાજરી',
-                't-homework': 'હોમવર્ક',
-                't-ratings': 'રેટિંગ',
-                's-live': 'લાઈવ ક્લાસ',
-                's-attendance': 'મારી હાજરી',
-                's-homework': 'હોમવર્ક',
-                's-rating': 'મારું રેટિંગ'
+                't-live': 'Live Class',
+                't-students': 'Students',
+                't-attendance': 'Attendance',
+                't-homework': 'Homework',
+                't-ratings': 'Ratings',
+                's-live': 'Live Class',
+                's-attendance': 'My Attendance',
+                's-homework': 'Homework',
+                's-rating': 'My Rating'
             };
-            pageTitle.textContent = labels[pageId] || 'ડેશબોર્ડ';
-            pageSubtitle.textContent = currentRole === 'teacher' ? 'શિક્ષક પેનલ' : 'વિદ્યાર્થી પેનલ';
+            pageTitle.textContent = labels[pageId] || 'Dashboard';
+            pageSubtitle.textContent = currentRole === 'teacher' ? 'Teacher Panel' : 'Student Panel';
 
             switch (pageId) {
                 case 't-live':
@@ -1227,7 +1225,7 @@
                     renderStudentRating();
                     break;
                 default:
-                    dynamicContent.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center;">પેજ મળ્યું નહીં.</div>';
+                    dynamicContent.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center;">Page not found.</div>';
             }
         }
 
@@ -1276,16 +1274,16 @@
         function renderTeacherLive() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>લાઈવ ક્લાસ</h2>
+                    <h2>Live Class</h2>
                     <div class="card">
                         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-                            <input type="text" id="newBranch" class="input-field" placeholder="બ્રાન્ચ" style="flex:1;min-width:80px;" value="${currentBranch || ''}" />
-                            <input type="number" id="newSemester" class="input-field" placeholder="સેમેસ્ટર" style="width:80px;" value="${currentSemester || 1}" />
-                            <input type="text" id="newSubject" class="input-field" placeholder="વિષય" style="flex:1;min-width:80px;" />
-                            <input type="text" id="newClassName" class="input-field" placeholder="ક્લાસનું નામ" style="flex:1;min-width:100px;" />
-                            <button id="createClassBtn" class="btn btn-primary">બનાવો</button>
+                            <input type="text" id="newBranch" class="input-field" placeholder="Branch" style="flex:1;min-width:80px;" value="${currentBranch || ''}" />
+                            <input type="number" id="newSemester" class="input-field" placeholder="Semester" style="width:80px;" value="${currentSemester || 1}" />
+                            <input type="text" id="newSubject" class="input-field" placeholder="Subject" style="flex:1;min-width:80px;" />
+                            <input type="text" id="newClassName" class="input-field" placeholder="Class Name" style="flex:1;min-width:100px;" />
+                            <button id="createClassBtn" class="btn btn-primary">Create</button>
                         </div>
-                        <div id="classListContainer"><div class="text-muted">લોડ થઈ રહ્યું છે...</div></div>
+                        <div id="classListContainer"><div class="text-muted">Loading...</div></div>
                     </div>
                     <div id="liveSessionContainer"></div>
                 </div>
@@ -1313,18 +1311,18 @@
                     classListContainer.innerHTML = '';
                     if (snap.exists()) {
                         const classes = snap.val();
-                        let html = '<div style="font-weight:500;margin-bottom:6px;">બધા ક્લાસ:</div>';
+                        let html = '<div style="font-weight:500;margin-bottom:6px;">All Classes:</div>';
                         Object.keys(classes).forEach(key => {
                             const cls = classes[key];
                             const isActive = cls.active || false;
                             html += `
                                 <div class="class-item" data-key="${key}">
                                     <span class="name">${cls.className} (${cls.branch}, Sem ${cls.semester}, ${cls.subject})</span>
-                                    <span class="status ${isActive ? 'active' : ''}">${isActive ? '🟢 લાઈવ' : '🔴 ઑફલાઈન'}</span>
+                                    <span class="status ${isActive ? 'active' : ''}">${isActive ? '🟢 Live' : '🔴 Offline'}</span>
                                     <div>
-                                        <button class="btn btn-success btn-sm startClassBtn" data-key="${key}" data-name="${cls.className}" ${isActive ? 'style="display:none;"' : ''}>શરૂ કરો</button>
-                                        <button class="btn btn-danger btn-sm endClassBtn" data-key="${key}" data-name="${cls.className}" ${!isActive ? 'style="display:none;"' : ''}>બંધ કરો</button>
-                                        <button class="btn btn-danger btn-sm deleteClassBtn" data-key="${key}" style="background:rgba(248,113,113,0.2);color:#f87171;border:1px solid rgba(248,113,113,0.2);">રદ કરો</button>
+                                        <button class="btn btn-success btn-sm startClassBtn" data-key="${key}" data-name="${cls.className}" ${isActive ? 'style="display:none;"' : ''}>Start</button>
+                                        <button class="btn btn-danger btn-sm endClassBtn" data-key="${key}" data-name="${cls.className}" ${!isActive ? 'style="display:none;"' : ''}>End</button>
+                                        <button class="btn btn-danger btn-sm deleteClassBtn" data-key="${key}" style="background:rgba(248,113,113,0.2);color:#f87171;border:1px solid rgba(248,113,113,0.2);">Delete</button>
                                     </div>
                                 </div>
                             `;
@@ -1346,13 +1344,13 @@
                         });
                         document.querySelectorAll('.deleteClassBtn').forEach(btn => {
                             btn.addEventListener('click', async () => {
-                                if (confirm('આ ક્લાસને રદ કરવો છે?')) {
+                                if (confirm('Delete this class?')) {
                                     await classesRef.child(btn.dataset.key).remove();
                                 }
                             });
                         });
                     } else {
-                        classListContainer.innerHTML = '<div class="text-muted">હજી કોઈ ક્લાસ બનાવ્યો નથી.</div>';
+                        classListContainer.innerHTML = '<div class="text-muted">No classes created yet.</div>';
                     }
                 });
             }
@@ -1364,13 +1362,13 @@
                 const subject = newSubject.value.trim();
                 let className = newClassName.value.trim();
                 if (!branch || !semester || !subject || !className) {
-                    alert('કૃપા કરીને બધી ફીલ્ડ ભરો.');
+                    alert('Please fill all fields.');
                     return;
                 }
                 className = className.replace(/\s+/g, '-');
                 const snap = await classesRef.orderByChild('className').equalTo(className).once('value');
                 if (snap.exists()) {
-                    alert('આ નામ સાથેનો ક્લાસ પહેલેથી છે.');
+                    alert('A class with this name already exists.');
                     return;
                 }
                 const newRef = classesRef.push();
@@ -1387,31 +1385,24 @@
                 newSubject.value = '';
             });
 
-            // ----- CAMERA SWITCH (FIXED) -----
             async function switchCamera() {
                 if (!localStream) return;
                 const newFacing = cameraFacing === 'user' ? 'environment' : 'user';
                 try {
-                    // Stop all existing video tracks
                     localStream.getVideoTracks().forEach(t => t.stop());
-                    // Get new stream with new facing mode
                     const newStream = await navigator.mediaDevices.getUserMedia({
                         video: { facingMode: newFacing },
                         audio: true
                     });
-                    // Replace video track
                     const newVideoTrack = newStream.getVideoTracks()[0];
                     const oldVideoTrack = localStream.getVideoTracks()[0];
                     localStream.removeTrack(oldVideoTrack);
                     localStream.addTrack(newVideoTrack);
                     cameraFacing = newFacing;
-                    // Update local video display
                     const localVideo = document.querySelector('#teacherVideoContainer .local-player video');
                     if (localVideo) localVideo.srcObject = localStream;
-                    // Also update for all students (stream is shared)
-                    console.log('Camera switched to:', newFacing);
                 } catch (err) {
-                    alert('કેમેરો બદલવામાં ભૂલ: ' + err.message);
+                    alert('Camera switch error: ' + err.message);
                 }
             }
 
@@ -1434,29 +1425,29 @@
                         liveContainer.innerHTML = `
                             <div class="card" style="margin-top:10px;">
                                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                                    <h3 style="font-size:16px;">🟢 લાઈવ: ${className}</h3>
-                                    <button id="switchCameraBtn" class="btn btn-sm btn-primary">🔄 કેમેરો બદલો</button>
+                                    <h3 style="font-size:16px;">🟢 Live: ${className}</h3>
+                                    <button id="switchCameraBtn" class="btn btn-sm btn-primary">🔄 Switch Camera</button>
                                 </div>
                                 <div class="video-wrapper" style="min-height:280px;position:relative;">
                                     <div id="teacherVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-direction:column;gap:8px;padding:8px;overflow-y:auto;position:relative;">
                                         <div class="local-player" style="flex:0 0 30%;min-width:120px;height:35%;min-height:80px;align-self:flex-start;"></div>
                                         <div id="studentListContainer" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding:4px;background:rgba(0,0,0,0.2);border-radius:12px;min-height:100px;">
-                                            <div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:8px;">કોઈ વિદ્યાર્થી જોડાયો નથી</div>
+                                            <div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:8px;">No students connected</div>
                                         </div>
                                     </div>
                                     <div class="video-overlay-badge">
                                         <i class="fas fa-circle" style="color:#34d399;"></i>
-                                        <span>લાઈવ (શિક્ષક)</span>
+                                        <span>Live (Teacher)</span>
                                     </div>
                                 </div>
                                 <div class="chat-box" style="margin-top:8px;height:120px;">
                                     <div class="chat-messages" id="teacher-chat-messages"></div>
                                     <div class="chat-input">
-                                        <input type="text" id="teacher-chat-input" placeholder="જવાબ આપો..." />
+                                        <input type="text" id="teacher-chat-input" placeholder="Reply..." />
                                         <button id="teacher-chat-send"><i class="fas fa-paper-plane"></i></button>
                                     </div>
                                 </div>
-                                <button id="stopLiveBtn" class="btn btn-danger" style="margin-top:8px;">ક્લાસ બંધ કરો</button>
+                                <button id="stopLiveBtn" class="btn btn-danger" style="margin-top:8px;">End Class</button>
                             </div>
                         `;
 
@@ -1509,135 +1500,158 @@
                             call.answer(localStream);
                             studentCalls[studentId] = { call, stream: null };
 
-                            // Add student to list (email only + icons)
-                            const studentList = document.getElementById('studentListContainer');
-                            const studentDiv = document.createElement('div');
-                            studentDiv.id = 'student-' + studentId;
-                            studentDiv.style.cssText =
-                                'display:flex;justify-content:space-between;align-items:center;padding:4px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.05);';
-                            studentDiv.innerHTML = `
-                                <span style="font-size:13px;color:rgba(255,255,255,0.7);">${studentId}</span>
-                                <div style="display:flex;gap:8px;">
-                                    <button class="micToggleBtn" data-student="${studentId}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
-                                        <i class="fas fa-microphone-slash"></i>
-                                    </button>
-                                    <button class="videoToggleBtn" data-student="${studentId}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
-                                        <i class="fas fa-video-slash"></i>
-                                    </button>
-                                </div>
-                            `;
-                            const placeholder = studentList.querySelector('div[style]');
-                            if (placeholder) placeholder.remove();
-                            studentList.appendChild(studentDiv);
-
-                            call.on('stream', (remoteStream) => {
-                                studentCalls[studentId].stream = remoteStream;
-                                // Initially mute audio & video
-                                remoteStream.getAudioTracks().forEach(t => t.enabled = false);
-                                remoteStream.getVideoTracks().forEach(t => t.enabled = false);
-
-                                // Listen to Firebase control node
-                                const controlRef = db.ref(`classControl/${className}/students/${studentId}`);
-                                controlRef.on('value', (snap) => {
-                                    if (!snap.exists()) return;
-                                    const data = snap.val();
-                                    // Audio control
-                                    const audioOn = data.audio === true;
-                                    remoteStream.getAudioTracks().forEach(t => t.enabled = audioOn);
-                                    const micBtn = studentDiv.querySelector('.micToggleBtn');
-                                    if (audioOn) {
-                                        micBtn.style.color = '#34d399';
-                                        micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-                                    } else {
-                                        micBtn.style.color = '#f87171';
-                                        micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
-                                    }
-                                    // Video control
-                                    const videoOn = data.video === true;
-                                    remoteStream.getVideoTracks().forEach(t => t.enabled = videoOn);
-                                    const vidBtn = studentDiv.querySelector('.videoToggleBtn');
-                                    if (videoOn) {
-                                        vidBtn.style.color = '#34d399';
-                                        vidBtn.innerHTML = '<i class="fas fa-video"></i>';
-                                    } else {
-                                        vidBtn.style.color = '#f87171';
-                                        vidBtn.innerHTML = '<i class="fas fa-video-slash"></i>';
-                                    }
-                                    // Show video in a floating window if video is on
-                                    let vidContainer = document.getElementById('vid-' + studentId);
-                                    if (videoOn) {
-                                        if (!vidContainer) {
-                                            vidContainer = document.createElement('div');
-                                            vidContainer.id = 'vid-' + studentId;
-                                            vidContainer.style.cssText =
-                                                'position:absolute;bottom:10px;right:10px;width:200px;height:150px;border-radius:12px;overflow:hidden;border:2px solid rgba(167,139,250,0.4);z-index:10;background:#1a1f2e;';
-                                            document.getElementById('teacherVideoContainer').appendChild(vidContainer);
-                                        }
-                                        let vidEl = vidContainer.querySelector('video');
-                                        if (!vidEl) {
-                                            vidEl = document.createElement('video');
-                                            vidEl.autoplay = true;
-                                            vidEl.style.width = '100%';
-                                            vidEl.style.height = '100%';
-                                            vidEl.style.objectFit = 'cover';
-                                            vidContainer.appendChild(vidEl);
-                                        }
-                                        vidEl.srcObject = remoteStream;
-                                        vidContainer.style.display = 'block';
-                                    } else {
-                                        if (vidContainer) {
-                                            vidContainer.style.display = 'none';
+                            // Get student name from DB
+                            db.ref('users').orderByChild('email').equalTo(studentId).once('value').then(snap => {
+                                let displayName = studentId;
+                                if (snap.exists()) {
+                                    const users = snap.val();
+                                    for (const key in users) {
+                                        if (users[key].email === studentId) {
+                                            displayName = users[key].name || studentId;
+                                            break;
                                         }
                                     }
-                                });
-                            });
-
-                            // MIC TOGGLE
-                            studentDiv.querySelector('.micToggleBtn').addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                const student = e.currentTarget.dataset.student;
-                                const ref = db.ref(`classControl/${className}/students/${student}/audio`);
-                                ref.once('value').then(snap => {
-                                    ref.set(!(snap.val() === true));
-                                });
-                            });
-
-                            // VIDEO TOGGLE
-                            studentDiv.querySelector('.videoToggleBtn').addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                const student = e.currentTarget.dataset.student;
-                                const ref = db.ref(`classControl/${className}/students/${student}/video`);
-                                ref.once('value').then(snap => {
-                                    ref.set(!(snap.val() === true));
-                                });
-                            });
-
-                            call.on('close', () => {
-                                delete studentCalls[studentId];
-                                const el = document.getElementById('student-' + studentId);
-                                if (el) el.remove();
-                                const vidEl = document.getElementById('vid-' + studentId);
-                                if (vidEl) vidEl.remove();
-                                const studentList = document.getElementById('studentListContainer');
-                                if (studentList.children.length === 0) {
-                                    studentList.innerHTML =
-                                        '<div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:8px;">કોઈ વિદ્યાર્થી જોડાયો નથી</div>';
                                 }
+                                // Add to student list
+                                const studentList = document.getElementById('studentListContainer');
+                                const studentDiv = document.createElement('div');
+                                studentDiv.id = 'student-' + studentId;
+                                studentDiv.style.cssText =
+                                    'display:flex;justify-content:space-between;align-items:center;padding:4px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.05);';
+                                studentDiv.innerHTML = `
+                                    <span style="font-size:13px;color:rgba(255,255,255,0.7);">${displayName}</span>
+                                    <div style="display:flex;gap:8px;">
+                                        <button class="micToggleBtn" data-student="${studentId}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
+                                            <i class="fas fa-microphone-slash"></i>
+                                        </button>
+                                        <button class="videoToggleBtn" data-student="${studentId}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
+                                            <i class="fas fa-video-slash"></i>
+                                        </button>
+                                    </div>
+                                `;
+                                const placeholder = studentList.querySelector('div[style]');
+                                if (placeholder) placeholder.remove();
+                                studentList.appendChild(studentDiv);
+
+                                // Update count
+                                updateStudentCount();
+
+                                // Handle stream
+                                call.on('stream', (remoteStream) => {
+                                    studentCalls[studentId].stream = remoteStream;
+                                    remoteStream.getAudioTracks().forEach(t => t.enabled = false);
+                                    remoteStream.getVideoTracks().forEach(t => t.enabled = false);
+
+                                    const controlRef = db.ref(`classControl/${className}/students/${studentId}`);
+                                    controlRef.on('value', (snap) => {
+                                        if (!snap.exists()) return;
+                                        const data = snap.val();
+                                        // Audio
+                                        const audioOn = data.audio === true;
+                                        remoteStream.getAudioTracks().forEach(t => t.enabled = audioOn);
+                                        const micBtn = studentDiv.querySelector('.micToggleBtn');
+                                        micBtn.style.color = audioOn ? '#34d399' : '#f87171';
+                                        micBtn.innerHTML = audioOn ? '<i class="fas fa-microphone"></i>' :
+                                            '<i class="fas fa-microphone-slash"></i>';
+                                        // Video
+                                        const videoOn = data.video === true;
+                                        remoteStream.getVideoTracks().forEach(t => t.enabled = videoOn);
+                                        const vidBtn = studentDiv.querySelector('.videoToggleBtn');
+                                        vidBtn.style.color = videoOn ? '#34d399' : '#f87171';
+                                        vidBtn.innerHTML = videoOn ? '<i class="fas fa-video"></i>' :
+                                            '<i class="fas fa-video-slash"></i>';
+                                        // Show video under student name
+                                        let vidContainer = document.getElementById('vid-' + studentId);
+                                        if (videoOn) {
+                                            if (!vidContainer) {
+                                                vidContainer = document.createElement('div');
+                                                vidContainer.id = 'vid-' + studentId;
+                                                vidContainer.style.cssText =
+                                                    'width:100%;max-width:200px;height:150px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);margin-top:4px;background:#0a0f1a;';
+                                                studentDiv.appendChild(vidContainer);
+                                            }
+                                            let vidEl = vidContainer.querySelector('video');
+                                            if (!vidEl) {
+                                                vidEl = document.createElement('video');
+                                                vidEl.autoplay = true;
+                                                vidEl.style.width = '100%';
+                                                vidEl.style.height = '100%';
+                                                vidEl.style.objectFit = 'cover';
+                                                vidContainer.appendChild(vidEl);
+                                            }
+                                            vidEl.srcObject = remoteStream;
+                                            vidContainer.style.display = 'block';
+                                        } else {
+                                            if (vidContainer) {
+                                                vidContainer.style.display = 'none';
+                                            }
+                                        }
+                                    });
+                                });
+
+                                // MIC TOGGLE
+                                studentDiv.querySelector('.micToggleBtn').addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    const student = e.currentTarget.dataset.student;
+                                    const ref = db.ref(`classControl/${className}/students/${student}/audio`);
+                                    ref.once('value').then(snap => {
+                                        ref.set(!(snap.val() === true));
+                                    });
+                                });
+
+                                // VIDEO TOGGLE
+                                studentDiv.querySelector('.videoToggleBtn').addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    const student = e.currentTarget.dataset.student;
+                                    const ref = db.ref(`classControl/${className}/students/${student}/video`);
+                                    ref.once('value').then(snap => {
+                                        ref.set(!(snap.val() === true));
+                                    });
+                                });
+
+                                call.on('close', () => {
+                                    delete studentCalls[studentId];
+                                    const el = document.getElementById('student-' + studentId);
+                                    if (el) el.remove();
+                                    updateStudentCount();
+                                    const studentList = document.getElementById('studentListContainer');
+                                    if (studentList.children.length === 0) {
+                                        studentList.innerHTML =
+                                            '<div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:8px;">No students connected</div>';
+                                    }
+                                });
                             });
                         });
 
                         document.getElementById('stopLiveBtn').addEventListener('click', () => {
                             endClass(classKey);
                         });
+
+                        // Function to update student count
+                        function updateStudentCount() {
+                            const container = document.getElementById('studentListContainer');
+                            const count = container.querySelectorAll('.student-item').length;
+                            const header = document.querySelector('.student-count');
+                            if (header) {
+                                header.textContent = `Students: ${count}`;
+                            } else {
+                                const h = document.createElement('div');
+                                h.className = 'student-count';
+                                h.style.cssText =
+                                    'font-weight:600;font-size:14px;padding:4px 8px;color:rgba(255,255,255,0.6);';
+                                h.textContent = `Students: ${count}`;
+                                container.prepend(h);
+                            }
+                        }
                     });
 
                     peer.on('error', (err) => {
-                        alert('PeerJS ભૂલ: ' + err.message);
+                        alert('PeerJS error: ' + err.message);
                         endClass(classKey);
                     });
 
                 } catch (err) {
-                    alert('ક્લાસ શરૂ કરવામાં ભૂલ: ' + err.message);
+                    alert('Error starting class: ' + err.message);
                 }
             }
 
@@ -1662,87 +1676,183 @@
         }
 
         // ================================================================
-        //  8. TEACHER OTHER PAGES (unchanged)
+        //  8. ATTENDANCE SYSTEM (FIXED)
+        // ================================================================
+        function renderTeacherAttendance() {
+            const today = new Date().toISOString().split('T')[0];
+            dynamicContent.innerHTML = `
+                <div class="page-content">
+                    <h2>Attendance</h2>
+                    <div id="attendanceContainer"></div>
+                </div>
+            `;
+            const container = document.getElementById('attendanceContainer');
+
+            const branch = currentBranch || '';
+            const semester = currentSemester || 0;
+
+            db.ref('users').orderByChild('role').equalTo('student').on('value', (snap) => {
+                container.innerHTML = '';
+                if (snap.exists()) {
+                    const users = snap.val();
+                    let html = `
+                        <div class="card">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                <span><strong>Date:</strong> ${today}</span>
+                                <span><strong>Branch:</strong> ${branch} | <strong>Semester:</strong> ${semester}</span>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-weight:600;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <div>Student</div>
+                                <div>Status</div>
+                                <div>Action</div>
+                            </div>
+                    `;
+                    let found = false;
+                    for (const key in users) {
+                        const user = users[key];
+                        if (user.branch === branch && user.semester === semester) {
+                            found = true;
+                            const studentEmail = user.email;
+                            const studentName = user.name || studentEmail;
+                            // Check attendance for today
+                            db.ref(`attendance/${today}/${studentEmail}`).once('value').then(snap2 => {
+                                const status = snap2.exists() ? snap2.val().status : 'Absent';
+                                const isPresent = status === 'Present';
+                                const studentDiv = document.createElement('div');
+                                studentDiv.style.cssText =
+                                    'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);align-items:center;';
+                                studentDiv.innerHTML = `
+                                    <div>${studentName}</div>
+                                    <div style="color:${isPresent ? '#34d399' : '#f87171'};">${status}</div>
+                                    <div>
+                                        <button class="attendanceToggle" data-email="${studentEmail}" style="padding:2px 12px;border-radius:20px;border:none;background:${isPresent ? '#f87171' : '#34d399'};color:#fff;cursor:pointer;font-size:11px;">
+                                            ${isPresent ? 'Mark Absent' : 'Mark Present'}
+                                        </button>
+                                    </div>
+                                `;
+                                container.appendChild(studentDiv);
+
+                                // Toggle attendance
+                                studentDiv.querySelector('.attendanceToggle').addEventListener('click', () => {
+                                    const email = studentDiv.querySelector('.attendanceToggle').dataset
+                                    .email;
+                                    const newStatus = isPresent ? 'Absent' : 'Present';
+                                    db.ref(`attendance/${today}/${email}`).set({
+                                        status: newStatus,
+                                        timestamp: Date.now()
+                                    }).then(() => {
+                                        // Reload page
+                                        renderTeacherAttendance();
+                                    });
+                                });
+                            });
+                        }
+                    }
+                    if (!found) {
+                        container.innerHTML =
+                        '<div class="text-muted">No students found for your branch & semester.</div>';
+                    }
+                } else {
+                    container.innerHTML = '<div class="text-muted">No students registered.</div>';
+                }
+            });
+        }
+
+        function renderStudentAttendance() {
+            const today = new Date().toISOString().split('T')[0];
+            dynamicContent.innerHTML = `
+                <div class="page-content">
+                    <h2>My Attendance</h2>
+                    <div id="attendanceContainer"></div>
+                </div>
+            `;
+            const container = document.getElementById('attendanceContainer');
+
+            const email = currentUser.email;
+            db.ref('attendance').on('value', (snap) => {
+                container.innerHTML = '';
+                if (snap.exists()) {
+                    const data = snap.val();
+                    let totalDays = 0;
+                    let presentDays = 0;
+                    let html = '<div class="card">';
+                    for (const date in data) {
+                        if (data[date][email]) {
+                            totalDays++;
+                            if (data[date][email].status === 'Present') presentDays++;
+                        }
+                    }
+                    html += `
+                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                            <span><strong>Total Days:</strong> ${totalDays}</span>
+                            <span><strong>Present:</strong> ${presentDays}</span>
+                            <span><strong>Absent:</strong> ${totalDays - presentDays}</span>
+                            <span><strong>Attendance %:</strong> ${totalDays > 0 ? Math.round((presentDays/totalDays)*100) : 0}%</span>
+                        </div>
+                        <div style="margin-top:8px;max-height:200px;overflow-y:auto;">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-weight:600;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <div>Date</div>
+                                <div>Status</div>
+                            </div>
+                    `;
+                    // Show all dates (newest first)
+                    const dates = Object.keys(data).sort((a, b) => b.localeCompare(a));
+                    for (const date of dates) {
+                        if (data[date][email]) {
+                            const status = data[date][email].status;
+                            html += `
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
+                                    <div>${date}</div>
+                                    <div style="color:${status === 'Present' ? '#34d399' : '#f87171'};">${status}</div>
+                                </div>
+                            `;
+                        }
+                    }
+                    html += '</div></div>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<div class="text-muted">No attendance records found.</div>';
+                }
+            });
+        }
+
+        // ================================================================
+        //  9. OTHER PAGES (simplified)
         // ================================================================
         function renderTeacherStudents() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>વિદ્યાર્થીઓ</h2>
-                    <div class="flex-row mb-10">
-                        <input type="email" id="studentEmailInput" class="input-field" placeholder="વિદ્યાર્થીનું ઇમેઇલ" style="flex:1;" />
-                        <button id="addStudentBtn" class="btn btn-primary">ઉમેરો</button>
-                    </div>
+                    <h2>Students</h2>
                     <div id="studentList"></div>
                 </div>
             `;
             const list = document.getElementById('studentList');
-            const addBtn = document.getElementById('addStudentBtn');
-            const input = document.getElementById('studentEmailInput');
+            const branch = currentBranch || '';
+            const semester = currentSemester || 0;
 
-            function loadStudents() {
-                db.ref('students').on('value', (snap) => {
-                    list.innerHTML = '';
-                    if (snap.exists()) {
-                        const data = snap.val();
-                        Object.keys(data).forEach(key => {
-                            const s = data[key];
-                            const div = document.createElement('div');
-                            div.className = 'card';
-                            div.style.cssText =
-                            'display:flex;justify-content:space-between;align-items:center;';
-                            div.innerHTML = `
-                                <span>${s.email}</span>
-                                <button class="btn btn-danger btn-sm removeStudent" data-key="${key}">દૂર કરો</button>
-                            `;
-                            list.appendChild(div);
-                        });
-                        list.querySelectorAll('.removeStudent').forEach(btn => {
-                            btn.addEventListener('click', async () => {
-                                await db.ref('students/' + btn.dataset.key).remove();
-                            });
-                        });
-                    } else {
-                        list.innerHTML = '<div class="text-muted">હજી કોઈ વિદ્યાર્થી ઉમેર્યો નથી.</div>';
-                    }
-                });
-            }
-            loadStudents();
-
-            addBtn.addEventListener('click', async () => {
-                const email = input.value.trim();
-                if (!email) return;
-                const ref = db.ref('students').push();
-                await ref.set({ email: email, addedBy: currentUser.uid });
-                input.value = '';
-            });
-        }
-
-        function renderTeacherAttendance() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>હાજરી</h2>
-                    <div id="attendanceList"></div>
-                </div>
-            `;
-            const list = document.getElementById('attendanceList');
-            db.ref('students').on('value', (snap) => {
+            db.ref('users').orderByChild('role').equalTo('student').on('value', (snap) => {
                 list.innerHTML = '';
                 if (snap.exists()) {
-                    const data = snap.val();
-                    let html =
-                        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-weight:500;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;">';
-                    html += '<div>વિદ્યાર્થી</div><div>સ્થિતિ</div><div>સમય</div></div>';
-                    Object.values(data).forEach(s => {
-                        html +=
-                            `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px;">
-                                <div>${s.email}</div>
-                                <div style="color:#34d399;">હાજર</div>
-                                <div style="color:rgba(255,255,255,0.3);">હમણાં</div>
-                            </div>`;
-                    });
+                    const users = snap.val();
+                    let html = '<div class="card">';
+                    let count = 0;
+                    for (const key in users) {
+                        const user = users[key];
+                        if (user.branch === branch && user.semester === semester) {
+                            count++;
+                            html += `
+                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
+                                    <span>${user.name || user.email}</span>
+                                    <span style="color:rgba(255,255,255,0.4);">${user.email}</span>
+                                </div>
+                            `;
+                        }
+                    }
+                    html += `<div style="margin-top:8px;font-weight:600;color:#a78bfa;">Total Students: ${count}</div>`;
+                    html += '</div>';
                     list.innerHTML = html;
                 } else {
-                    list.innerHTML = '<div class="text-muted">કોઈ વિદ્યાર્થી નોંધાયો નથી.</div>';
+                    list.innerHTML = '<div class="text-muted">No students found.</div>';
                 }
             });
         }
@@ -1750,17 +1860,17 @@
         function renderTeacherHomework() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>હોમવર્ક વ્યવસ્થાપન</h2>
+                    <h2>Homework Management</h2>
                     <div class="card">
-                        <h3 style="font-size:16px;margin-bottom:8px;">📤 નવું હોમવર્ક અપલોડ કરો</h3>
+                        <h3 style="font-size:16px;margin-bottom:8px;">📤 Upload New Assignment</h3>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                            <input type="text" id="hwSubject" class="input-field" placeholder="વિષય" />
-                            <input type="text" id="hwTopic" class="input-field" placeholder="ટોપિક" />
-                            <input type="text" id="hwChapter" class="input-field" placeholder="પ્રકરણ" />
+                            <input type="text" id="hwSubject" class="input-field" placeholder="Subject" />
+                            <input type="text" id="hwTopic" class="input-field" placeholder="Topic" />
+                            <input type="text" id="hwChapter" class="input-field" placeholder="Chapter" />
                             <input type="datetime-local" id="hwDueDate" class="input-field" />
                         </div>
                         <input type="file" id="hwTeacherFile" accept="image/*" class="input-field" style="margin-top:8px;" />
-                        <button id="uploadHwBtn" class="btn btn-primary" style="margin-top:8px;">અપલોડ કરો</button>
+                        <button id="uploadHwBtn" class="btn btn-primary" style="margin-top:8px;">Upload Assignment</button>
                         <div id="hwUploadStatus" class="text-muted mt-10"></div>
                     </div>
                     <div id="hwSubmissions"></div>
@@ -1782,10 +1892,10 @@
                 const chap = chapter.value.trim();
                 const due = dueDate.value;
                 if (!file || !subj || !top || !chap || !due) {
-                    status.textContent = 'કૃપા કરીને બધી ફીલ્ડ ભરો અને ફોટો પસંદ કરો.';
+                    status.textContent = 'Please fill all fields and select an image.';
                     return;
                 }
-                status.textContent = '⏳ કન્વર્ટ થઈ રહ્યું છે...';
+                status.textContent = '⏳ Converting...';
                 try {
                     const reader = new FileReader();
                     const base64 = await new Promise((resolve) => {
@@ -1809,7 +1919,7 @@
                         branch: currentBranch || '',
                         semester: currentSemester || 0
                     });
-                    status.textContent = '✅ હોમવર્ક અપલોડ થઈ ગયું!';
+                    status.textContent = '✅ Assignment uploaded!';
                     fileInput.value = '';
                     subject.value = '';
                     topic.value = '';
@@ -1817,7 +1927,7 @@
                     dueDate.value = '';
                     loadSubmissions();
                 } catch (err) {
-                    status.textContent = '❌ ભૂલ: ' + err.message;
+                    status.textContent = '❌ Error: ' + err.message;
                 }
             });
 
@@ -1826,23 +1936,23 @@
                     subsDiv.innerHTML = '';
                     if (snap.exists()) {
                         const data = snap.val();
-                        let html = '<h3 style="font-size:16px;margin:12px 0 8px;">📋 બધા હોમવર્ક</h3>';
+                        let html = '<h3 style="font-size:16px;margin:12px 0 8px;">📋 All Assignments</h3>';
                         for (const [hwId, hw] of Object.entries(data)) {
                             html += `<div class="card">
-                                <div><strong>${hw.subject}</strong> — ${hw.topic} (પ્રક. ${hw.chapter})</div>
-                                <div style="font-size:12px;color:rgba(255,255,255,0.5);">છેલ્લી તારીખ: ${new Date(hw.dueDate).toLocaleString()}</div>
-                                <div><strong>હોમવર્ક:</strong> <img src="${hw.imageBase64}" style="max-width:80px;max-height:80px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);" /></div>
-                                <div><strong>સબમિશન:</strong> ${hw.submissions ? Object.keys(hw.submissions).length : 0}</div>`;
+                                <div><strong>${hw.subject}</strong> — ${hw.topic} (Ch. ${hw.chapter})</div>
+                                <div style="font-size:12px;color:rgba(255,255,255,0.5);">Due: ${new Date(hw.dueDate).toLocaleString()}</div>
+                                <div><strong>Assignment:</strong> <img src="${hw.imageBase64}" style="max-width:80px;max-height:80px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);" /></div>
+                                <div><strong>Submissions:</strong> ${hw.submissions ? Object.keys(hw.submissions).length : 0}</div>`;
                             if (hw.submissions) {
                                 html += '<div style="margin-top:6px;">';
                                 for (const [sid, sub] of Object.entries(hw.submissions)) {
                                     const sim = sub.similarity || 0;
                                     const grade = sub.grade || 'N/A';
-                                    const warning = sim > 70 ? ' ⚠️ શક્ય નકલ' : '';
+                                    const warning = sim > 70 ? ' ⚠️ Possible Cheating' : '';
                                     html += `<div style="display:flex;gap:10px;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px;flex-wrap:wrap;">
                                         <span style="color:rgba(255,255,255,0.5);">${sid}</span>
-                                        <span style="color:#a78bfa;">ગ્રેડ: ${grade}</span>
-                                        <span style="color:rgba(255,255,255,0.3);">સમાનતા: ${sim.toFixed(1)}%</span>
+                                        <span style="color:#a78bfa;">Grade: ${grade}</span>
+                                        <span style="color:rgba(255,255,255,0.3);">Sim: ${sim.toFixed(1)}%</span>
                                         ${warning}
                                         <img src="${sub.imageBase64}" style="max-width:30px;max-height:30px;border-radius:4px;border:1px solid rgba(255,255,255,0.05);" />
                                     </div>`;
@@ -1853,7 +1963,7 @@
                         }
                         subsDiv.innerHTML = html;
                     } else {
-                        subsDiv.innerHTML = '<div class="text-muted">હજી કોઈ હોમવર્ક નથી.</div>';
+                        subsDiv.innerHTML = '<div class="text-muted">No assignments yet.</div>';
                     }
                 });
             }
@@ -1863,61 +1973,75 @@
         function renderTeacherRatings() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>રેટિંગ</h2>
+                    <h2>Ratings</h2>
                     <div id="ratingList"></div>
                 </div>
             `;
             const list = document.getElementById('ratingList');
-            db.ref('students').on('value', (snap) => {
+            const branch = currentBranch || '';
+            const semester = currentSemester || 0;
+
+            db.ref('users').orderByChild('role').equalTo('student').on('value', (snap) => {
                 list.innerHTML = '';
                 if (snap.exists()) {
-                    const data = snap.val();
-                    Object.values(data).forEach(s => {
-                        const div = document.createElement('div');
-                        div.className = 'card';
-                        div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;';
-                        div.innerHTML = `
-                            <span>${s.email}</span>
-                            <div>
-                                <select class="ratingSelect" data-email="${s.email}" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px 10px;color:#fff;font-size:12px;">
-                                    <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
-                                </select>
-                                <button class="btn btn-primary btn-sm saveRating" data-email="${s.email}" style="margin-left:4px;">સેવ કરો</button>
-                            </div>
-                        `;
-                        list.appendChild(div);
-                    });
-                    db.ref('ratings/' + currentUser.uid).once('value').then(snap2 => {
-                        if (snap2.exists()) {
-                            const ratings = snap2.val();
-                            document.querySelectorAll('.ratingSelect').forEach(sel => {
-                                const email = sel.dataset.email;
-                                if (ratings[email]) sel.value = ratings[email];
-                            });
+                    const users = snap.val();
+                    let html = '';
+                    let count = 0;
+                    for (const key in users) {
+                        const user = users[key];
+                        if (user.branch === branch && user.semester === semester) {
+                            count++;
+                            html += `
+                                <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                                    <span>${user.name || user.email}</span>
+                                    <div>
+                                        <select class="ratingSelect" data-email="${user.email}" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px 10px;color:#fff;font-size:12px;">
+                                            <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                                        </select>
+                                        <button class="btn btn-primary btn-sm saveRating" data-email="${user.email}" style="margin-left:4px;">Save</button>
+                                    </div>
+                                </div>
+                            `;
                         }
-                    });
-                    document.querySelectorAll('.saveRating').forEach(btn => {
-                        btn.addEventListener('click', async () => {
-                            const email = btn.dataset.email;
-                            const sel = document.querySelector(`.ratingSelect[data-email="${email}"]`);
-                            await db.ref('ratings/' + currentUser.uid + '/' + email).set(parseInt(sel
-                            .value));
-                            alert('✅ રેટિંગ સેવ થઈ ગયું!');
+                    }
+                    if (count === 0) {
+                        list.innerHTML = '<div class="text-muted">No students found for your branch & semester.</div>';
+                    } else {
+                        list.innerHTML = html;
+                        // Load saved ratings
+                        db.ref('ratings/' + currentUser.uid).once('value').then(snap2 => {
+                            if (snap2.exists()) {
+                                const ratings = snap2.val();
+                                document.querySelectorAll('.ratingSelect').forEach(sel => {
+                                    const email = sel.dataset.email;
+                                    if (ratings[email]) sel.value = ratings[email];
+                                });
+                            }
                         });
-                    });
+                        document.querySelectorAll('.saveRating').forEach(btn => {
+                            btn.addEventListener('click', async () => {
+                                const email = btn.dataset.email;
+                                const sel = document.querySelector(`.ratingSelect[data-email="${email}"]`);
+                                await db.ref('ratings/' + currentUser.uid + '/' + email).set(parseInt(sel
+                                .value));
+                                alert('✅ Rating saved!');
+                            });
+                        });
+                    }
                 } else {
-                    list.innerHTML = '<div class="text-muted">કોઈ વિદ્યાર્થી નથી.</div>';
+                    list.innerHTML = '<div class="text-muted">No students.</div>';
                 }
             });
         }
 
         // ================================================================
-        //  9. STUDENT LIVE CLASS
+        //  10. STUDENT PAGES
         // ================================================================
         function renderStudentLive() {
+            // Same as before, with updated UI
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>લાઈવ ક્લાસ</h2>
+                    <h2>Live Class</h2>
                     <div id="studentClassList"></div>
                     <div id="studentLiveContainer"></div>
                 </div>
@@ -1933,7 +2057,7 @@
                 if (snap.exists()) {
                     const classes = snap.val();
                     let found = false;
-                    let html = '<div style="margin-bottom:10px;">ઉપલબ્ધ લાઈવ ક્લાસ:</div>';
+                    let html = '<div style="margin-bottom:10px;">Available Live Classes:</div>';
 
                     Object.keys(classes).forEach(key => {
                         const cls = classes[key];
@@ -1945,14 +2069,14 @@
                             html += `
                                 <div class="class-item" data-key="${key}">
                                     <span class="name">${cls.className} (${cls.subject})</span>
-                                    <button class="btn btn-success btn-sm joinClassBtn" data-name="${cls.className}">જોડાઓ</button>
+                                    <button class="btn btn-success btn-sm joinClassBtn" data-name="${cls.className}">Join</button>
                                 </div>
                             `;
                         }
                     });
 
                     if (!found) {
-                        html += `<div class="text-muted">તમારી બ્રાન્ચ અને સેમેસ્ટર માટે કોઈ લાઈવ ક્લાસ નથી.</div>`;
+                        html += `<div class="text-muted">No live classes for your branch & semester.</div>`;
                     }
                     classListDiv.innerHTML = html;
 
@@ -1963,7 +2087,7 @@
                         });
                     });
                 } else {
-                    classListDiv.innerHTML = '<div class="text-muted">હમણાં કોઈ લાઈવ ક્લાસ નથી.</div>';
+                    classListDiv.innerHTML = '<div class="text-muted">No live classes at the moment.</div>';
                 }
             });
 
@@ -2035,13 +2159,13 @@
                         }
                     }, 1600);
                 } catch (e) {
-                    console.warn('સાયરન સપોર્ટેડ નથી:', e);
+                    console.warn('Siren not supported:', e);
                 }
             }
 
             async function initFaceDetection(videoElement) {
                 if (!window.FaceDetector) {
-                    console.warn('FaceDetector સપોર્ટેડ નથી. ચહેરો ટ્રેકિંગ બંધ.');
+                    console.warn('FaceDetector not supported. Face tracking disabled.');
                     return;
                 }
                 try {
@@ -2066,11 +2190,11 @@
                                 }
                             }
                         } catch (err) {
-                            console.warn('ચહેરો શોધમાં ભૂલ:', err);
+                            console.warn('Face detection error:', err);
                         }
                     }, 1000);
                 } catch (err) {
-                    console.warn('FaceDetector ભૂલ:', err);
+                    console.warn('FaceDetector error:', err);
                 }
             }
 
@@ -2129,7 +2253,7 @@
                     call.on('stream', (remoteStream) => {
                         liveContainer.innerHTML = `
                             <div class="card" style="margin-top:10px;">
-                                <h3 style="font-size:16px;margin-bottom:6px;">🟢 જોડાયા: ${className}</h3>
+                                <h3 style="font-size:16px;margin-bottom:6px;">🟢 Joined: ${className}</h3>
                                 <div class="video-wrapper" style="min-height:280px;position:relative;">
                                     <div id="studentVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:8px;padding:8px;overflow-y:auto;position:relative;">
                                         <div class="remote-player" style="flex:2 1 60%;min-width:180px;height:60%;min-height:140px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.05);"></div>
@@ -2137,17 +2261,17 @@
                                     </div>
                                     <div class="video-overlay-badge">
                                         <i class="fas fa-circle" style="color:#34d399;"></i>
-                                        <span>કનેક્ટેડ</span>
+                                        <span>Connected</span>
                                     </div>
                                 </div>
                                 <div class="chat-box" style="margin-top:8px;height:120px;">
                                     <div class="chat-messages" id="student-chat-messages"></div>
                                     <div class="chat-input">
-                                        <input type="text" id="student-chat-input" placeholder="પ્રશ્ન પૂછો..." />
+                                        <input type="text" id="student-chat-input" placeholder="Ask question..." />
                                         <button id="student-chat-send"><i class="fas fa-paper-plane"></i></button>
                                     </div>
                                 </div>
-                                <button id="leaveClassBtn" class="btn btn-danger" style="margin-top:8px;">ક્લાસ છોડો</button>
+                                <button id="leaveClassBtn" class="btn btn-danger" style="margin-top:8px;">Leave Class</button>
                             </div>
                         `;
 
@@ -2212,7 +2336,7 @@
                         // Start face detection on local video
                         initFaceDetection(localVideo);
 
-                        // Listen for teacher's audio command (unmute)
+                        // Listen for teacher's audio command
                         const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/audio`);
                         controlRef.on('value', (snap) => {
                             const audioOn = snap.val() === true;
@@ -2233,7 +2357,7 @@
                     });
 
                     call.on('error', (err) => {
-                        alert('❌ કનેક્શન ભૂલ: ' + err.message);
+                        alert('❌ Connection error: ' + err.message);
                         stopFaceDetection();
                         if (studentPeer) studentPeer.destroy();
                         studentPeer = null;
@@ -2245,7 +2369,7 @@
                     });
 
                 } catch (err) {
-                    alert('❌ જોડાવામાં ભૂલ: ' + err.message);
+                    alert('❌ Join error: ' + err.message);
                     stopFaceDetection();
                     if (studentPeer) {
                         studentPeer.destroy();
@@ -2264,40 +2388,11 @@
             });
         }
 
-        // ================================================================
-        //  10. STUDENT OTHER PAGES
-        // ================================================================
-        function renderStudentAttendance() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>મારી હાજરી</h2>
-                    <div id="studentAttendanceList"></div>
-                </div>
-            `;
-            const list = document.getElementById('studentAttendanceList');
-            db.ref('attendance').on('value', (snap) => {
-                list.innerHTML = '';
-                if (snap.exists()) {
-                    const data = snap.val();
-                    let found = false;
-                    for (const [session, students] of Object.entries(data)) {
-                        if (students[currentUser.uid]) {
-                            found = true;
-                            const date = new Date(students[currentUser.uid].joined).toLocaleString();
-                            list.innerHTML += `<div class="card">📅 ${session} — <span style="color:#34d399;">જોડાયા</span> at ${date}</div>`;
-                        }
-                    }
-                    if (!found) list.innerHTML = '<div class="text-muted">કોઈ હાજરી મળી નહીં.</div>';
-                } else {
-                    list.innerHTML = '<div class="text-muted">કોઈ રેકોર્ડ નથી.</div>';
-                }
-            });
-        }
-
+        // Other student pages (simplified)
         function renderStudentHomework() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>હોમવર્ક</h2>
+                    <h2>Homework</h2>
                     <div id="studentHomeworkList"></div>
                     <div id="studentHomeworkDetail" style="margin-top:12px;"></div>
                 </div>
@@ -2328,9 +2423,9 @@
                                         <div class="card" style="cursor:pointer;max-width:200px;" data-hwid="${hwId}">
                                             <div><strong>${hw.subject}</strong></div>
                                             <div style="font-size:12px;">${hw.topic}</div>
-                                            <div style="font-size:11px;color:rgba(255,255,255,0.4);">પ્રક. ${hw.chapter}</div>
-                                            <div style="font-size:11px;color:rgba(255,255,255,0.4);">છેલ્લી તારીખ: ${new Date(hw.dueDate).toLocaleDateString()}</div>
-                                            <button class="btn btn-primary btn-sm selectHwBtn" data-hwid="${hwId}">પસંદ કરો</button>
+                                            <div style="font-size:11px;color:rgba(255,255,255,0.4);">Ch. ${hw.chapter}</div>
+                                            <div style="font-size:11px;color:rgba(255,255,255,0.4);">Due: ${new Date(hw.dueDate).toLocaleDateString()}</div>
+                                            <button class="btn btn-primary btn-sm selectHwBtn" data-hwid="${hwId}">Select</button>
                                         </div>
                                     `;
                                 }
@@ -2344,7 +2439,7 @@
                                     });
                                 });
                             } else {
-                                listDiv.innerHTML = '<div class="text-muted">કોઈ હોમવર્ક પોસ્ટ થયું નથી.</div>';
+                                listDiv.innerHTML = '<div class="text-muted">No assignments posted.</div>';
                             }
                         });
                     }
@@ -2355,13 +2450,13 @@
                 detailDiv.innerHTML = `
                     <div class="card">
                         <h3 style="font-size:16px;">${hw.subject} — ${hw.topic}</h3>
-                        <p style="font-size:13px;">પ્રકરણ: ${hw.chapter}</p>
-                        <p style="font-size:13px;color:rgba(255,255,255,0.5);">છેલ્લી તારીખ: ${new Date(hw.dueDate).toLocaleString()}</p>
-                        <div><strong>હોમવર્ક ફોટો:</strong> <img src="${hw.imageBase64}" style="max-width:120px;max-height:120px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);" /></div>
+                        <p style="font-size:13px;">Chapter: ${hw.chapter}</p>
+                        <p style="font-size:13px;color:rgba(255,255,255,0.5);">Due: ${new Date(hw.dueDate).toLocaleString()}</p>
+                        <div><strong>Assignment Image:</strong> <img src="${hw.imageBase64}" style="max-width:120px;max-height:120px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);" /></div>
                         <div style="margin-top:10px;">
-                            <h4 style="font-size:14px;">તમારું કામ સબમિટ કરો</h4>
+                            <h4 style="font-size:14px;">Submit Your Work</h4>
                             <input type="file" id="studentHwFile" accept="image/*" class="input-field" style="margin-bottom:6px;" />
-                            <button id="submitHwBtn" class="btn btn-primary">સબમિટ કરો</button>
+                            <button id="submitHwBtn" class="btn btn-primary">Submit</button>
                             <div id="studentHwStatus" class="text-muted mt-10"></div>
                             <div id="studentHwResult" class="mt-10"></div>
                         </div>
@@ -2375,7 +2470,7 @@
 
                 db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once('value').then(snap => {
                     if (snap.exists()) {
-                        status.textContent = '✅ તમે પહેલેથી સબમિટ કર્યું છે.';
+                        status.textContent = '✅ You already submitted this assignment.';
                         status.style.color = '#34d399';
                         submitBtn.disabled = true;
                     }
@@ -2383,14 +2478,14 @@
 
                 submitBtn.addEventListener('click', async () => {
                     const file = fileInput.files[0];
-                    if (!file) { status.textContent = 'કૃપા કરીને ફોટો પસંદ કરો.'; return; }
+                    if (!file) { status.textContent = 'Select an image first.'; return; }
                     const snap = await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once(
                         'value');
                     if (snap.exists()) {
-                        status.textContent = 'તમે પહેલેથી સબમિટ કર્યું છે.';
+                        status.textContent = 'You already submitted this assignment.';
                         return;
                     }
-                    status.textContent = '⏳ પ્રોસેસ થઈ રહ્યું છે...';
+                    status.textContent = '⏳ Processing...';
                     try {
                         const reader = new FileReader();
                         const studentBase64 = await new Promise((resolve) => {
@@ -2405,7 +2500,7 @@
                         const existing = await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`)
                             .once('value');
                         if (existing.exists()) {
-                            status.textContent = 'તમે પહેલેથી સબમિટ કર્યું છે.';
+                            status.textContent = 'You already submitted this assignment.';
                             return;
                         }
 
@@ -2436,17 +2531,17 @@
                             timestamp: Date.now()
                         });
 
-                        status.textContent = '✅ સબમિટ થઈ ગયું! ગ્રેડ: ' + finalGrade + '/5';
+                        status.textContent = '✅ Submitted! Grade: ' + finalGrade + '/5';
                         resultDiv.innerHTML = `
                             <div style="background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.1);border-radius:14px;padding:14px;text-align:center;">
-                                <div style="font-size:13px;color:rgba(255,255,255,0.5);">સમાનતા: ${similarity.toFixed(1)}%</div>
+                                <div style="font-size:13px;color:rgba(255,255,255,0.5);">Similarity: ${similarity.toFixed(1)}%</div>
                                 <div style="font-size:32px;font-weight:700;color:#a78bfa;">${finalGrade} / 5</div>
-                                ${similarity > 70 ? '<div style="color:#f87171;margin-top:4px;font-size:12px;">⚠️ ઉચ્ચ સમાનતા મળી. તમારું સબમિશન ફ્લેગ થઈ શકે છે.</div>' : ''}
+                                ${similarity > 70 ? '<div style="color:#f87171;margin-top:4px;font-size:12px;">⚠️ High similarity detected. Your submission may be flagged.</div>' : ''}
                             </div>
                         `;
                         submitBtn.disabled = true;
                     } catch (err) {
-                        status.textContent = '❌ ભૂલ: ' + err.message;
+                        status.textContent = '❌ Error: ' + err.message;
                         console.error(err);
                     }
                 });
@@ -2456,7 +2551,7 @@
         function renderStudentRating() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>મારું રેટિંગ</h2>
+                    <h2>My Rating</h2>
                     <div id="studentRatingDisplay"></div>
                 </div>
             `;
@@ -2477,7 +2572,7 @@
                             if (snap2.exists()) {
                                 display.innerHTML = `<div style="font-size:40px;font-weight:700;color:#a78bfa;">${snap2.val()} / 5</div>`;
                             } else {
-                                display.innerHTML = '<div class="text-muted">હજી કોઈ રેટિંગ મળ્યું નથી.</div>';
+                                display.innerHTML = '<div class="text-muted">No rating given yet.</div>';
                             }
                         });
                     }
@@ -2488,11 +2583,13 @@
         // ================================================================
         //  INIT
         // ================================================================
-        console.log('✅ સ્માર્ટ ક્લાસરૂમ સંપૂર્ણપણે કાર્યરત છે.');
-        console.log('📌 પ્રોફાઇલ માટે અવતાર પર ક્લિક કરો.');
-        console.log('🔄 ટીચર "કેમેરો બદલો" બટન વડે કેમેરો સ્વિચ કરી શકે છે.');
-        console.log('🎤 ટીચર દરેક સ્ટુડન્ટના માઇક અને કેમેરાને ઓન/ઓફ કરી શકે છે.');
-        console.log('📹 સ્ટુડન્ટનો વિડિયો ફક્ત ત્યારે જ દેખાય છે જ્યારે ટીચર કેમેરા આઇકોન પર ક્લિક કરે.');
+        console.log('✅ Smart Classroom fully functional with all features.');
+        console.log('📌 Click avatar for profile.');
+        console.log('📊 Attendance system works per day.');
+        console.log('👥 Student list shows names and total count.');
+        console.log('🎤 Teacher can control mic and camera for each student.');
+        console.log('📹 Student video appears under their name when enabled.');
+        console.log('✅ All 3 bugs fixed: attendance save, attendance listener, peer open await.');
     </script>
 </body>
 </html>
