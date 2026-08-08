@@ -24,7 +24,7 @@
     </script>
 
     <style>
-        /* ===== GLOBAL (same as before) ===== */
+        /* ===== GLOBAL ===== */
         * {
             margin: 0;
             padding: 0;
@@ -1132,7 +1132,7 @@
             let localStream = null;
             let currentClassKey = null;
             let isTeacherLive = false;
-            let studentCalls = {}; // key: studentId, value: { call, stream }
+            let studentCalls = {}; // key: studentId (email), value: { call, stream }
 
             const classesRef = db.ref('classes');
 
@@ -1293,7 +1293,7 @@
 
                         // Listen for student calls
                         peer.on('call', (call) => {
-                            const studentId = call.peer;
+                            const studentId = call.peer; // this is email now
                             if (studentCalls[studentId]) {
                                 call.close();
                                 return;
@@ -1345,7 +1345,6 @@
                                         btn.title = 'Unmute student';
                                     }
                                 });
-                                // Also listen for student disconnection
                             });
 
                             // Mute/unmute button on thumbnail
@@ -1497,27 +1496,48 @@
             });
         }
 
+        // ================================================================
+        //  6. TEACHER HOMEWORK (unchanged, full version included)
+        // ================================================================
         function renderTeacherHomework() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>Homework</h2>
+                    <h2>Homework Management</h2>
                     <div class="card">
                         <h3 style="font-size:17px;margin-bottom:10px;">📤 Upload New Assignment</h3>
-                        <input type="file" id="hwTeacherFile" accept="image/*" class="input-field" style="margin-bottom:10px;" />
-                        <button id="uploadHwBtn" class="btn btn-primary">Upload</button>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                            <input type="text" id="hwSubject" class="input-field" placeholder="Subject" />
+                            <input type="text" id="hwTopic" class="input-field" placeholder="Topic" />
+                            <input type="text" id="hwChapter" class="input-field" placeholder="Chapter" />
+                            <input type="datetime-local" id="hwDueDate" class="input-field" />
+                        </div>
+                        <input type="file" id="hwTeacherFile" accept="image/*" class="input-field" style="margin-top:10px;" />
+                        <button id="uploadHwBtn" class="btn btn-primary" style="margin-top:10px;">Upload Assignment</button>
                         <div id="hwUploadStatus" class="text-muted mt-10"></div>
                     </div>
                     <div id="hwSubmissions"></div>
                 </div>
             `;
+
             const fileInput = document.getElementById('hwTeacherFile');
             const uploadBtn = document.getElementById('uploadHwBtn');
             const status = document.getElementById('hwUploadStatus');
             const subsDiv = document.getElementById('hwSubmissions');
+            const subject = document.getElementById('hwSubject');
+            const topic = document.getElementById('hwTopic');
+            const chapter = document.getElementById('hwChapter');
+            const dueDate = document.getElementById('hwDueDate');
 
             uploadBtn.addEventListener('click', async () => {
                 const file = fileInput.files[0];
-                if (!file) { status.textContent = 'Select an image first.'; return; }
+                const subj = subject.value.trim();
+                const top = topic.value.trim();
+                const chap = chapter.value.trim();
+                const due = dueDate.value;
+                if (!file || !subj || !top || !chap || !due) {
+                    status.textContent = 'Please fill all fields and select an image.';
+                    return;
+                }
                 status.textContent = '⏳ Converting...';
                 try {
                     const reader = new FileReader();
@@ -1525,14 +1545,29 @@
                         reader.onload = (e) => resolve(e.target.result);
                         reader.readAsDataURL(file);
                     });
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(base64));
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
                     const hwRef = db.ref('homework/' + currentUser.uid).push();
                     await hwRef.set({
                         teacher: currentUser.uid,
+                        subject: subj,
+                        topic: top,
+                        chapter: chap,
+                        dueDate: due,
                         imageBase64: base64,
-                        timestamp: Date.now()
+                        imageHash: hashHex,
+                        timestamp: Date.now(),
+                        branch: currentBranch || '',
+                        semester: currentSemester || 0
                     });
                     status.textContent = '✅ Assignment uploaded!';
                     fileInput.value = '';
+                    subject.value = '';
+                    topic.value = '';
+                    chapter.value = '';
+                    dueDate.value = '';
                     loadSubmissions();
                 } catch (err) {
                     status.textContent = '❌ Error: ' + err.message;
@@ -1544,18 +1579,24 @@
                     subsDiv.innerHTML = '';
                     if (snap.exists()) {
                         const data = snap.val();
-                        let html = '<h3 style="font-size:17px;margin:16px 0 10px;">📋 Student Submissions</h3>';
+                        let html = '<h3 style="font-size:17px;margin:16px 0 10px;">📋 All Assignments</h3>';
                         for (const [hwId, hw] of Object.entries(data)) {
                             html += `<div class="card">
-                                <div><strong>Assignment:</strong> <img src="${hw.imageBase64}" style="max-width:80px;max-height:80px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);" /></div>
+                                <div><strong>${hw.subject}</strong> — ${hw.topic} (Ch. ${hw.chapter})</div>
+                                <div style="font-size:13px;color:rgba(255,255,255,0.5);">Due: ${new Date(hw.dueDate).toLocaleString()}</div>
+                                <div><strong>Assignment:</strong> <img src="${hw.imageBase64}" style="max-width:100px;max-height:100px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);" /></div>
                                 <div><strong>Submissions:</strong> ${hw.submissions ? Object.keys(hw.submissions).length : 0}</div>`;
                             if (hw.submissions) {
                                 html += '<div style="margin-top:8px;">';
                                 for (const [sid, sub] of Object.entries(hw.submissions)) {
+                                    const sim = sub.similarity || 0;
+                                    const grade = sub.grade || 'N/A';
+                                    const warning = sim > 70 ? ' ⚠️ Possible Cheating' : '';
                                     html += `<div style="display:flex;gap:12px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;flex-wrap:wrap;">
                                         <span style="color:rgba(255,255,255,0.5);">${sid}</span>
-                                        <span style="color:#a78bfa;">Grade: ${sub.grade || 'N/A'}</span>
-                                        <span style="color:rgba(255,255,255,0.3);">Sim: ${sub.similarity ? sub.similarity.toFixed(1) : 'N/A'}%</span>
+                                        <span style="color:#a78bfa;">Grade: ${grade}</span>
+                                        <span style="color:rgba(255,255,255,0.3);">Sim: ${sim.toFixed(1)}%</span>
+                                        ${warning}
                                         <img src="${sub.imageBase64}" style="max-width:40px;max-height:40px;border-radius:4px;border:1px solid rgba(255,255,255,0.05);" />
                                     </div>`;
                                 }
@@ -1572,6 +1613,7 @@
             loadSubmissions();
         }
 
+        // --- Teacher Ratings ---
         function renderTeacherRatings() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
@@ -1624,9 +1666,10 @@
         }
 
         // ================================================================
-        //  6. STUDENT PAGES
+        //  7. STUDENT PAGES
         // ================================================================
 
+        // --- Student Live Class ---
         function renderStudentLive() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
@@ -1682,12 +1725,24 @@
             let noFaceCount = 0;
             const warningOverlay = document.getElementById('warningOverlay');
             let sirenAudio = null;
+            let audioCtx = null;
 
-            // Function to play siren sound using Web Audio API
+            // Function to resume audio context on user gesture
+            function resumeAudioContext() {
+                if (!audioCtx) {
+                    try {
+                        audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {}
+                }
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            }
+
             function playSiren() {
-                if (sirenAudio) return; // already playing
+                resumeAudioContext();
+                if (sirenAudio || !audioCtx) return;
                 try {
-                    const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
                     const oscillator = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
                     oscillator.connect(gainNode);
@@ -1696,7 +1751,6 @@
                     let freq = 200;
                     const startTime = audioCtx.currentTime;
                     oscillator.frequency.setValueAtTime(freq, startTime);
-                    // Sweep frequency up and down
                     oscillator.frequency.linearRampToValueAtTime(600, startTime + 0.3);
                     oscillator.frequency.linearRampToValueAtTime(200, startTime + 0.6);
                     oscillator.frequency.linearRampToValueAtTime(600, startTime + 0.9);
@@ -1705,8 +1759,7 @@
                     gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 1.5);
                     oscillator.start(startTime);
                     oscillator.stop(startTime + 1.5);
-                    // Keep reference
-                    sirenAudio = { oscillator, gainNode, audioCtx };
+                    sirenAudio = { oscillator, gainNode };
                     setTimeout(() => {
                         if (sirenAudio) {
                             sirenAudio = null;
@@ -1717,7 +1770,6 @@
                 }
             }
 
-            // Face detection using FaceDetector API (Chrome/Edge)
             async function initFaceDetection(videoElement) {
                 if (!window.FaceDetector) {
                     console.warn('FaceDetector not supported. Face tracking disabled.');
@@ -1728,24 +1780,21 @@
                         maxDetectedFaces: 1,
                         fastMode: true
                     });
-                    // Start periodic check
                     faceCheckInterval = setInterval(async () => {
                         if (!videoElement || videoElement.readyState < 2) return;
                         try {
                             const faces = await faceDetector.detect(videoElement);
                             if (faces.length > 0) {
-                                // Face detected
                                 noFaceCount = 0;
                                 warningOverlay.classList.remove('active');
                             } else {
                                 noFaceCount++;
-                                if (noFaceCount > 5) { // ~5 seconds (check every 1s)
+                                if (noFaceCount > 5) { // ~5 seconds
                                     warningOverlay.classList.add('active');
                                     playSiren();
                                 }
                             }
                         } catch (err) {
-                            // If detection fails, assume face present? We'll set noFaceCount high
                             console.warn('Face detection error:', err);
                         }
                     }, 1000);
@@ -1766,16 +1815,16 @@
                 if (sirenAudio) {
                     try {
                         sirenAudio.oscillator.stop();
-                        sirenAudio.audioCtx.close();
+                        if (audioCtx) audioCtx.close();
                     } catch (e) {}
                     sirenAudio = null;
+                    audioCtx = null;
                 }
                 noFaceCount = 0;
             }
 
             async function joinStudentClass(className) {
                 if (studentCall) {
-                    // Leave
                     studentCall.close();
                     studentCall = null;
                     if (studentStream) {
@@ -1792,18 +1841,20 @@
                 }
 
                 try {
+                    // Resume audio context on user click
+                    resumeAudioContext();
+
                     studentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                    // Initially mute audio (teacher will unmute)
                     studentStream.getAudioTracks().forEach(t => t.enabled = false);
 
-                    studentPeer = new Peer();
+                    // Use email as Peer ID so teacher can identify
+                    studentPeer = new Peer(currentUser.email);
 
                     studentPeer.on('open', () => {
                         const call = studentPeer.call(className, studentStream);
                         studentCall = call;
 
                         call.on('stream', (remoteStream) => {
-                            // Build UI
                             liveContainer.innerHTML = `
                                 <div class="card" style="margin-top:12px;">
                                     <h3 style="font-size:17px;margin-bottom:8px;">🟢 Joined: ${className}</h3>
@@ -1824,7 +1875,6 @@
                                 </div>
                             `;
 
-                            // Teacher video (remote) in main
                             const mainVideo = document.createElement('video');
                             mainVideo.srcObject = remoteStream;
                             mainVideo.autoplay = true;
@@ -1833,7 +1883,6 @@
                             mainVideo.style.objectFit = 'cover';
                             document.getElementById('student-main-video').appendChild(mainVideo);
 
-                            // Student's own video in thumbnail
                             const selfThumb = document.getElementById('student-self-thumb');
                             const selfVideo = document.createElement('video');
                             selfVideo.srcObject = studentStream;
@@ -1844,7 +1893,6 @@
                             selfVideo.style.objectFit = 'cover';
                             selfThumb.appendChild(selfVideo);
 
-                            // Chat listener
                             const chatRef = db.ref('chat/' + className);
                             chatRef.on('child_added', (snap) => {
                                 const data = snap.val();
@@ -1858,7 +1906,6 @@
                                 container.scrollTop = container.scrollHeight;
                             });
 
-                            // Send chat (student)
                             document.getElementById('student-chat-send').addEventListener('click', () => {
                                 const input = document.getElementById('student-chat-input');
                                 const text = input.value.trim();
@@ -1872,17 +1919,14 @@
                                 input.value = '';
                             });
 
-                            // Leave button
                             document.getElementById('leaveClassBtn').addEventListener('click', () => {
                                 joinStudentClass(className);
                             });
 
-                            // Record attendance
                             db.ref('attendance/' + className + '/' + currentUser.uid).set({
                                 joined: Date.now()
                             });
 
-                            // Start face detection on student's own video
                             initFaceDetection(selfVideo);
 
                             // Listen for teacher's unmute command
@@ -1901,7 +1945,6 @@
                             if (studentPeer) studentPeer.destroy();
                             studentPeer = null;
                             studentCall = null;
-                            // Remove control listener
                             const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/unmute`);
                             controlRef.off();
                         });
@@ -1919,13 +1962,12 @@
                 }
             }
 
-            // Cleanup when page unloads
             window.addEventListener('beforeunload', () => {
                 stopFaceDetection();
             });
         }
 
-        // --- Other student pages (unchanged) ---
+        // --- Student Attendance ---
         function renderStudentAttendance() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
@@ -1953,26 +1995,20 @@
             });
         }
 
+        // ================================================================
+        //  8. STUDENT HOMEWORK
+        // ================================================================
         function renderStudentHomework() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
                     <h2>Homework</h2>
                     <div id="studentHomeworkList"></div>
-                    <div class="card" style="margin-top:16px;">
-                        <h3 style="font-size:17px;margin-bottom:10px;">📤 Submit Your Work</h3>
-                        <input type="file" id="studentHwFile" accept="image/*" class="input-field" style="margin-bottom:10px;" />
-                        <button id="submitHwBtn" class="btn btn-primary">Submit & Grade</button>
-                        <div id="studentHwStatus" class="text-muted mt-10"></div>
-                        <div id="studentHwResult" class="mt-10"></div>
-                    </div>
+                    <div id="studentHomeworkDetail" style="margin-top:16px;"></div>
                 </div>
             `;
 
-            const list = document.getElementById('studentHomeworkList');
-            const fileInput = document.getElementById('studentHwFile');
-            const submitBtn = document.getElementById('submitHwBtn');
-            const status = document.getElementById('studentHwStatus');
-            const resultDiv = document.getElementById('studentHwResult');
+            const listDiv = document.getElementById('studentHomeworkList');
+            const detailDiv = document.getElementById('studentHomeworkDetail');
 
             const teacherEmail = 'nagrajmall2317@gmail.com';
             db.ref('users').once('value').then(snap => {
@@ -1987,85 +2023,147 @@
                     }
                     if (teacherUid) {
                         db.ref('homework/' + teacherUid).on('value', (snap2) => {
-                            list.innerHTML = '';
+                            listDiv.innerHTML = '';
                             if (snap2.exists()) {
                                 const hws = snap2.val();
                                 let html = '<div style="display:flex;flex-wrap:wrap;gap:12px;">';
-                                Object.values(hws).forEach(hw => {
-                                    html += `<div class="card" style="max-width:180px;">
-                                        <img src="${hw.imageBase64}" style="max-width:100%;border-radius:8px;border:1px solid rgba(255,255,255,0.05);" />
-                                        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">${new Date(hw.timestamp).toLocaleDateString()}</div>
-                                    </div>`;
-                                });
+                                for (const [hwId, hw] of Object.entries(hws)) {
+                                    html += `
+                                        <div class="card" style="cursor:pointer;max-width:220px;" data-hwid="${hwId}">
+                                            <div><strong>${hw.subject}</strong></div>
+                                            <div style="font-size:13px;">${hw.topic}</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,0.4);">Ch. ${hw.chapter}</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,0.4);">Due: ${new Date(hw.dueDate).toLocaleDateString()}</div>
+                                            <button class="btn btn-primary btn-sm selectHwBtn" data-hwid="${hwId}">Select</button>
+                                        </div>
+                                    `;
+                                }
                                 html += '</div>';
-                                list.innerHTML = html;
+                                listDiv.innerHTML = html;
+
+                                document.querySelectorAll('.selectHwBtn').forEach(btn => {
+                                    btn.addEventListener('click', (e) => {
+                                        const hwId = btn.dataset.hwid;
+                                        showHomeworkDetail(hwId, hws[hwId]);
+                                    });
+                                });
                             } else {
-                                list.innerHTML = '<div class="text-muted">No assignments posted.</div>';
+                                listDiv.innerHTML = '<div class="text-muted">No assignments posted.</div>';
                             }
                         });
                     }
                 }
             });
 
-            submitBtn.addEventListener('click', async () => {
-                const file = fileInput.files[0];
-                if (!file) { status.textContent = 'Select an image first.'; return; }
-                status.textContent = '⏳ Processing...';
-                try {
-                    const reader = new FileReader();
-                    const studentBase64 = await new Promise((resolve) => {
-                        reader.onload = (e) => resolve(e.target.result);
-                        reader.readAsDataURL(file);
-                    });
+            function showHomeworkDetail(hwId, hw) {
+                detailDiv.innerHTML = `
+                    <div class="card">
+                        <h3 style="font-size:17px;">${hw.subject} — ${hw.topic}</h3>
+                        <p>Chapter: ${hw.chapter}</p>
+                        <p>Due: ${new Date(hw.dueDate).toLocaleString()}</p>
+                        <div><strong>Assignment Image:</strong> <img src="${hw.imageBase64}" style="max-width:150px;max-height:150px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);" /></div>
+                        <div style="margin-top:12px;">
+                            <h4>Submit Your Work</h4>
+                            <input type="file" id="studentHwFile" accept="image/*" class="input-field" style="margin-bottom:8px;" />
+                            <button id="submitHwBtn" class="btn btn-primary">Submit & Grade</button>
+                            <div id="studentHwStatus" class="text-muted mt-10"></div>
+                            <div id="studentHwResult" class="mt-10"></div>
+                        </div>
+                    </div>
+                `;
 
-                    const teacherEmail = 'nagrajmall2317@gmail.com';
-                    const usersSnap = await db.ref('users').once('value');
-                    let teacherUid = null;
-                    if (usersSnap.exists()) {
-                        const users = usersSnap.val();
-                        for (const [uid, data] of Object.entries(users)) {
-                            if (data.email === teacherEmail && data.role === 'teacher') {
-                                teacherUid = uid;
-                                break;
-                            }
-                        }
+                const fileInput = document.getElementById('studentHwFile');
+                const submitBtn = document.getElementById('submitHwBtn');
+                const status = document.getElementById('studentHwStatus');
+                const resultDiv = document.getElementById('studentHwResult');
+
+                // Check if already submitted
+                db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once('value').then(snap => {
+                    if (snap.exists()) {
+                        status.textContent = '✅ You already submitted this assignment.';
+                        status.style.color = '#34d399';
+                        submitBtn.disabled = true;
                     }
-                    if (!teacherUid) { status.textContent = 'Teacher not found.'; return; }
+                });
 
-                    const hwSnap = await db.ref('homework/' + teacherUid).once('value');
-                    if (!hwSnap.exists() || Object.keys(hwSnap.val()).length === 0) {
-                        status.textContent = 'No assignment from teacher.';
+                submitBtn.addEventListener('click', async () => {
+                    const file = fileInput.files[0];
+                    if (!file) { status.textContent = 'Select an image first.'; return; }
+                    // Re-check if already submitted
+                    const snap = await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once('value');
+                    if (snap.exists()) {
+                        status.textContent = 'You already submitted this assignment.';
                         return;
                     }
-                    const hwKey = Object.keys(hwSnap.val())[0];
-                    const teacherHw = hwSnap.val()[hwKey];
-                    const teacherBase64 = teacherHw.imageBase64;
+                    status.textContent = '⏳ Processing...';
+                    try {
+                        const reader = new FileReader();
+                        const studentBase64 = await new Promise((resolve) => {
+                            reader.onload = (e) => resolve(e.target.result);
+                            reader.readAsDataURL(file);
+                        });
+                        // Compute hash
+                        const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(
+                            studentBase64));
+                        const hashArray = Array.from(new Uint8Array(hashBuffer));
+                        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-                    const similarity = await compareImagesBase64(teacherBase64, studentBase64);
-                    const grade = Math.round((similarity / 100) * 5);
-                    const finalGrade = Math.min(5, Math.max(1, grade));
+                        // Check duplicate hash for this assignment (student side)
+                        const existing = await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once('value');
+                        if (existing.exists()) {
+                            status.textContent = 'You already submitted this assignment.';
+                            return;
+                        }
+                        // Also check if same hash used for any other submission? Not needed.
 
-                    await db.ref('homework/' + teacherUid + '/' + hwKey + '/submissions/' + currentUser.uid).set({
-                        imageBase64: studentBase64,
-                        similarity: similarity,
-                        grade: finalGrade,
-                        timestamp: Date.now()
-                    });
+                        // Compare with teacher's image
+                        const teacherBase64 = hw.imageBase64;
+                        const similarity = await compareImagesBase64(teacherBase64, studentBase64);
+                        let grade;
+                        if (similarity >= 50) grade = 5;
+                        else if (similarity >= 40) grade = 4;
+                        else if (similarity >= 30) grade = 3;
+                        else if (similarity >= 20) grade = 2;
+                        else grade = 1;
 
-                    status.textContent = '✅ Submitted! Grade: ' + finalGrade + '/5';
-                    resultDiv.innerHTML = `
-                        <div style="background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.1);border-radius:16px;padding:16px;text-align:center;">
-                            <div style="font-size:14px;color:rgba(255,255,255,0.5);">Similarity: ${similarity.toFixed(1)}%</div>
-                            <div style="font-size:42px;font-weight:700;color:#a78bfa;">${finalGrade} / 5</div>
-                        </div>
-                    `;
-                } catch (err) {
-                    status.textContent = '❌ Error: ' + err.message;
-                    console.error(err);
-                }
-            });
+                        const finalGrade = Math.min(5, Math.max(1, grade));
+
+                        // Save submission in student's own node
+                        await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).set({
+                            imageBase64: studentBase64,
+                            hash: hashHex,
+                            similarity: similarity,
+                            grade: finalGrade,
+                            timestamp: Date.now()
+                        });
+
+                        // Also store in teacher's submission node
+                        await db.ref(`homework/${hw.teacher}/${hwId}/submissions/${currentUser.email}`).set({
+                            imageBase64: studentBase64,
+                            hash: hashHex,
+                            similarity: similarity,
+                            grade: finalGrade,
+                            timestamp: Date.now()
+                        });
+
+                        status.textContent = '✅ Submitted! Grade: ' + finalGrade + '/5';
+                        resultDiv.innerHTML = `
+                            <div style="background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.1);border-radius:16px;padding:16px;text-align:center;">
+                                <div style="font-size:14px;color:rgba(255,255,255,0.5);">Similarity: ${similarity.toFixed(1)}%</div>
+                                <div style="font-size:42px;font-weight:700;color:#a78bfa;">${finalGrade} / 5</div>
+                                ${similarity > 70 ? '<div style="color:#f87171;margin-top:6px;">⚠️ High similarity detected. Your submission may be flagged.</div>' : ''}
+                            </div>
+                        `;
+                        submitBtn.disabled = true;
+                    } catch (err) {
+                        status.textContent = '❌ Error: ' + err.message;
+                        console.error(err);
+                    }
+                });
+            }
         }
 
+        // --- Student Rating ---
         function renderStudentRating() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
@@ -2101,9 +2199,9 @@
         // ================================================================
         //  INIT
         // ================================================================
-        console.log('✅ Smart Classroom with microphone control & face tracking ready.');
+        console.log('✅ Smart Classroom with fixed mic control and siren ready.');
         console.log('📌 Accounts: Teacher: nagrajmall2317@gmail.com, Student: sachuumali2317@gmail.com');
-        console.log('💡 Face tracking uses FaceDetector API (Chrome/Edge).');
+        console.log('💡 Teacher can now unmute student mic, and siren plays after 5 seconds of face missing.');
     </script>
 
 </body>
