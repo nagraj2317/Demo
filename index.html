@@ -1,1426 +1,1769 @@
 <!DOCTYPE html>
-<html lang="gu">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Smart Classroom · Gujarat</title>
+    <title>Smart Classroom · PeerJS</title>
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <!-- Firebase Compat -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-database-compat.js">
+    </script>
+
+    <!-- PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js">
+    </script>
+
     <style>
+        /* ===== Same styles as before (omitted for brevity – included in final code) ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
-            font-family: 'Segoe UI', 'Google Sans', system-ui, sans-serif;
-            background: linear-gradient(145deg, #0a0e1a 0%, #141b2b 100%);
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 20% 30%, #0b1120, #030712);
             min-height: 100vh;
-            padding: 1rem;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        #loginOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        /* ===== CARDS ===== */
-        .card {
+        .login-box {
+            background: #1a1f2e;
+            border-radius: 48px;
+            padding: 40px;
+            max-width: 420px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        }
+        .login-box h2 {
+            font-size: 28px;
+            margin-bottom: 24px;
+            text-align: center;
+            background: linear-gradient(135deg, #a78bfa, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .login-box input,
+        .login-box select {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            margin-bottom: 12px;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+        .login-box input:focus,
+        .login-box select:focus {
+            border-color: rgba(167, 139, 250, 0.4);
+            background: rgba(255, 255, 255, 0.07);
+        }
+        .login-box button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 30px;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            margin-top: 4px;
+        }
+        .login-box button:hover {
+            transform: scale(1.02);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #818cf8, #a78bfa);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #34d399, #10b981);
+        }
+        .toggle-link {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .toggle-link span {
+            color: #a78bfa;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .msg {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #f87171;
+            min-height: 20px;
+        }
+        #appContainer {
+            display: none;
+            width: 1440px;
+            max-width: 100%;
+            height: 92vh;
+            max-height: 900px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(24px);
+            border-radius: 48px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+            display: grid;
+            grid-template-columns: 72px 1fr 320px;
+            grid-template-rows: 1fr;
+            overflow: hidden;
+        }
+        .sidebar {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(12px);
-            border-radius: 32px;
-            padding: 2rem;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            margin-bottom: 1.5rem;
-        }
-
-        .card-header {
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 28px 0 20px;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            margin-bottom: 1.2rem;
+            gap: 32px;
+            overflow-y: auto;
+            scrollbar-width: none;
         }
-
-        .card-title {
-            color: #f0f5ff;
-            font-size: 1.3rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
+        .sidebar::-webkit-scrollbar {
+            display: none;
         }
-
-        .card-title small {
-            font-size: 0.75rem;
-            color: rgba(180, 200, 255, 0.2);
-            font-weight: 400;
-        }
-
-        /* ===== LOGIN ===== */
-        #loginContainer .card {
-            max-width: 460px;
-            margin: 2rem auto;
-        }
-
-        .login-title {
-            text-align: center;
-            font-size: 2.2rem;
+        .sidebar .brand {
+            font-size: 20px;
             font-weight: 700;
-            background: linear-gradient(to right, #f2f6ff, #b0c9ff);
+            background: linear-gradient(135deg, #a78bfa, #60a5fa);
             -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 0.2rem;
+            -webkit-text-fill-color: transparent;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            padding: 4px 0;
+            letter-spacing: -2px;
         }
-
-        .login-sub {
-            text-align: center;
-            color: rgba(180, 200, 255, 0.25);
-            font-size: 0.9rem;
-            margin-bottom: 1.8rem;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            color: rgba(200, 215, 255, 0.5);
-            font-size: 0.8rem;
-            font-weight: 500;
-            margin-bottom: 0.2rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 40px;
-            padding: 0.7rem 1.5rem;
-            font-size: 1rem;
-            color: #e0ecff;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .form-group input:focus {
-            border-color: #4b7eff;
-            box-shadow: 0 0 0 3px rgba(75, 126, 255, 0.12);
-        }
-
-        .btn {
-            padding: 0.6rem 1.8rem;
-            border-radius: 40px;
-            border: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: linear-gradient(135deg, #4b7eff, #3b5fd9);
-            color: #fff;
-            box-shadow: 0 6px 20px -8px rgba(50, 100, 255, 0.3);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 28px -8px rgba(50, 100, 255, 0.4);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ff4b6a, #d93b55);
-            box-shadow: 0 6px 20px -8px rgba(255, 50, 80, 0.25);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            box-shadow: 0 6px 20px -8px rgba(34, 197, 94, 0.3);
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            box-shadow: 0 6px 20px -8px rgba(245, 158, 11, 0.3);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            color: rgba(200, 215, 255, 0.4);
-            box-shadow: none;
-        }
-
-        .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.04);
-            color: #fff;
-            transform: none;
-        }
-
-        .btn-sm {
-            padding: 0.25rem 0.8rem;
-            font-size: 0.75rem;
-        }
-
-        .btn-block {
-            width: 100%;
-        }
-
-        .error-msg {
-            background: rgba(255, 50, 80, 0.08);
-            border: 1px solid rgba(255, 50, 80, 0.15);
-            color: #ff6b7a;
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            font-size: 0.85rem;
-            text-align: center;
-            margin-bottom: 1rem;
-            display: none;
-        }
-
-        .error-msg.show {
-            display: block;
-        }
-
-        /* ===== DASHBOARD ===== */
-        #dashboard {
-            display: none;
-        }
-        #dashboard.active {
-            display: block;
-        }
-
-        .dash-header {
+        .sidebar nav {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            margin-bottom: 1.5rem;
+            flex-direction: column;
+            gap: 16px;
         }
-
-        .dash-user {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .dash-avatar {
+        .sidebar nav a {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 20px;
+            padding: 12px;
+            border-radius: 16px;
+            transition: 0.25s ease;
             width: 48px;
             height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4b7eff, #7b5dff);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
-            color: #fff;
-            flex-shrink: 0;
-        }
-
-        .dash-user-info h2 {
-            color: #f0f5ff;
-            font-size: 1.2rem;
-        }
-
-        .dash-user-info .role-badge {
-            font-size: 0.7rem;
-            color: #b8d0ff;
-            background: rgba(60, 130, 255, 0.12);
-            padding: 0.1rem 0.7rem;
-            border-radius: 20px;
-            border: 1px solid rgba(100, 160, 255, 0.1);
-        }
-
-        .btn-logout {
-            padding: 0.4rem 1.2rem;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 40px;
-            background: transparent;
-            color: rgba(200, 215, 255, 0.3);
-            font-size: 0.8rem;
+            text-decoration: none;
+            position: relative;
             cursor: pointer;
-            transition: all 0.2s;
         }
-
-        .btn-logout:hover {
-            background: rgba(255, 255, 255, 0.04);
+        .sidebar nav a:hover {
             color: #fff;
+            background: rgba(255, 255, 255, 0.07);
         }
-
-        /* ===== VIDEO SECTION ===== */
-        .video-section {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 24px;
-            padding: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            min-height: 320px;
+        .sidebar nav a.active {
+            color: #a78bfa;
+            background: rgba(167, 139, 250, 0.15);
+            box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.15);
+        }
+        .sidebar .bottom {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .sidebar .bottom a {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .sidebar .bottom a:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .main-area {
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            min-width: 0;
+        }
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .top-bar .page-title h2 {
+            font-weight: 600;
+            font-size: 20px;
+            color: #f1f5f9;
+        }
+        .top-bar .page-title p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.35);
+            margin-top: 2px;
+        }
+        .top-bar .actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .top-bar .actions .pill {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 6px 16px 6px 12px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .top-bar .actions .pill i {
+            color: #34d399;
+            font-size: 8px;
+        }
+        .top-bar .actions .avatar-group {
+            display: flex;
+            align-items: center;
+        }
+        .top-bar .actions .avatar-group .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #818cf8, #a78bfa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 13px;
+            color: #fff;
+            border: 2px solid rgba(15, 23, 42, 0.6);
+        }
+        .video-wrapper {
+            flex: 1;
+            min-height: 280px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
             position: relative;
         }
-
-        .video-section video {
+        .video-wrapper #videoContainer {
             width: 100%;
-            max-height: 450px;
+            height: 100%;
+            background: #0a0f1a;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px;
+            overflow-y: auto;
+            position: relative;
+        }
+        .video-wrapper .remote-player {
+            width: 45%;
+            min-width: 180px;
+            height: 45%;
+            min-height: 140px;
+            background: #1a1f2e;
             border-radius: 16px;
-            background: #000;
-            object-fit: cover;
-        }
-
-        .video-placeholder {
-            text-align: center;
-            color: rgba(180, 200, 255, 0.12);
-        }
-
-        .video-placeholder .icon {
-            font-size: 3.5rem;
-            margin-bottom: 0.3rem;
-        }
-
-        .video-placeholder p {
-            font-size: 1rem;
-        }
-
-        .video-controls {
-            position: absolute;
-            bottom: 1.5rem;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 0.6rem;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 0.4rem 1rem;
-            border-radius: 60px;
-            backdrop-filter: blur(8px);
+            overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            flex-wrap: wrap;
-            justify-content: center;
         }
-
-        .video-controls .btn {
-            padding: 0.3rem 1rem;
-            font-size: 0.75rem;
+        .video-wrapper .local-player {
+            width: 30%;
+            min-width: 150px;
+            height: 30%;
+            min-height: 110px;
+            background: #1a1f2e;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid rgba(167, 139, 250, 0.4);
+            position: relative;
         }
-
-        /* ===== LIVE STATUS ===== */
-        .live-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-            align-items: center;
-            justify-content: center;
-            padding: 0.8rem;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 60px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            margin-top: 1rem;
-        }
-
-        .live-status {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.2rem 1rem;
+        .video-overlay-badge {
+            position: absolute;
+            bottom: 16px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 6px 16px 6px 12px;
             border-radius: 40px;
-            background: rgba(255, 255, 255, 0.03);
+            font-size: 11px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
         }
-
-        .live-dot {
-            width: 10px;
-            height: 10px;
+        .video-overlay-badge i {
+            font-size: 8px;
+        }
+        .right-panel {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 18px;
+            gap: 16px;
+            overflow: hidden;
+        }
+        .right-panel .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .right-panel .panel-header h4 {
+            font-weight: 600;
+            font-size: 14px;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .right-panel .panel-header h4 i {
+            color: #a78bfa;
+        }
+        .right-panel .panel-header .dot {
+            width: 8px;
+            height: 8px;
+            background: #34d399;
             border-radius: 50%;
-            background: #ff4b6a;
-            transition: all 0.3s;
+            display: inline-block;
+            animation: pulse-dot 2s infinite;
         }
-
-        .live-dot.active {
-            background: #22c55e;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
+        @keyframes pulse-dot {
             0%,
             100% {
                 opacity: 1;
                 transform: scale(1);
             }
             50% {
-                opacity: 0.5;
-                transform: scale(1.2);
+                opacity: 0.3;
+                transform: scale(0.8);
             }
         }
-
-        .live-status .status-text {
-            color: #ff6b7a;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .live-status .status-text.active {
-            color: #22c55e;
-        }
-
-        /* ===== GRID ===== */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.2rem;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 0.8rem;
-        }
-
-        /* ===== STAT CARDS ===== */
-        .stat-card {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 20px;
-            padding: 1.2rem;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            text-align: center;
-        }
-
-        .stat-card .number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #b0caff;
-        }
-
-        .stat-card .label {
-            font-size: 0.75rem;
-            color: rgba(180, 200, 255, 0.25);
-            margin-top: 0.2rem;
-        }
-
-        /* ===== STUDENT CARD ===== */
-        .student-card {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 16px;
-            padding: 0.7rem 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            transition: all 0.2s;
-        }
-
-        .student-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .student-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #7b5dff, #4b7eff);
+        .right-panel .placeholder {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            color: #fff;
-            font-size: 0.7rem;
-            flex-shrink: 0;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 13px;
+            text-align: center;
+            line-height: 1.6;
         }
-
-        .student-info {
+        .page-content {
+            padding: 4px 0;
             flex: 1;
-        }
-
-        .student-name {
-            color: #e8efff;
-            font-weight: 500;
-            font-size: 0.85rem;
-        }
-
-        .student-meta {
-            color: rgba(180, 200, 255, 0.15);
-            font-size: 0.6rem;
-        }
-
-        .student-badge {
-            font-size: 0.6rem;
-            padding: 0.1rem 0.5rem;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.04);
-            color: rgba(180, 200, 255, 0.2);
-        }
-
-        .student-badge.present {
-            background: rgba(34, 197, 94, 0.12);
-            color: #22c55e;
-        }
-
-        .student-badge.absent {
-            background: rgba(255, 50, 80, 0.08);
-            color: #ff4b6a;
-        }
-
-        /* ===== AI BOT ===== */
-        .bot-container {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            padding: 1rem;
-            max-height: 250px;
             overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.04);
         }
-
-        .bot-msg {
-            padding: 0.5rem 1rem;
-            margin-bottom: 0.5rem;
+        .page-content h2 {
+            font-weight: 600;
+            font-size: 22px;
+            margin-bottom: 16px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 16px;
-            max-width: 85%;
-            font-size: 0.85rem;
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.2s;
         }
-
-        .bot-msg.bot {
-            background: rgba(75, 126, 255, 0.08);
-            color: #b8d0ff;
-            border: 1px solid rgba(75, 126, 255, 0.06);
-            align-self: flex-start;
+        .card:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
-
-        .bot-msg.user {
+        .btn {
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.25s;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #818cf8, #a78bfa);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #34d399, #10b981);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #f87171, #ef4444);
+        }
+        .btn-sm {
+            padding: 6px 16px;
+            font-size: 12px;
+        }
+        .input-field {
+            padding: 12px 18px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             background: rgba(255, 255, 255, 0.04);
-            color: #e8efff;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            align-self: flex-end;
-            margin-left: auto;
-        }
-
-        .bot-input {
-            display: flex;
-            gap: 0.6rem;
-            margin-top: 0.6rem;
-        }
-
-        .bot-input input {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 40px;
-            padding: 0.5rem 1.2rem;
-            color: #e0ecff;
-            font-size: 0.85rem;
+            color: #fff;
             outline: none;
+            width: 100%;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            transition: 0.3s;
         }
-
-        .bot-input input:focus {
-            border-color: #4b7eff;
+        .input-field:focus {
+            border-color: rgba(167, 139, 250, 0.3);
+            background: rgba(255, 255, 255, 0.07);
         }
-
-        /* ===== HOMEWORK ===== */
-        .hw-item {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 16px;
-            padding: 0.8rem 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            margin-bottom: 0.5rem;
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .mt-10 {
+            margin-top: 10px;
+        }
+        .mb-10 {
+            margin-bottom: 10px;
+        }
+        .text-muted {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 13px;
+        }
+        .grade-big {
+            font-size: 48px;
+            font-weight: 700;
+            color: #a78bfa;
+            text-align: center;
+            padding: 10px 0;
+        }
+        .class-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            margin-bottom: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
-
-        .hw-item .name {
-            color: #e8efff;
-            font-size: 0.85rem;
+        .class-item .name {
+            font-weight: 500;
         }
-
-        .hw-item .score {
-            font-weight: 700;
-            font-size: 1rem;
+        .class-item .status {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
         }
-
-        .hw-item .score.good {
-            color: #22c55e;
+        .class-item .status.active {
+            color: #34d399;
         }
-        .hw-item .score.avg {
-            color: #f59e0b;
+        @media (max-width: 1100px) {
+            #appContainer {
+                grid-template-columns: 64px 1fr 260px;
+                height: 96vh;
+            }
         }
-        .hw-item .score.bad {
-            color: #ff4b6a;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 1.5rem;
-            color: rgba(180, 200, 255, 0.08);
-            grid-column: 1/-1;
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 900px) {
-            .grid-2 {
+        @media (max-width: 860px) {
+            #appContainer {
                 grid-template-columns: 1fr;
-            }
-            .grid-3 {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .card {
-                padding: 1rem;
-                border-radius: 24px;
-            }
-            .grid-3 {
-                grid-template-columns: 1fr;
-            }
-            .video-section {
-                min-height: 200px;
-            }
-            .video-controls {
-                bottom: 0.8rem;
-                padding: 0.3rem 0.6rem;
-                gap: 0.3rem;
-            }
-            .video-controls .btn {
-                padding: 0.2rem 0.6rem;
-                font-size: 0.65rem;
-            }
-            .dash-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .live-bar {
-                flex-direction: column;
+                grid-template-rows: 56px 1fr auto;
+                height: auto;
                 border-radius: 28px;
             }
+            .sidebar {
+                flex-direction: row;
+                padding: 6px 16px;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                gap: 12px;
+                overflow-x: auto;
+                height: 56px;
+                align-items: center;
+            }
+            .sidebar .brand {
+                writing-mode: horizontal-tb;
+                font-size: 15px;
+                margin-right: auto;
+                padding: 0;
+            }
+            .sidebar nav {
+                flex-direction: row;
+                gap: 4px;
+            }
+            .sidebar nav a {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+                padding: 6px;
+            }
+            .sidebar .bottom {
+                flex-direction: row;
+                margin-top: 0;
+                gap: 4px;
+            }
+            .sidebar .bottom a {
+                width: 34px;
+                height: 34px;
+                font-size: 14px;
+                padding: 6px;
+            }
+            .right-panel {
+                border-left: none;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                max-height: 180px;
+                padding: 14px;
+            }
+            .main-area {
+                padding: 14px;
+            }
+            .video-wrapper {
+                min-height: 200px;
+            }
+            .login-box {
+                padding: 28px 20px;
+                margin: 16px;
+            }
         }
-
-        /* ===== SCROLLBAR ===== */
-        .bot-container::-webkit-scrollbar {
-            width: 4px;
-        }
-        .bot-container::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
-        }
-        .bot-container::-webkit-scrollbar-thumb {
-            background: rgba(75, 126, 255, 0.3);
-            border-radius: 10px;
+        @media (max-width: 480px) {
+            .login-box {
+                padding: 20px 16px;
+            }
+            .login-box h2 {
+                font-size: 22px;
+            }
+            .main-area {
+                padding: 10px;
+            }
+            .top-bar .page-title h2 {
+                font-size: 17px;
+            }
+            .btn {
+                font-size: 12px;
+                padding: 8px 16px;
+            }
+            .card {
+                padding: 10px 12px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-
-    <!-- ===== LOGIN ===== -->
-    <div id="loginContainer">
-        <div class="card">
-            <div class="login-title">🧠 AI Smart Classroom</div>
-            <div class="login-sub">Gujarat · NEP 2020 · Digital India</div>
-
-            <div class="error-msg" id="loginError">Invalid credentials. Please try again.</div>
-
-            <div class="form-group">
-                <label>📧 Email</label>
-                <input type="email" id="loginEmail" placeholder="Enter your email" value="sachuumali2317@gmail.com" />
+    <!-- ===== LOGIN OVERLAY ===== -->
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h2>Smart Classroom</h2>
+            <div id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Email address" value="sachuumali2317@gmail.com" />
+                <input type="password" id="loginPassword" placeholder="Password" value="11223344" />
+                <button class="btn-primary" id="loginBtn">Sign In</button>
+                <div class="toggle-link">New user? <span id="showSignup">Create account</span></div>
+                <div class="msg" id="loginMsg"></div>
             </div>
-
-            <div class="form-group">
-                <label>🔑 Password</label>
-                <input type="password" id="loginPassword" placeholder="Enter password" value="11223344" />
-            </div>
-
-            <button class="btn btn-block" id="loginBtn">🔐 Sign In</button>
-
-            <div style="margin-top:1rem; text-align:center; font-size:0.65rem; color:rgba(180,200,255,0.08);">
-                Teacher: sachuumali2317@gmail.com · Student: nagrajmall2317@gmail.com
+            <div id="signupForm" style="display:none;">
+                <input type="email" id="signupEmail" placeholder="Email address" />
+                <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" />
+                <input type="text" id="signupBranch" placeholder="Branch (e.g. Computer Engineering)" />
+                <input type="number" id="signupSemester" placeholder="Semester (e.g. 1)" min="1" />
+                <select id="signupRole">
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                </select>
+                <button class="btn-success" id="signupBtn">Create Account</button>
+                <div class="toggle-link">Already have account? <span id="showLogin">Sign in</span></div>
+                <div class="msg" id="signupMsg"></div>
             </div>
         </div>
     </div>
 
-    <!-- ===== DASHBOARD ===== -->
-    <div id="dashboard">
-
-        <!-- === HEADER === -->
-        <div class="card">
-            <div class="dash-header">
-                <div class="dash-user">
-                    <div class="dash-avatar" id="dashAvatar">👨‍🏫</div>
-                    <div class="dash-user-info">
-                        <h2 id="dashName">User</h2>
-                        <span class="role-badge" id="dashRole">Teacher</span>
-                    </div>
+    <!-- ===== APP ===== -->
+    <div id="appContainer">
+        <aside id="sidebar" class="sidebar"></aside>
+        <main class="main-area">
+            <div class="top-bar">
+                <div class="page-title">
+                    <h2 id="pageTitle">Dashboard</h2>
+                    <p id="pageSubtitle">Welcome</p>
                 </div>
-                <button class="btn-logout" id="logoutBtn">🚪 Logout</button>
-            </div>
-
-            <!-- === LIVE CLASS BAR === -->
-            <div class="live-bar">
-                <div class="live-status">
-                    <div class="live-dot" id="liveDot"></div>
-                    <span class="status-text" id="liveStatusText">Offline</span>
-                </div>
-                <button class="btn btn-success btn-sm" id="startClassBtn">▶ Start Class</button>
-                <button class="btn btn-danger btn-sm" id="endClassBtn">⏹ End Class</button>
-                <button class="btn btn-outline btn-sm" id="recordBtn">⏺ Record</button>
-                <span style="color:rgba(180,200,255,0.15); font-size:0.7rem;" id="lectureTimer">⏱ 00:00</span>
-            </div>
-
-            <!-- === VIDEO === -->
-            <div class="video-section" id="videoSection">
-                <video id="teacherVideo" autoplay playsinline style="display:none;"></video>
-                <video id="studentVideo" autoplay playsinline style="display:none;"></video>
-
-                <div class="video-placeholder" id="videoPlaceholder">
-                    <div class="icon">🎓</div>
-                    <p>Waiting for class to start...</p>
-                    <p style="font-size:0.7rem; color:rgba(180,200,255,0.05);">Biometric verification required for teacher</p>
-                </div>
-
-                <div class="video-controls" id="videoControls" style="display:none;">
-                    <button class="btn btn-sm" id="toggleMicBtn">🎤 Mic</button>
-                    <button class="btn btn-sm" id="toggleCamBtn">📷 Cam</button>
-                    <button class="btn btn-sm btn-outline" id="biometricBtn">🔐 Face Verify</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- === GRID: Stats === -->
-        <div class="grid-3">
-            <div class="card">
-                <div class="stat-card">
-                    <div class="number" id="studentCount">0</div>
-                    <div class="label">👨‍🎓 Total Students</div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="stat-card">
-                    <div class="number" id="presentCount">0</div>
-                    <div class="label">✅ Present Today</div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="stat-card">
-                    <div class="number" id="lectureCount">0</div>
-                    <div class="label">📚 Lectures Archived</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- === GRID: Main Features === -->
-        <div class="grid-2">
-
-            <!-- LEFT: Students + Attendance -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">👨‍🎓 Students <small>— attendance & alerts</small></div>
-                    <button class="btn btn-sm btn-outline" id="autoAddBtn">➕ Auto Add</button>
-                </div>
-                <div class="grid-4" id="studentGrid">
-                    <!-- rendered by JS -->
-                </div>
-                <div style="margin-top:0.8rem; display:flex; gap:0.6rem; flex-wrap:wrap;">
-                    <button class="btn btn-sm btn-warning" id="alertBtn">🔔 Send Alerts</button>
-                    <button class="btn btn-sm btn-outline" id="resetStudentsBtn">↺ Reset</button>
-                </div>
-            </div>
-
-            <!-- RIGHT: AI Homework Evaluation -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">📝 AI Homework <small>— OCR + auto-grading</small></div>
-                    <button class="btn btn-sm btn-success" id="scanHwBtn">🔍 Scan</button>
-                </div>
-                <div id="hwList">
-                    <div class="hw-item">
-                        <span class="name">Priya Patel</span>
-                        <span class="score good">4.5/5</span>
-                    </div>
-                    <div class="hw-item">
-                        <span class="name">Rahul Desai</span>
-                        <span class="score avg">3.0/5</span>
-                    </div>
-                    <div class="hw-item">
-                        <span class="name">Sneha Reddy</span>
-                        <span class="score bad">1.5/5</span>
-                    </div>
-                    <div class="hw-item">
-                        <span class="name">Arjun Singh</span>
-                        <span class="score good">4.0/5</span>
-                    </div>
-                    <div class="hw-item" style="border-color:rgba(255,255,255,0.02); color:rgba(180,200,255,0.1); font-size:0.8rem; justify-content:center;">
-                        ⚡ AI Vision OCR: Auto-scan & grade assignments
+                <div class="actions">
+                    <span class="pill"><i class="fas fa-circle"></i> <span id="roleBadge">Student</span></span>
+                    <div class="avatar-group">
+                        <span class="avatar" id="avatarLetter">U</span>
                     </div>
                 </div>
             </div>
-
-        </div>
-
-        <!-- === GRID: Security + AI Bot === -->
-        <div class="grid-2">
-
-            <!-- Security -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">🛡️ Security <small>— biometric + watermark</small></div>
-                    <span style="font-size:0.65rem; color:rgba(34,197,94,0.5);">● AES-256 Encrypted</span>
-                </div>
-                <div style="display:flex; flex-wrap:wrap; gap:0.8rem;">
-                    <div style="flex:1; min-width:120px; background:rgba(255,255,255,0.02); border-radius:16px; padding:0.8rem; border:1px solid rgba(255,255,255,0.04);">
-                        <div style="font-size:1.5rem;">🆔</div>
-                        <div style="color:#e8efff; font-size:0.85rem;">Biometric Unlock</div>
-                        <div style="color:rgba(180,200,255,0.15); font-size:0.65rem;">Face verification required</div>
-                    </div>
-                    <div style="flex:1; min-width:120px; background:rgba(255,255,255,0.02); border-radius:16px; padding:0.8rem; border:1px solid rgba(255,255,255,0.04);">
-                        <div style="font-size:1.5rem;">💧</div>
-                        <div style="color:#e8efff; font-size:0.85rem;">Dynamic Watermark</div>
-                        <div style="color:rgba(180,200,255,0.15); font-size:0.65rem;">Student ID on video</div>
-                    </div>
-                    <div style="flex:1; min-width:120px; background:rgba(255,255,255,0.02); border-radius:16px; padding:0.8rem; border:1px solid rgba(255,255,255,0.04);">
-                        <div style="font-size:1.5rem;">🔒</div>
-                        <div style="color:#e8efff; font-size:0.85rem;">E2E Encryption</div>
-                        <div style="color:rgba(180,200,255,0.15); font-size:0.65rem;">Military-grade AES-256</div>
-                    </div>
-                </div>
-                <div style="margin-top:0.8rem; background:rgba(255,200,50,0.04); border:1px solid rgba(255,200,50,0.06); border-radius:16px; padding:0.6rem 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
-                    <span style="color:rgba(200,215,255,0.4); font-size:0.8rem;">📊 Predictive Alert: 90% accuracy</span>
-                    <span style="color:#22c55e; font-size:0.75rem;">● System Active</span>
-                </div>
+            <div id="dynamicContent" style="flex:1;overflow-y:auto;padding-bottom:8px;"></div>
+        </main>
+        <aside class="right-panel">
+            <div class="panel-header">
+                <h4><i class="fas fa-robot"></i> AI Assistant <span class="dot"></span></h4>
+                <span style="font-size:10px;color:rgba(255,255,255,0.2);">Coming soon</span>
             </div>
-
-            <!-- AI Bot: Saral Sahay -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">🤖 Saral Sahay <small>— 24x7 AI Bot</small></div>
-                    <span style="font-size:0.6rem; color:rgba(180,200,255,0.1);">Gujarati · Hindi · English</span>
-                </div>
-                <div class="bot-container" id="botContainer">
-                    <div class="bot-msg bot">🙏 Namaste! I am Saral Sahay, your AI assistant. Ask me anything about courses, schedules, or exams in Gujarati, Hindi, or English.</div>
-                    <div class="bot-msg bot">📚 Today's lectures: Physics (10AM), Mathematics (12PM), Chemistry (2PM)</div>
-                </div>
-                <div class="bot-input">
-                    <input type="text" id="botInput" placeholder="Ask in Gujarati, Hindi or English..." />
-                    <button class="btn btn-sm" id="botSendBtn">➤</button>
-                </div>
+            <div class="placeholder">
+                <div>📚 AI chat &amp; alerts<br /><span style="font-size:11px;color:rgba(255,255,255,0.1);">will be available here</span></div>
             </div>
-
-        </div>
-
-        <!-- === Footer === -->
-        <div style="text-align:center; padding:1rem 0; color:rgba(180,200,255,0.05); font-size:0.7rem; border-top:1px solid rgba(255,255,255,0.02); margin-top:1rem;">
-            AI Smart Classroom · Gujarat · NEP 2020 · Digital India 🇮🇳
-        </div>
-
+        </aside>
     </div>
 
-</div>
-
-<script>
-    (function() {
-        // ===== CREDENTIALS =====
-        const USERS = {
-            teacher: {
-                email: 'sachuumali2317@gmail.com',
-                password: '11223344',
-                name: 'Dr. Aarav Sharma',
-                role: 'teacher'
-            },
-            student: {
-                email: 'nagrajmall2317@gmail.com',
-                password: '11223344',
-                name: 'Student',
-                role: 'student'
-            }
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT – FIREBASE + PEERJS (Debug Version)              -->
+    <!-- ============================================================ -->
+    <script>
+        // ================================================================
+        //  1. FIREBASE CONFIG
+        // ================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBurp3M6C4sgDIUX7H6eEGCAep9oBt24ss",
+            authDomain: "aiclassdemo.firebaseapp.com",
+            projectId: "aiclassdemo",
+            databaseURL: "https://aiclassdemo-default-rtdb.firebaseio.com",
+            storageBucket: "aiclassdemo.firebasestorage.app",
+            messagingSenderId: "851078707703",
+            appId: "1:851078707703:web:656731ca0310ba878e56f2",
+            measurementId: "G-R57HXZ4EK4"
         };
 
-        // ===== DOM REFS =====
-        const loginContainer = document.getElementById('loginContainer');
-        const dashboard = document.getElementById('dashboard');
+        console.log('🔥 Firebase config loaded.');
+
+        // Initialize Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase initialized successfully.');
+        } catch (err) {
+            console.error('❌ Firebase init error:', err);
+            alert('Firebase initialization failed: ' + err.message);
+        }
+
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // Check if auth is ready
+        auth.onAuthStateChanged((user) => {
+            console.log('🔄 Auth state changed:', user ? user.email : 'null');
+        });
+
+        // ================================================================
+        //  2. DOM REFS
+        // ================================================================
+        const loginOverlay = document.getElementById('loginOverlay');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
         const loginEmail = document.getElementById('loginEmail');
         const loginPassword = document.getElementById('loginPassword');
         const loginBtn = document.getElementById('loginBtn');
-        const loginError = document.getElementById('loginError');
-        const logoutBtn = document.getElementById('logoutBtn');
+        const loginMsg = document.getElementById('loginMsg');
+        const signupEmail = document.getElementById('signupEmail');
+        const signupPassword = document.getElementById('signupPassword');
+        const signupBranch = document.getElementById('signupBranch');
+        const signupSemester = document.getElementById('signupSemester');
+        const signupRole = document.getElementById('signupRole');
+        const signupBtn = document.getElementById('signupBtn');
+        const signupMsg = document.getElementById('signupMsg');
+        const showSignup = document.getElementById('showSignup');
+        const showLogin = document.getElementById('showLogin');
+        const appContainer = document.getElementById('appContainer');
+        const sidebar = document.getElementById('sidebar');
+        const dynamicContent = document.getElementById('dynamicContent');
+        const pageTitle = document.getElementById('pageTitle');
+        const pageSubtitle = document.getElementById('pageSubtitle');
+        const roleBadge = document.getElementById('roleBadge');
+        const avatarLetter = document.getElementById('avatarLetter');
 
-        const dashName = document.getElementById('dashName');
-        const dashRole = document.getElementById('dashRole');
-        const dashAvatar = document.getElementById('dashAvatar');
-
-        const studentGrid = document.getElementById('studentGrid');
-        const studentCount = document.getElementById('studentCount');
-        const presentCount = document.getElementById('presentCount');
-        const lectureCount = document.getElementById('lectureCount');
-
-        const liveDot = document.getElementById('liveDot');
-        const liveStatusText = document.getElementById('liveStatusText');
-        const startClassBtn = document.getElementById('startClassBtn');
-        const endClassBtn = document.getElementById('endClassBtn');
-        const recordBtn = document.getElementById('recordBtn');
-        const lectureTimer = document.getElementById('lectureTimer');
-
-        const teacherVideo = document.getElementById('teacherVideo');
-        const studentVideo = document.getElementById('studentVideo');
-        const videoPlaceholder = document.getElementById('videoPlaceholder');
-        const videoControls = document.getElementById('videoControls');
-        const toggleMicBtn = document.getElementById('toggleMicBtn');
-        const toggleCamBtn = document.getElementById('toggleCamBtn');
-        const biometricBtn = document.getElementById('biometricBtn');
-
-        const autoAddBtn = document.getElementById('autoAddBtn');
-        const resetStudentsBtn = document.getElementById('resetStudentsBtn');
-        const alertBtn = document.getElementById('alertBtn');
-        const scanHwBtn = document.getElementById('scanHwBtn');
-
-        const botContainer = document.getElementById('botContainer');
-        const botInput = document.getElementById('botInput');
-        const botSendBtn = document.getElementById('botSendBtn');
-
-        // ===== STATE =====
         let currentUser = null;
-        let students = [];
-        let isLive = false;
-        let isRecording = false;
-        let lectureSeconds = 0;
-        let timerInterval = null;
-        let localStream = null;
-        let isMicOn = true;
-        let isCamOn = true;
-        let isBiometricVerified = false;
-        let lecturesArchived = 0;
+        let currentRole = null;
+        let currentBranch = null;
+        let currentSemester = null;
 
-        // ===== DEFAULT DATA =====
-        const DEFAULT_STUDENTS = [
-            { id: 1, name: 'Priya Patel', present: false },
-            { id: 2, name: 'Rahul Desai', present: false },
-            { id: 3, name: 'Sneha Reddy', present: false },
-            { id: 4, name: 'Arjun Singh', present: false },
-            { id: 5, name: 'Neha Shah', present: false },
-            { id: 6, name: 'Vikram Gupta', present: false },
-        ];
+        // ================================================================
+        //  3. AUTH LISTENERS (with debug)
+        // ================================================================
+        showSignup.addEventListener('click', () => {
+            console.log('Show signup form');
+            loginForm.style.display = 'none';
+            signupForm.style.display = 'block';
+            loginMsg.textContent = '';
+            signupMsg.textContent = '';
+        });
+        showLogin.addEventListener('click', () => {
+            console.log('Show login form');
+            loginForm.style.display = 'block';
+            signupForm.style.display = 'none';
+            loginMsg.textContent = '';
+            signupMsg.textContent = '';
+        });
 
-        const AUTO_NAMES = [
-            'Aisha Mehta', 'Rohan Patel', 'Kiran Joshi', 'Maya Iyer',
-            'Dev Sharma', 'Isha Kumar', 'Ankit Verma', 'Pooja Rao',
-            'Jay Patel', 'Kavya Singh', 'Arjun Nair', 'Sara Khan'
-        ];
-
-        const BOT_RESPONSES = {
-            'hello': 'Hello! How can I help you today?',
-            'hi': 'Hi there! Ask me about courses, schedules, or exams.',
-            'time': 'Today\'s lectures: Physics (10AM), Mathematics (12PM), Chemistry (2PM)',
-            'exam': 'Mid-term exams start from December 15. Check your dashboard for details.',
-            'schedule': 'Monday: Physics, Tuesday: Mathematics, Wednesday: Chemistry, Thursday: Engineering Drawing, Friday: Computer Science',
-            'gujarati': 'હેલો! હું સરળ સહાય છું. તમે ગુજરાતી, હિન્દી કે અંગ્રેજીમાં પૂછી શકો છો.',
-            'hindi': 'नमस्ते! मैं सरल सहाय हूँ। आप गुजराती, हिंदी या अंग्रेजी में पूछ सकते हैं।',
-            'default': 'I\'m here to help! Please ask about courses, schedules, exams, or any academic query.'
-        };
-
-        // ===== HELPERS =====
-        function generateId() {
-            return Date.now() + Math.floor(Math.random() * 1000);
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function getInitials(name) {
-            return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-        }
-
-        function formatTime(seconds) {
-            const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-            const s = String(seconds % 60).padStart(2, '0');
-            return `${m}:${s}`;
-        }
-
-        // ===== SAVE / LOAD =====
-        function saveData() {
+        // --- Login ---
+        loginBtn.addEventListener('click', async () => {
+            console.log('Login button clicked');
+            const email = loginEmail.value.trim();
+            const pass = loginPassword.value.trim();
+            if (!email || !pass) {
+                loginMsg.textContent = 'Please enter email and password.';
+                return;
+            }
+            loginMsg.textContent = '⏳ Signing in...';
+            loginMsg.style.color = 'rgba(255,255,255,0.5)';
             try {
-                localStorage.setItem('smartClassStudents', JSON.stringify(students));
-                localStorage.setItem('smartClassLive', JSON.stringify(isLive));
-                localStorage.setItem('smartClassLectures', JSON.stringify(lecturesArchived));
-            } catch (e) {}
-        }
-
-        function loadData() {
-            try {
-                const saved = localStorage.getItem('smartClassStudents');
-                if (saved) {
-                    students = JSON.parse(saved);
-                } else {
-                    students = DEFAULT_STUDENTS.map(s => ({ ...s, id: generateId() }));
-                }
-                const status = localStorage.getItem('smartClassLive');
-                if (status) isLive = JSON.parse(status);
-                const lect = localStorage.getItem('smartClassLectures');
-                if (lect) lecturesArchived = JSON.parse(lect);
-            } catch (e) {
-                students = DEFAULT_STUDENTS.map(s => ({ ...s, id: generateId() }));
-                isLive = false;
-                lecturesArchived = 0;
-            }
-            updateLiveUI();
-            renderStudents();
-            updateStats();
-            lectureCount.textContent = lecturesArchived;
-        }
-
-        // ===== RENDER =====
-        function renderStudents() {
-            if (students.length === 0) {
-                studentGrid.innerHTML = `<div class="empty-state">📚 No students enrolled</div>`;
-            } else {
-                studentGrid.innerHTML = students.map(s => `
-                    <div class="student-card">
-                        <div class="student-avatar">${getInitials(s.name)}</div>
-                        <div class="student-info">
-                            <div class="student-name">${escapeHtml(s.name)}</div>
-                            <div class="student-meta">ID: ${s.id}</div>
-                        </div>
-                        <span class="student-badge ${s.present ? 'present' : 'absent'}">
-                            ${s.present ? '●' : '○'}
-                        </span>
-                    </div>
-                `).join('');
-            }
-            updateStats();
-            saveData();
-        }
-
-        function updateStats() {
-            studentCount.textContent = students.length;
-            const present = students.filter(s => s.present).length;
-            presentCount.textContent = present;
-        }
-
-        // ===== LIVE CLASS =====
-        function updateLiveUI() {
-            if (isLive) {
-                liveDot.className = 'live-dot active';
-                liveStatusText.textContent = '🟢 Live';
-                liveStatusText.className = 'status-text active';
-            } else {
-                liveDot.className = 'live-dot';
-                liveStatusText.textContent = '🔴 Offline';
-                liveStatusText.className = 'status-text';
-            }
-            saveData();
-        }
-
-        function startTimer() {
-            if (timerInterval) return;
-            timerInterval = setInterval(() => {
-                lectureSeconds++;
-                lectureTimer.textContent = `⏱ ${formatTime(lectureSeconds)}`;
-            }, 1000);
-        }
-
-        function stopTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-        }
-
-        // ===== MEDIA =====
-        async function startMedia() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: true
-                });
-                localStream = stream;
-                teacherVideo.srcObject = stream;
-                teacherVideo.style.display = 'block';
-                videoControls.style.display = 'flex';
-                videoPlaceholder.style.display = 'none';
-                isMicOn = true;
-                isCamOn = true;
-                toggleMicBtn.textContent = '🎤 Mic';
-                toggleCamBtn.textContent = '📷 Cam';
-                return true;
+                console.log('Attempting signInWithEmailAndPassword...');
+                await auth.signInWithEmailAndPassword(email, pass);
+                console.log('Sign-in successful (should redirect via listener)');
             } catch (err) {
-                console.error('Media error:', err);
-                alert('⚠️ Cannot access camera/microphone. Please allow permissions.');
-                return false;
+                console.error('Login error:', err);
+                loginMsg.textContent = '❌ ' + err.message;
+                loginMsg.style.color = '#f87171';
+                alert('Login failed: ' + err.message);
             }
-        }
+        });
 
-        function stopMedia() {
-            if (localStream) {
-                localStream.getTracks().forEach(t => t.stop());
-                localStream = null;
-            }
-            teacherVideo.srcObject = null;
-            teacherVideo.style.display = 'none';
-            studentVideo.srcObject = null;
-            studentVideo.style.display = 'none';
-            videoControls.style.display = 'none';
-            if (!isLive) {
-                videoPlaceholder.style.display = 'block';
-            }
-        }
-
-        function toggleMic() {
-            if (!localStream) return;
-            const track = localStream.getAudioTracks()[0];
-            if (track) {
-                isMicOn = !isMicOn;
-                track.enabled = isMicOn;
-                toggleMicBtn.textContent = isMicOn ? '🎤 Mic' : '🔇 Mute';
-            }
-        }
-
-        function toggleCam() {
-            if (!localStream) return;
-            const track = localStream.getVideoTracks()[0];
-            if (track) {
-                isCamOn = !isCamOn;
-                track.enabled = isCamOn;
-                toggleCamBtn.textContent = isCamOn ? '📷 Cam' : '🚫 Cam Off';
-            }
-        }
-
-        // ===== BIOMETRIC =====
-        function biometricVerify() {
-            if (!isLive) {
-                alert('⚠️ Please start the class first.');
+        // --- Signup ---
+        signupBtn.addEventListener('click', async () => {
+            console.log('Signup button clicked');
+            const email = signupEmail.value.trim();
+            const pass = signupPassword.value.trim();
+            const role = signupRole.value;
+            const branch = signupBranch.value.trim();
+            const semester = parseInt(signupSemester.value);
+            if (!email || !pass || !branch || isNaN(semester) || semester < 1) {
+                signupMsg.textContent = 'Please fill all fields correctly.';
                 return;
             }
-            // Simulate face verification
-            isBiometricVerified = true;
-            biometricBtn.textContent = '✅ Verified';
-            biometricBtn.style.background = 'rgba(34,197,94,0.2)';
-            biometricBtn.style.color = '#22c55e';
-            biometricBtn.style.borderColor = '#22c55e';
-            alert('✅ Biometric verification successful!');
-        }
-
-        // ===== START/END CLASS =====
-        async function startClass() {
-            if (currentUser && currentUser.role !== 'teacher') {
-                alert('⚠️ Only Teacher can start the class!');
+            if (pass.length < 6) {
+                signupMsg.textContent = 'Password must be at least 6 characters.';
                 return;
             }
-
-            const ok = await startMedia();
-            if (!ok) return;
-
-            isLive = true;
-            students.forEach(s => s.present = true);
-            renderStudents();
-            updateLiveUI();
-            startTimer();
-            lectureCount.textContent = lecturesArchived;
-
-            // Show for student
-            if (localStream) {
-                studentVideo.srcObject = localStream;
-                studentVideo.style.display = 'block';
-            }
-
-            // Auto watermark simulation
-            console.log('💧 Dynamic Watermark: Student IDs active');
-        }
-
-        function endClass() {
-            if (currentUser && currentUser.role !== 'teacher') {
-                alert('⚠️ Only Teacher can end the class!');
-                return;
-            }
-
-            // Archive lecture
-            if (isLive && lectureSeconds > 10) {
-                lecturesArchived++;
-                lectureCount.textContent = lecturesArchived;
-                saveData();
-            }
-
-            isLive = false;
-            stopMedia();
-            stopTimer();
-            lectureSeconds = 0;
-            lectureTimer.textContent = '⏱ 00:00';
-            students.forEach(s => s.present = false);
-            renderStudents();
-            updateLiveUI();
-            isBiometricVerified = false;
-            biometricBtn.textContent = '🔐 Face Verify';
-            biometricBtn.style.background = '';
-            biometricBtn.style.color = '';
-            biometricBtn.style.borderColor = '';
-        }
-
-        function toggleRecording() {
-            isRecording = !isRecording;
-            recordBtn.textContent = isRecording ? '⏹ Recording...' : '⏺ Record';
-            recordBtn.style.background = isRecording ? 'rgba(255,50,80,0.2)' : '';
-            recordBtn.style.color = isRecording ? '#ff4b6a' : '';
-        }
-
-        // ===== STUDENT CRUD =====
-        function addStudent(name) {
-            if (!name || name.trim() === '') return false;
-            students.push({
-                id: generateId(),
-                name: name.trim(),
-                present: isLive
-            });
-            renderStudents();
-            return true;
-        }
-
-        function autoAddStudents(count = 4) {
-            const available = AUTO_NAMES.filter(n =>
-                !students.some(s => s.name.toLowerCase() === n.toLowerCase())
-            );
-            const toAdd = available.slice(0, count);
-            if (toAdd.length === 0) {
-                alert('No more unique names available!');
-                return;
-            }
-            toAdd.forEach(name => {
-                students.push({
-                    id: generateId(),
-                    name: name,
-                    present: isLive
+            signupMsg.textContent = '⏳ Creating account...';
+            signupMsg.style.color = 'rgba(255,255,255,0.5)';
+            try {
+                console.log('Attempting createUserWithEmailAndPassword...');
+                const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                console.log('User created, UID:', cred.user.uid);
+                // Save user data
+                await db.ref('users/' + cred.user.uid).set({
+                    email,
+                    role,
+                    branch,
+                    semester: role === 'student' ? semester : 0
                 });
+                console.log('User data saved.');
+                signupMsg.textContent = '✅ Account created! Please sign in.';
+                signupMsg.style.color = '#34d399';
+                // Switch to login
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+                loginEmail.value = email;
+                loginPassword.value = pass;
+                loginMsg.textContent = 'Account created, please sign in.';
+                loginMsg.style.color = '#34d399';
+            } catch (err) {
+                console.error('Signup error:', err);
+                signupMsg.textContent = '❌ ' + err.message;
+                signupMsg.style.color = '#f87171';
+                alert('Signup failed: ' + err.message);
+            }
+        });
+
+        // --- Auth state listener ---
+        auth.onAuthStateChanged(async (user) => {
+            console.log('Auth state changed:', user ? 'User logged in: ' + user.email : 'No user');
+            if (user) {
+                try {
+                    const snap = await db.ref('users/' + user.uid).once('value');
+                    console.log('User data snapshot exists?', snap.exists());
+                    if (snap.exists()) {
+                        const data = snap.val();
+                        console.log('User data:', data);
+                        currentRole = data.role;
+                        currentBranch = data.branch || '';
+                        currentSemester = data.semester || 0;
+                        currentUser = { uid: user.uid, email: user.email, ...data };
+                        // Show app
+                        loginOverlay.style.display = 'none';
+                        appContainer.style.display = 'grid';
+                        roleBadge.textContent = currentRole.charAt(0).toUpperCase() + currentRole.slice(1);
+                        avatarLetter.textContent = user.email.charAt(0).toUpperCase();
+                        console.log('Building dashboard...');
+                        buildDashboard();
+                    } else {
+                        console.warn('User data not found in DB. Signing out.');
+                        await auth.signOut();
+                        alert('User role not found. Please sign up again.');
+                    }
+                } catch (err) {
+                    console.error('Error loading user data:', err);
+                    alert('Error loading user data: ' + err.message);
+                    await auth.signOut();
+                }
+            } else {
+                // Show login
+                loginOverlay.style.display = 'flex';
+                appContainer.style.display = 'none';
+                loginMsg.textContent = '';
+            }
+        });
+
+        // ================================================================
+        //  4. DASHBOARD BUILDER (same as before)
+        // ================================================================
+        function buildDashboard() {
+            console.log('buildDashboard called');
+            sidebar.innerHTML = '';
+            const brand = document.createElement('div');
+            brand.className = 'brand';
+            brand.textContent = 'AI';
+            sidebar.appendChild(brand);
+
+            const nav = document.createElement('nav');
+            const items = [];
+            if (currentRole === 'teacher') {
+                items.push({ icon: 'fa-chalkboard-teacher', label: 'Live Class', id: 't-live' });
+                items.push({ icon: 'fa-user-graduate', label: 'Students', id: 't-students' });
+                items.push({ icon: 'fa-clipboard-check', label: 'Attendance', id: 't-attendance' });
+                items.push({ icon: 'fa-pencil-alt', label: 'Homework', id: 't-homework' });
+                items.push({ icon: 'fa-star', label: 'Ratings', id: 't-ratings' });
+            } else {
+                items.push({ icon: 'fa-chalkboard-teacher', label: 'Live Class', id: 's-live' });
+                items.push({ icon: 'fa-calendar-check', label: 'My Attendance', id: 's-attendance' });
+                items.push({ icon: 'fa-pencil-alt', label: 'Homework', id: 's-homework' });
+                items.push({ icon: 'fa-star', label: 'My Rating', id: 's-rating' });
+            }
+            items.forEach(item => {
+                const a = document.createElement('a');
+                a.href = '#';
+                a.id = item.id;
+                a.innerHTML = `<i class="fas ${item.icon}"></i>`;
+                a.title = item.label;
+                a.addEventListener('click', (e) => { e.preventDefault();
+                    loadPage(item.id); });
+                nav.appendChild(a);
             });
-            renderStudents();
+            sidebar.appendChild(nav);
+
+            const bottom = document.createElement('div');
+            bottom.className = 'bottom';
+            const logoutBtn = document.createElement('a');
+            logoutBtn.href = '#';
+            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+            logoutBtn.title = 'Logout';
+            logoutBtn.addEventListener('click', (e) => { e.preventDefault();
+                auth.signOut(); });
+            bottom.appendChild(logoutBtn);
+            sidebar.appendChild(bottom);
+
+            loadPage(currentRole === 'teacher' ? 't-live' : 's-live');
         }
 
-        function resetStudents() {
-            if (confirm('Reset to default student list?')) {
-                students = DEFAULT_STUDENTS.map(s => ({ ...s, id: generateId(), present: isLive }));
-                renderStudents();
+        function loadPage(pageId) {
+            console.log('loadPage:', pageId);
+            document.querySelectorAll('#sidebar nav a').forEach(a => a.classList.remove('active'));
+            const activeLink = document.getElementById(pageId);
+            if (activeLink) activeLink.classList.add('active');
+
+            const labels = {
+                't-live': 'Live Class',
+                't-students': 'Manage Students',
+                't-attendance': 'Attendance',
+                't-homework': 'Homework',
+                't-ratings': 'Ratings',
+                's-live': 'Live Class',
+                's-attendance': 'My Attendance',
+                's-homework': 'Homework',
+                's-rating': 'My Rating'
+            };
+            pageTitle.textContent = labels[pageId] || 'Dashboard';
+            pageSubtitle.textContent = currentRole === 'teacher' ? 'Teacher Panel' : 'Student Panel';
+
+            switch (pageId) {
+                case 't-live':
+                    renderTeacherLive();
+                    break;
+                case 't-students':
+                    renderTeacherStudents();
+                    break;
+                case 't-attendance':
+                    renderTeacherAttendance();
+                    break;
+                case 't-homework':
+                    renderTeacherHomework();
+                    break;
+                case 't-ratings':
+                    renderTeacherRatings();
+                    break;
+                case 's-live':
+                    renderStudentLive();
+                    break;
+                case 's-attendance':
+                    renderStudentAttendance();
+                    break;
+                case 's-homework':
+                    renderStudentHomework();
+                    break;
+                case 's-rating':
+                    renderStudentRating();
+                    break;
+                default:
+                    dynamicContent.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center;">Page not found.</div>';
             }
         }
 
-        // ===== ALERTS =====
-        function sendAlerts() {
-            const absent = students.filter(s => !s.present);
-            if (absent.length === 0) {
-                alert('✅ All students are present! No alerts needed.');
-                return;
-            }
-            alert(`🔔 Predictive Alert: ${absent.length} students absent.\n90% accuracy - recommending parent notification.`);
-            // Simulate alert sent
-            console.log('📧 Alerts sent to parents of:', absent.map(s => s.name).join(', '));
+        // ================================================================
+        //  5. HELPER: IMAGE COMPARE (for homework)
+        // ================================================================
+        function compareImagesBase64(base64_1, base64_2) {
+            return new Promise((resolve) => {
+                const img1 = new Image();
+                const img2 = new Image();
+                let loaded = 0;
+
+                function checkDone() {
+                    loaded++;
+                    if (loaded === 2) {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const size = 80;
+                        canvas.width = size;
+                        canvas.height = size;
+                        ctx.drawImage(img1, 0, 0, size, size);
+                        const data1 = ctx.getImageData(0, 0, size, size).data;
+                        ctx.drawImage(img2, 0, 0, size, size);
+                        const data2 = ctx.getImageData(0, 0, size, size).data;
+                        let mse = 0;
+                        for (let i = 0; i < data1.length; i++) {
+                            mse += (data1[i] - data2[i]) ** 2;
+                        }
+                        mse = mse / (data1.length);
+                        const similarity = Math.max(0, (1 - Math.sqrt(mse) / 255) * 100);
+                        resolve(similarity);
+                    }
+                }
+                img1.onload = checkDone;
+                img2.onload = checkDone;
+                img1.onerror = () => { resolve(0); };
+                img2.onerror = () => { resolve(0); };
+                img1.src = base64_1;
+                img2.src = base64_2;
+            });
         }
 
-        // ===== AI HOMEWORK SCAN =====
-        function scanHomework() {
-            const hwItems = document.querySelectorAll('.hw-item .name');
-            const scores = ['4.5/5', '3.0/5', '2.5/5', '4.0/5', '3.5/5', '2.0/5'];
-            const statuses = ['good', 'avg', 'bad', 'good', 'avg', 'bad'];
+        // ================================================================
+        //  6. TEACHER PAGES (same as before, but with debug logs)
+        // ================================================================
 
-            hwItems.forEach((el, i) => {
-                if (i < scores.length) {
-                    const scoreEl = el.parentElement.querySelector('.score');
-                    if (scoreEl) {
-                        scoreEl.textContent = scores[i % scores.length];
-                        scoreEl.className = `score ${statuses[i % statuses.length]}`;
+        function renderTeacherLive() {
+            console.log('renderTeacherLive');
+            dynamicContent.innerHTML = `
+                <div class="page-content">
+                    <h2>Live Class</h2>
+                    <div class="card">
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                            <input type="text" id="newBranch" class="input-field" placeholder="Branch (e.g. Computer Engineering)" style="flex:1;min-width:120px;" value="${currentBranch || ''}" />
+                            <input type="number" id="newSemester" class="input-field" placeholder="Semester" style="width:120px;" value="${currentSemester || 1}" />
+                            <input type="text" id="newSubject" class="input-field" placeholder="Subject (e.g. Mathematics)" style="flex:1;min-width:120px;" />
+                            <input type="text" id="newClassName" class="input-field" placeholder="Class Name (e.g. Math-101)" style="flex:1;min-width:120px;" />
+                            <button id="createClassBtn" class="btn btn-primary">Create Class</button>
+                        </div>
+                        <div id="classListContainer">
+                            <div class="text-muted">Loading classes...</div>
+                        </div>
+                    </div>
+                    <div id="liveSessionContainer"></div>
+                </div>
+            `;
+
+            const classListContainer = document.getElementById('classListContainer');
+            const newBranch = document.getElementById('newBranch');
+            const newSemester = document.getElementById('newSemester');
+            const newSubject = document.getElementById('newSubject');
+            const newClassName = document.getElementById('newClassName');
+            const createBtn = document.getElementById('createClassBtn');
+            const liveContainer = document.getElementById('liveSessionContainer');
+
+            let peer = null;
+            let currentCall = null;
+            let localStream = null;
+            let currentClassKey = null;
+            let isTeacherLive = false;
+
+            const classesRef = db.ref('classes');
+
+            function loadClasses() {
+                classesRef.on('value', (snap) => {
+                    classListContainer.innerHTML = '';
+                    if (snap.exists()) {
+                        const classes = snap.val();
+                        let html = '<div style="font-weight:500;margin-bottom:6px;">All Classes:</div>';
+                        Object.keys(classes).forEach(key => {
+                            const cls = classes[key];
+                            const isActive = cls.active || false;
+                            html += `
+                                <div class="class-item" data-key="${key}">
+                                    <span class="name">${cls.className} (${cls.branch}, Sem ${cls.semester}, ${cls.subject})</span>
+                                    <span class="status ${isActive ? 'active' : ''}">${isActive ? '🟢 Live' : '🔴 Offline'}</span>
+                                    <div>
+                                        <button class="btn btn-success btn-sm startClassBtn" data-key="${key}" data-name="${cls.className}" ${isActive ? 'style="display:none;"' : ''}>Start</button>
+                                        <button class="btn btn-danger btn-sm endClassBtn" data-key="${key}" data-name="${cls.className}" ${!isActive ? 'style="display:none;"' : ''}>End</button>
+                                        <button class="btn btn-danger btn-sm deleteClassBtn" data-key="${key}" style="background:rgba(248,113,113,0.2);color:#f87171;border:1px solid rgba(248,113,113,0.2);">Delete</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        classListContainer.innerHTML = html;
+
+                        document.querySelectorAll('.startClassBtn').forEach(btn => {
+                            btn.addEventListener('click', async (e) => {
+                                const key = btn.dataset.key;
+                                const name = btn.dataset.name;
+                                await startClass(key, name);
+                            });
+                        });
+                        document.querySelectorAll('.endClassBtn').forEach(btn => {
+                            btn.addEventListener('click', async (e) => {
+                                const key = btn.dataset.key;
+                                await endClass(key);
+                            });
+                        });
+                        document.querySelectorAll('.deleteClassBtn').forEach(btn => {
+                            btn.addEventListener('click', async (e) => {
+                                if (confirm('Delete this class?')) {
+                                    await classesRef.child(btn.dataset.key).remove();
+                                }
+                            });
+                        });
+                    } else {
+                        classListContainer.innerHTML = '<div class="text-muted">No classes created yet.</div>';
+                    }
+                });
+            }
+            loadClasses();
+
+            createBtn.addEventListener('click', async () => {
+                const branch = newBranch.value.trim();
+                const semester = parseInt(newSemester.value);
+                const subject = newSubject.value.trim();
+                const className = newClassName.value.trim();
+                if (!branch || !semester || !subject || !className) {
+                    alert('Please fill all fields.');
+                    return;
+                }
+                const snap = await classesRef.orderByChild('className').equalTo(className).once('value');
+                if (snap.exists()) {
+                    alert('A class with this name already exists.');
+                    return;
+                }
+                const newRef = classesRef.push();
+                await newRef.set({
+                    branch,
+                    semester,
+                    subject,
+                    className,
+                    teacher: currentUser.uid,
+                    createdAt: Date.now(),
+                    active: false
+                });
+                newClassName.value = '';
+                newSubject.value = '';
+            });
+
+            async function startClass(classKey, className) {
+                if (isTeacherLive) {
+                    await endClass(currentClassKey);
+                }
+                try {
+                    if (peer) {
+                        peer.destroy();
+                        peer = null;
+                    }
+                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    console.log('Got local stream');
+
+                    peer = new Peer(className, { debug: 2 });
+                    peer.on('open', (id) => {
+                        console.log('PeerJS open, id:', id);
+                        isTeacherLive = true;
+                        currentClassKey = classKey;
+                        classesRef.child(classKey).update({ active: true });
+                        loadClasses();
+
+                        liveContainer.innerHTML = `
+                            <div class="card" style="margin-top:12px;">
+                                <h3 style="font-size:17px;margin-bottom:8px;">🟢 Live: ${className}</h3>
+                                <div class="video-wrapper" style="min-height:300px;position:relative;">
+                                    <div id="videoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:12px;padding:12px;overflow-y:auto;">
+                                        <div class="local-player" style="width:40%;min-width:150px;height:40%;min-height:120px;"></div>
+                                    </div>
+                                    <div class="video-overlay-badge">
+                                        <i class="fas fa-circle" style="color:#34d399;"></i>
+                                        <span>Live (PeerJS)</span>
+                                    </div>
+                                </div>
+                                <button id="stopLiveBtn" class="btn btn-danger" style="margin-top:10px;">Stop Class</button>
+                            </div>
+                        `;
+                        const videoContainer = document.getElementById('videoContainer');
+                        const localDiv = videoContainer.querySelector('.local-player');
+                        const videoElement = document.createElement('video');
+                        videoElement.srcObject = localStream;
+                        videoElement.autoplay = true;
+                        videoElement.muted = true;
+                        videoElement.style.width = '100%';
+                        videoElement.style.height = '100%';
+                        videoElement.style.objectFit = 'cover';
+                        localDiv.appendChild(videoElement);
+
+                        peer.on('call', (call) => {
+                            call.answer(localStream);
+                            call.on('stream', (remoteStream) => {
+                                const remoteDiv = document.createElement('div');
+                                remoteDiv.className = 'remote-player';
+                                videoContainer.appendChild(remoteDiv);
+                                const remoteVideo = document.createElement('video');
+                                remoteVideo.srcObject = remoteStream;
+                                remoteVideo.autoplay = true;
+                                remoteVideo.style.width = '100%';
+                                remoteVideo.style.height = '100%';
+                                remoteVideo.style.objectFit = 'cover';
+                                remoteDiv.appendChild(remoteVideo);
+                            });
+                            call.on('close', () => {
+                                const remoteDiv = videoContainer.querySelector('.remote-player');
+                                if (remoteDiv) remoteDiv.remove();
+                            });
+                            currentCall = call;
+                        });
+
+                        document.getElementById('stopLiveBtn').addEventListener('click', () => {
+                            endClass(classKey);
+                        });
+                    });
+
+                    peer.on('error', (err) => {
+                        console.error('PeerJS error:', err);
+                        alert('PeerJS error: ' + err.message);
+                        endClass(classKey);
+                    });
+
+                } catch (err) {
+                    alert('Error starting class: ' + err.message);
+                    console.error(err);
+                }
+            }
+
+            async function endClass(classKey) {
+                if (currentCall) {
+                    currentCall.close();
+                    currentCall = null;
+                }
+                if (localStream) {
+                    localStream.getTracks().forEach(t => t.stop());
+                    localStream = null;
+                }
+                if (peer) {
+                    peer.destroy();
+                    peer = null;
+                }
+                isTeacherLive = false;
+                liveContainer.innerHTML = '';
+                await classesRef.child(classKey).update({ active: false });
+                loadClasses();
+                currentClassKey = null;
+            }
+        }
+
+        // --- Other teacher functions (same as before, I'll keep them short) ---
+        function renderTeacherStudents() {
+            dynamicContent.innerHTML = `
+                <div class="page-content">
+                    <h2>Manage Students</h2>
+                    <div class="flex-row mb-10">
+                        <input type="email" id="studentEmailInput" class="input-field" placeholder="Student email" style="flex:1;" />
+                        <button id="addStudentBtn" class="btn btn-primary">Add</button>
+                    </div>
+                    <div id="studentList"></div>
+                </div>
+            `;
+            const list = document.getElementById('studentList');
+            const addBtn = document.getElementById('addStudentBtn');
+            const input = document.getElementById('studentEmailInput');
+
+            function loadStudents() {
+                db.ref('students').on('value', (snap) => {
+                    list.innerHTML = '';
+                    if (snap.exists()) {
+                        const data = snap.val();
+                        Object.keys(data).forEach(key => {
+                            const s = data[key];
+                            const div = document.createElement('div');
+                            div.className = 'card';
+                            div.style.cssText =
+                            'display:flex;justify-content:space-between;align-items:center;';
+                            div.innerHTML = `
+                                <span>${s.email}</span>
+                                <button class="btn btn-danger btn-sm removeStudent" data-key="${key}">Remove</button>
+                            `;
+                            list.appendChild(div);
+                        });
+                        list.querySelectorAll('.removeStudent').forEach(btn => {
+                            btn.addEventListener('click', async () => {
+                                await db.ref('students/' + btn.dataset.key).remove();
+                            });
+                        });
+                    } else {
+                        list.innerHTML = '<div class="text-muted">No students added yet.</div>';
+                    }
+                });
+            }
+            loadStudents();
+
+            addBtn.addEventListener('click', async () => {
+                const email = input.value.trim();
+                if (!email) return;
+                const ref = db.ref('students').push();
+                await ref.set({ email: email, addedBy: currentUser.uid });
+                input.value = '';
+            });
+        }
+
+        function renderTeacherAttendance() {
+            dynamicContent.innerHTML = `
+                <div class="page-content">
+                    <h2>Attendance</h2>
+                    <div id="attendanceList"></div>
+                </div>
+            `;
+            const list = document.getElementById('attendanceList');
+            db.ref('students').on('value', (snap) => {
+                list.innerHTML = '';
+                if (snap.exists()) {
+                    const data = snap.val();
+                    let html =
+                        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-weight:500;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;">';
+                    html += '<div>Student</div><div>Status</div><div>Time</div></div>';
+                    Object.values(data).forEach(s => {
+                        html +=
+                            `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;">
+                                <div>${s.email}</div>
+                                <div style="color:#34d399;">Present</div>
+                                <div style="color:rgba(255,255,255,0.3);">Just now</div>
+                            </div>`;
+                    });
+                    list.innerHTML = html;
+                } else {
+                    list.innerHTML = '<div class="text-muted">No students enrolled.</div>';
+                }
+            });
+        }
+
+        function renderTeacherHomework() {
+            dynamicContent.innerHTML = `
+                <div class="page-content">
+                    <h2>Homework</h2>
+                    <div class="card">
+                        <h3 style="font-size:17px;margin-bottom:10px;">📤 Upload New Assignment</h3>
+                        <input type="file" id="hwTeacherFile" accept="image/*" class="input-field" style="margin-bottom:10px;" />
+                        <button id="uploadHwBtn" class="btn btn-primary">Upload</button>
+                        <div id="hwUploadStatus" class="text-muted mt-10"></div>
+                    </div>
+                    <div id="hwSubmissions"></div>
+                </div>
+            `;
+            const fileInput = document.getElementById('hwTeacherFile');
+            const uploadBtn = document.getElementById('uploadHwBtn');
+            const status = document.getElementById('hwUploadStatus');
+            const subsDiv = document.getElementById('hwSubmissions');
+
+            uploadBtn.addEventListener('click', async () => {
+                const file = fileInput.files[0];
+                if (!file) { status.textContent = 'Select an image first.'; return; }
+                status.textContent = '⏳ Converting...';
+                try {
+                    const reader = new FileReader();
+                    const base64 = await new Promise((resolve) => {
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
+                    const hwRef = db.ref('homework/' + currentUser.uid).push();
+                    await hwRef.set({
+                        teacher: currentUser.uid,
+                        imageBase64: base64,
+                        timestamp: Date.now()
+                    });
+                    status.textContent = '✅ Assignment uploaded!';
+                    fileInput.value = '';
+                    loadSubmissions();
+                } catch (err) {
+                    status.textContent = '❌ Error: ' + err.message;
+                }
+            });
+
+            function loadSubmissions() {
+                db.ref('homework/' + currentUser.uid).on('value', (snap) => {
+                    subsDiv.innerHTML = '';
+                    if (snap.exists()) {
+                        const data = snap.val();
+                        let html = '<h3 style="font-size:17px;margin:16px 0 10px;">📋 Student Submissions</h3>';
+                        for (const [hwId, hw] of Object.entries(data)) {
+                            html += `<div class="card">
+                                <div><strong>Assignment:</strong> <img src="${hw.imageBase64}" style="max-width:80px;max-height:80px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);" /></div>
+                                <div><strong>Submissions:</strong> ${hw.submissions ? Object.keys(hw.submissions).length : 0}</div>`;
+                            if (hw.submissions) {
+                                html += '<div style="margin-top:8px;">';
+                                for (const [sid, sub] of Object.entries(hw.submissions)) {
+                                    html += `<div style="display:flex;gap:12px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;flex-wrap:wrap;">
+                                        <span style="color:rgba(255,255,255,0.5);">${sid}</span>
+                                        <span style="color:#a78bfa;">Grade: ${sub.grade || 'N/A'}</span>
+                                        <span style="color:rgba(255,255,255,0.3);">Sim: ${sub.similarity ? sub.similarity.toFixed(1) : 'N/A'}%</span>
+                                        <img src="${sub.imageBase64}" style="max-width:40px;max-height:40px;border-radius:4px;border:1px solid rgba(255,255,255,0.05);" />
+                                    </div>`;
+                                }
+                                html += '</div>';
+                            }
+                            html += '</div>';
+                        }
+                        subsDiv.innerHTML = html;
+                    } else {
+                        subsDiv.innerHTML = '<div class="text-muted">No assignments yet.</div>';
+                    }
+                });
+            }
+            loadSubmissions();
+        }
+
+        function renderTeacherRatings() {
+            dynamicContent.innerHTML = `
+                <div class="page-content">
+                    <h2>Ratings</h2>
+                    <div id="ratingList"></div>
+                </div>
+            `;
+            const list = document.getElementById('ratingList');
+            db.ref('students').on('value', (snap) => {
+                list.innerHTML = '';
+                if (snap.exists()) {
+                    const data = snap.val();
+                    Object.values(data).forEach(s => {
+                        const div = document.createElement('div');
+                        div.className = 'card';
+                        div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;';
+                        div.innerHTML = `
+                            <span>${s.email}</span>
+                            <div>
+                                <select class="ratingSelect" data-email="${s.email}" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:4px 12px;color:#fff;font-size:13px;">
+                                    <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                                </select>
+                                <button class="btn btn-primary btn-sm saveRating" data-email="${s.email}" style="margin-left:6px;">Save</button>
+                            </div>
+                        `;
+                        list.appendChild(div);
+                    });
+                    db.ref('ratings/' + currentUser.uid).once('value').then(snap2 => {
+                        if (snap2.exists()) {
+                            const ratings = snap2.val();
+                            document.querySelectorAll('.ratingSelect').forEach(sel => {
+                                const email = sel.dataset.email;
+                                if (ratings[email]) sel.value = ratings[email];
+                            });
+                        }
+                    });
+                    document.querySelectorAll('.saveRating').forEach(btn => {
+                        btn.addEventListener('click', async () => {
+                            const email = btn.dataset.email;
+                            const sel = document.querySelector(`.ratingSelect[data-email="${email}"]`);
+                            await db.ref('ratings/' + currentUser.uid + '/' + email).set(parseInt(sel
+                            .value));
+                            alert('✅ Rating saved!');
+                        });
+                    });
+                } else {
+                    list.innerHTML = '<div class="text-muted">No students.</div>';
+                }
+            });
+        }
+
+        // ================================================================
+        //  7. STUDENT PAGES
+        // ================================================================
+
+        function renderStudentLive() {
+            dynamicContent.innerHTML = `
+                <div class="page-content">
+                    <h2>Live Class</h2>
+                    <div id="studentClassList"></div>
+                    <div id="studentLiveContainer"></div>
+                </div>
+            `;
+            const classListDiv = document.getElementById('studentClassList');
+            const liveContainer = document.getElementById('studentLiveContainer');
+
+            const branch = currentBranch || '';
+            const semester = currentSemester || 0;
+
+            db.ref('classes').orderByChild('active').equalTo(true).on('value', (snap) => {
+                classListDiv.innerHTML = '';
+                if (snap.exists()) {
+                    const classes = snap.val();
+                    let found = false;
+                    let html = '<div style="margin-bottom:12px;">Available Live Classes:</div>';
+                    Object.keys(classes).forEach(key => {
+                        const cls = classes[key];
+                        if (cls.branch === branch && cls.semester === semester) {
+                            found = true;
+                            html += `
+                                <div class="class-item" data-key="${key}">
+                                    <span class="name">${cls.className} (${cls.subject})</span>
+                                    <button class="btn btn-success btn-sm joinClassBtn" data-name="${cls.className}">Join</button>
+                                </div>
+                            `;
+                        }
+                    });
+                    if (!found) {
+                        html += '<div class="text-muted">No live classes for your branch & semester.</div>';
+                    }
+                    classListDiv.innerHTML = html;
+                    document.querySelectorAll('.joinClassBtn').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const name = btn.dataset.name;
+                            await joinStudentClass(name);
+                        });
+                    });
+                } else {
+                    classListDiv.innerHTML = '<div class="text-muted">No live classes at the moment.</div>';
+                }
+            });
+
+            let studentPeer = null;
+            let studentCall = null;
+            let studentStream = null;
+
+            async function joinStudentClass(className) {
+                if (studentCall) {
+                    studentCall.close();
+                    studentCall = null;
+                    if (studentStream) {
+                        studentStream.getTracks().forEach(t => t.stop());
+                        studentStream = null;
+                    }
+                    if (studentPeer) {
+                        studentPeer.destroy();
+                        studentPeer = null;
+                    }
+                    liveContainer.innerHTML = '';
+                    alert('Left class.');
+                    return;
+                }
+
+                try {
+                    studentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    studentPeer = new Peer();
+
+                    studentPeer.on('open', (id) => {
+                        const call = studentPeer.call(className, studentStream);
+                        studentCall = call;
+
+                        call.on('stream', (remoteStream) => {
+                            liveContainer.innerHTML = `
+                                <div class="card" style="margin-top:12px;">
+                                    <h3 style="font-size:17px;margin-bottom:8px;">🟢 Joined: ${className}</h3>
+                                    <div class="video-wrapper" style="min-height:300px;position:relative;">
+                                        <div id="studentVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:12px;padding:12px;overflow-y:auto;">
+                                            <div class="local-player" style="width:40%;min-width:150px;height:40%;min-height:120px;"></div>
+                                            <div class="remote-player" style="width:45%;min-width:180px;height:40%;min-height:120px;"></div>
+                                        </div>
+                                        <div class="video-overlay-badge">
+                                            <i class="fas fa-circle" style="color:#34d399;"></i>
+                                            <span>Connected</span>
+                                        </div>
+                                    </div>
+                                    <button id="leaveClassBtn" class="btn btn-danger" style="margin-top:10px;">Leave Class</button>
+                                </div>
+                            `;
+                            const container = document.getElementById('studentVideoContainer');
+                            const localDiv = container.querySelector('.local-player');
+                            const remoteDiv = container.querySelector('.remote-player');
+
+                            const localVideo = document.createElement('video');
+                            localVideo.srcObject = studentStream;
+                            localVideo.autoplay = true;
+                            localVideo.muted = true;
+                            localVideo.style.width = '100%';
+                            localVideo.style.height = '100%';
+                            localVideo.style.objectFit = 'cover';
+                            localDiv.appendChild(localVideo);
+
+                            const remoteVideo = document.createElement('video');
+                            remoteVideo.srcObject = remoteStream;
+                            remoteVideo.autoplay = true;
+                            remoteVideo.style.width = '100%';
+                            remoteVideo.style.height = '100%';
+                            remoteVideo.style.objectFit = 'cover';
+                            remoteDiv.appendChild(remoteVideo);
+
+                            db.ref('attendance/' + className + '/' + currentUser.uid).set({
+                                joined: Date.now()
+                            });
+
+                            document.getElementById('leaveClassBtn').addEventListener('click', () => {
+                                joinStudentClass(className);
+                            });
+                        });
+
+                        call.on('close', () => {
+                            liveContainer.innerHTML = '';
+                            alert('Teacher ended the class.');
+                            if (studentPeer) studentPeer.destroy();
+                            studentPeer = null;
+                            studentCall = null;
+                        });
+                    });
+
+                    studentPeer.on('error', (err) => {
+                        console.error('PeerJS error:', err);
+                        alert('Error: ' + err.message);
+                        if (studentPeer) studentPeer.destroy();
+                        studentPeer = null;
+                    });
+
+                } catch (err) {
+                    alert('Error joining class: ' + err.message);
+                    console.error(err);
+                }
+            }
+        }
+
+        function renderStudentAttendance() {
+            dynamicContent.innerHTML = `
+                <div class="page-content">
+                    <h2>My Attendance</h2>
+                    <div id="studentAttendanceList"></div>
+                </div>
+            `;
+            const list = document.getElementById('studentAttendanceList');
+            db.ref('attendance').on('value', (snap) => {
+                list.innerHTML = '';
+                if (snap.exists()) {
+                    const data = snap.val();
+                    let found = false;
+                    for (const [session, students] of Object.entries(data)) {
+                        if (students[currentUser.uid]) {
+                            found = true;
+                            const date = new Date(students[currentUser.uid].joined).toLocaleString();
+                            list.innerHTML += `<div class="card">📅 ${session} — <span style="color:#34d399;">Joined</span> at ${date}</div>`;
+                        }
+                    }
+                    if (!found) list.innerHTML = '<div class="text-muted">No attendance records found.</div>';
+                } else {
+                    list.innerHTML = '<div class="text-muted">No records.</div>';
+                }
+            });
+        }
+
+        function renderStudentHomework() {
+            dynamicContent.innerHTML = `
+                <div class="page-content">
+                    <h2>Homework</h2>
+                    <div id="studentHomeworkList"></div>
+                    <div class="card" style="margin-top:16px;">
+                        <h3 style="font-size:17px;margin-bottom:10px;">📤 Submit Your Work</h3>
+                        <input type="file" id="studentHwFile" accept="image/*" class="input-field" style="margin-bottom:10px;" />
+                        <button id="submitHwBtn" class="btn btn-primary">Submit & Grade</button>
+                        <div id="studentHwStatus" class="text-muted mt-10"></div>
+                        <div id="studentHwResult" class="mt-10"></div>
+                    </div>
+                </div>
+            `;
+
+            const list = document.getElementById('studentHomeworkList');
+            const fileInput = document.getElementById('studentHwFile');
+            const submitBtn = document.getElementById('submitHwBtn');
+            const status = document.getElementById('studentHwStatus');
+            const resultDiv = document.getElementById('studentHwResult');
+
+            const teacherEmail = 'nagrajmall2317@gmail.com';
+            db.ref('users').once('value').then(snap => {
+                if (snap.exists()) {
+                    const users = snap.val();
+                    let teacherUid = null;
+                    for (const [uid, data] of Object.entries(users)) {
+                        if (data.email === teacherEmail && data.role === 'teacher') {
+                            teacherUid = uid;
+                            break;
+                        }
+                    }
+                    if (teacherUid) {
+                        db.ref('homework/' + teacherUid).on('value', (snap2) => {
+                            list.innerHTML = '';
+                            if (snap2.exists()) {
+                                const hws = snap2.val();
+                                let html = '<div style="display:flex;flex-wrap:wrap;gap:12px;">';
+                                Object.values(hws).forEach(hw => {
+                                    html += `<div class="card" style="max-width:180px;">
+                                        <img src="${hw.imageBase64}" style="max-width:100%;border-radius:8px;border:1px solid rgba(255,255,255,0.05);" />
+                                        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">${new Date(hw.timestamp).toLocaleDateString()}</div>
+                                    </div>`;
+                                });
+                                html += '</div>';
+                                list.innerHTML = html;
+                            } else {
+                                list.innerHTML = '<div class="text-muted">No assignments posted.</div>';
+                            }
+                        });
                     }
                 }
             });
 
-            // Add new scan result
-            const hwList = document.getElementById('hwList');
-            const newItem = document.createElement('div');
-            newItem.className = 'hw-item';
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString();
-            const randomScore = (2 + Math.random() * 3).toFixed(1);
-            const grade = parseFloat(randomScore) >= 3.5 ? 'good' : parseFloat(randomScore) >= 2.5 ? 'avg' : 'bad';
-            newItem.innerHTML = `
-                <span class="name">📄 Scanned Assignment (${timeStr})</span>
-                <span class="score ${grade}">${randomScore}/5</span>
+            submitBtn.addEventListener('click', async () => {
+                const file = fileInput.files[0];
+                if (!file) { status.textContent = 'Select an image first.'; return; }
+                status.textContent = '⏳ Processing...';
+                try {
+                    const reader = new FileReader();
+                    const studentBase64 = await new Promise((resolve) => {
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
+
+                    const teacherEmail = 'nagrajmall2317@gmail.com';
+                    const usersSnap = await db.ref('users').once('value');
+                    let teacherUid = null;
+                    if (usersSnap.exists()) {
+                        const users = usersSnap.val();
+                        for (const [uid, data] of Object.entries(users)) {
+                            if (data.email === teacherEmail && data.role === 'teacher') {
+                                teacherUid = uid;
+                                break;
+                            }
+                        }
+                    }
+                    if (!teacherUid) { status.textContent = 'Teacher not found.'; return; }
+
+                    const hwSnap = await db.ref('homework/' + teacherUid).once('value');
+                    if (!hwSnap.exists() || Object.keys(hwSnap.val()).length === 0) {
+                        status.textContent = 'No assignment from teacher.';
+                        return;
+                    }
+                    const hwKey = Object.keys(hwSnap.val())[0];
+                    const teacherHw = hwSnap.val()[hwKey];
+                    const teacherBase64 = teacherHw.imageBase64;
+
+                    const similarity = await compareImagesBase64(teacherBase64, studentBase64);
+                    const grade = Math.round((similarity / 100) * 5);
+                    const finalGrade = Math.min(5, Math.max(1, grade));
+
+                    await db.ref('homework/' + teacherUid + '/' + hwKey + '/submissions/' + currentUser.uid).set({
+                        imageBase64: studentBase64,
+                        similarity: similarity,
+                        grade: finalGrade,
+                        timestamp: Date.now()
+                    });
+
+                    status.textContent = '✅ Submitted! Grade: ' + finalGrade + '/5';
+                    resultDiv.innerHTML = `
+                        <div style="background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.1);border-radius:16px;padding:16px;text-align:center;">
+                            <div style="font-size:14px;color:rgba(255,255,255,0.5);">Similarity: ${similarity.toFixed(1)}%</div>
+                            <div style="font-size:42px;font-weight:700;color:#a78bfa;">${finalGrade} / 5</div>
+                        </div>
+                    `;
+                } catch (err) {
+                    status.textContent = '❌ Error: ' + err.message;
+                    console.error(err);
+                }
+            });
+        }
+
+        function renderStudentRating() {
+            dynamicContent.innerHTML = `
+                <div class="page-content">
+                    <h2>My Rating</h2>
+                    <div id="studentRatingDisplay"></div>
+                </div>
             `;
-            hwList.insertBefore(newItem, hwList.firstChild);
-
-            // Limit items
-            while (hwList.children.length > 8) {
-                hwList.removeChild(hwList.lastChild);
-            }
-
-            alert('✅ AI Vision OCR scan complete! Assignments graded.');
-        }
-
-        // ===== AI BOT =====
-        function getBotResponse(msg) {
-            const lower = msg.toLowerCase();
-            if (lower.includes('hello') || lower.includes('hi') || lower.includes('namaste')) {
-                return BOT_RESPONSES['hello'];
-            }
-            if (lower.includes('time') || lower.includes('schedule') || lower.includes('lecture')) {
-                return BOT_RESPONSES['schedule'];
-            }
-            if (lower.includes('exam') || lower.includes('test') || lower.includes('mid')) {
-                return BOT_RESPONSES['exam'];
-            }
-            if (lower.includes('gujarati') || lower.includes('ગુજરાતી')) {
-                return BOT_RESPONSES['gujarati'];
-            }
-            if (lower.includes('hindi') || lower.includes('हिंदी')) {
-                return BOT_RESPONSES['hindi'];
-            }
-            return BOT_RESPONSES['default'];
-        }
-
-        function sendBotMessage() {
-            const msg = botInput.value.trim();
-            if (!msg) return;
-
-            // User message
-            const userDiv = document.createElement('div');
-            userDiv.className = 'bot-msg user';
-            userDiv.textContent = msg;
-            botContainer.appendChild(userDiv);
-
-            botInput.value = '';
-
-            // Bot response
-            setTimeout(() => {
-                const response = getBotResponse(msg);
-                const botDiv = document.createElement('div');
-                botDiv.className = 'bot-msg bot';
-                botDiv.textContent = response;
-                botContainer.appendChild(botDiv);
-                botContainer.scrollTop = botContainer.scrollHeight;
-            }, 300);
-
-            botContainer.scrollTop = botContainer.scrollHeight;
-        }
-
-        // ===== LOGIN =====
-        function handleLogin() {
-            const email = loginEmail.value.trim();
-            const password = loginPassword.value.trim();
-
-            loginError.classList.remove('show');
-
-            let foundUser = null;
-            for (const key in USERS) {
-                const u = USERS[key];
-                if (u.email === email && u.password === password) {
-                    foundUser = u;
-                    break;
+            const display = document.getElementById('studentRatingDisplay');
+            const teacherEmail = 'nagrajmall2317@gmail.com';
+            db.ref('users').once('value').then(snap => {
+                if (snap.exists()) {
+                    const users = snap.val();
+                    let teacherUid = null;
+                    for (const [uid, data] of Object.entries(users)) {
+                        if (data.email === teacherEmail && data.role === 'teacher') {
+                            teacherUid = uid;
+                            break;
+                        }
+                    }
+                    if (teacherUid) {
+                        db.ref('ratings/' + teacherUid + '/' + currentUser.email).on('value', (snap2) => {
+                            if (snap2.exists()) {
+                                display.innerHTML = `<div class="grade-big">${snap2.val()} / 5</div>`;
+                            } else {
+                                display.innerHTML = '<div class="text-muted">No rating given yet.</div>';
+                            }
+                        });
+                    }
                 }
-            }
-
-            if (!foundUser) {
-                loginError.classList.add('show');
-                return;
-            }
-
-            currentUser = foundUser;
-            showDashboard();
+            });
         }
 
-        function showDashboard() {
-            loginContainer.style.display = 'none';
-            dashboard.classList.add('active');
-
-            dashName.textContent = currentUser.name;
-            dashRole.textContent = currentUser.role === 'teacher' ? '👨‍🏫 Teacher' : '👨‍🎓 Student';
-            dashAvatar.textContent = currentUser.role === 'teacher' ? '👨‍🏫' : '👨‍🎓';
-
-            loadData();
-
-            if (currentUser.role === 'student') {
-                // Hide teacher-only controls
-                document.querySelectorAll('.live-bar .btn-success, .live-bar .btn-danger, .live-bar .btn-outline')
-                    .forEach(el => el.style.display = 'none');
-                document.getElementById('autoAddBtn').style.display = 'none';
-                document.getElementById('resetStudentsBtn').style.display = 'none';
-                document.getElementById('alertBtn').style.display = 'none';
-                document.getElementById('scanHwBtn').style.display = 'none';
-
-                // Show student video if live
-                if (isLive && localStream) {
-                    studentVideo.srcObject = localStream;
-                    studentVideo.style.display = 'block';
-                    videoPlaceholder.style.display = 'none';
-                }
-            } else {
-                // Teacher: show all controls
-                document.querySelectorAll('.live-bar .btn-success, .live-bar .btn-danger, .live-bar .btn-outline')
-                    .forEach(el => el.style.display = 'inline-block');
-                document.getElementById('autoAddBtn').style.display = 'inline-block';
-                document.getElementById('resetStudentsBtn').style.display = 'inline-block';
-                document.getElementById('alertBtn').style.display = 'inline-block';
-                document.getElementById('scanHwBtn').style.display = 'inline-block';
-            }
-        }
-
-        function handleLogout() {
-            stopMedia();
-            stopTimer();
-            currentUser = null;
-            loginContainer.style.display = 'block';
-            dashboard.classList.remove('active');
-            loginEmail.value = '';
-            loginPassword.value = '';
-            loginError.classList.remove('show');
-            studentVideo.srcObject = null;
-            studentVideo.style.display = 'none';
-            teacherVideo.style.display = 'none';
-            videoPlaceholder.style.display = 'block';
-            videoControls.style.display = 'none';
-            lectureSeconds = 0;
-            lectureTimer.textContent = '⏱ 00:00';
-        }
-
-        // ===== EVENT BINDINGS =====
-        loginBtn.addEventListener('click', handleLogin);
-        loginEmail.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
-        loginPassword.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
-        logoutBtn.addEventListener('click', handleLogout);
-
-        startClassBtn.addEventListener('click', startClass);
-        endClassBtn.addEventListener('click', endClass);
-        recordBtn.addEventListener('click', toggleRecording);
-        toggleMicBtn.addEventListener('click', toggleMic);
-        toggleCamBtn.addEventListener('click', toggleCam);
-        biometricBtn.addEventListener('click', biometricVerify);
-
-        autoAddBtn.addEventListener('click', () => autoAddStudents(4));
-        resetStudentsBtn.addEventListener('click', resetStudents);
-        alertBtn.addEventListener('click', sendAlerts);
-        scanHwBtn.addEventListener('click', scanHomework);
-
-        botSendBtn.addEventListener('click', sendBotMessage);
-        botInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendBotMessage(); });
-
-        // ===== INIT =====
-        console.log('🧠 AI Smart Classroom · Gujarat');
-        console.log('👨‍🏫 Teacher: sachuumali2317@gmail.com');
-        console.log('👨‍🎓 Student: nagrajmall2317@gmail.com');
-        console.log('🔑 Password: 11223344');
-
-        // Pre-fill login
-        loginEmail.value = 'sachuumali2317@gmail.com';
-        loginPassword.value = '11223344';
-
-        // Auto-login for demo (uncomment to auto-login)
-        // handleLogin();
-
-        console.log('✅ All features loaded!');
-        console.log('📌 Features: Live Streaming, Auto-Archive, Biometric, Watermark, AI Bot, Homework Evaluation, Predictive Alerts');
-    })();
-</script>
-
+        // ================================================================
+        //  INIT
+        // ================================================================
+        console.log('✅ Smart Classroom with PeerJS (Debug version) loaded.');
+        console.log('📌 Use accounts:');
+        console.log('   Teacher: nagrajmall2317@gmail.com / 11223344');
+        console.log('   Student: sachuumali2317@gmail.com / 11223344');
+        console.log('💡 Signup with Branch & Semester for filtering.');
+        console.log('🔍 Open browser console (F12) to see detailed logs.');
+    </script>
 </body>
 </html>
