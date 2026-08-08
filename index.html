@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Smart Classroom · Working</title>
+    <title>Smart Classroom · Final</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -745,18 +745,35 @@
                 padding: 14px;
             }
         }
+        /* Toast notification for student face warning */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(248, 113, 113, 0.9);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            z-index: 999;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: none;
+            max-width: 300px;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
-
-    <!-- ===== WARNING OVERLAY ===== -->
-    <div id="warningOverlay" class="warning-overlay">
-        <div class="content">
-            <i class="fas fa-exclamation-triangle"></i>
-            <h2>⚠️ Attention!</h2>
-            <p>Your face is not visible. Please sit in front of the camera.</p>
-        </div>
-    </div>
 
     <!-- ===== PROFILE MODAL ===== -->
     <div id="profileModal" class="profile-modal">
@@ -849,6 +866,9 @@
         </aside>
     </div>
 
+    <!-- ===== TOAST (student face warning) ===== -->
+    <div id="toast" class="toast"></div>
+
     <script>
         // ================================================================
         //  1. FIREBASE CONFIG
@@ -905,6 +925,7 @@
         const profilePassword = document.getElementById('profilePassword');
         const profileSaveBtn = document.getElementById('profileSaveBtn');
         const profileMsg = document.getElementById('profileMsg');
+        const toast = document.getElementById('toast');
 
         let currentUser = null;
         let currentRole = null;
@@ -1230,7 +1251,7 @@
         }
 
         // ================================================================
-        //  7. TEACHER LIVE CLASS
+        //  7. TEACHER LIVE CLASS (with working buttons)
         // ================================================================
         function renderTeacherLive() {
             dynamicContent.innerHTML = `
@@ -1262,7 +1283,7 @@
             let localStream = null;
             let currentClassKey = null;
             let isTeacherLive = false;
-            let studentCalls = {}; // key: studentId, value: { call, stream, element }
+            let studentCalls = {};
             let cameraFacing = 'user';
             let notifRef = null;
 
@@ -1455,7 +1476,7 @@
                             input.value = '';
                         });
 
-                        // Notification listener
+                        // Notification listener (for face detection)
                         if (notifRef) notifRef.off();
                         notifRef = db.ref(`notifications/${className}`);
                         notifRef.on('child_added', (snap) => {
@@ -1464,15 +1485,22 @@
                                 snap.ref.update({ seen: true });
                                 const notifContainer = document.getElementById('notificationContainer');
                                 if (notifContainer) {
+                                    // Remove placeholder if exists
+                                    const placeholder = notifContainer.querySelector('div[style]');
+                                    if (placeholder && notifContainer.children.length === 1) {
+                                        // Only placeholder, remove it
+                                        notifContainer.innerHTML = '';
+                                    }
                                     const notifDiv = document.createElement('div');
                                     notifDiv.style.cssText =
-                                        'background:rgba(248,113,113,0.15);border:1px solid #f87171;border-radius:10px;padding:8px 12px;margin-bottom:6px;color:#f1f5f9;font-size:13px;';
+                                        'background:rgba(248,113,113,0.15);border:1px solid #f87171;border-radius:10px;padding:6px 10px;margin-bottom:4px;color:#f1f5f9;font-size:12px;display:flex;justify-content:space-between;align-items:center;';
                                     notifDiv.innerHTML = `
-                                        <span style="color:#f87171;">⚠️</span> 
+                                        <span style="color:#f87171;">⚠️</span>
                                         <span>${data.message}</span>
-                                        <span style="font-size:11px;color:rgba(255,255,255,0.3);margin-left:8px;">${new Date(data.timestamp).toLocaleTimeString()}</span>
+                                        <span style="font-size:10px;color:rgba(255,255,255,0.3);">${new Date(data.timestamp).toLocaleTimeString()}</span>
                                     `;
                                     notifContainer.prepend(notifDiv);
+                                    // Keep only last 10
                                     while (notifContainer.children.length > 10) {
                                         notifContainer.removeChild(notifContainer.lastChild);
                                     }
@@ -1484,15 +1512,13 @@
                         peer.on('call', (call) => {
                             const studentId = call.peer;
                             if (studentCalls[studentId]) {
-                                // If already connected, reject duplicate
                                 call.close();
                                 return;
                             }
                             call.answer(localStream);
-                            // Store call info
                             studentCalls[studentId] = { call, stream: null, element: null };
 
-                            // Get student name from DB
+                            // Get student name
                             db.ref('users').orderByChild('email').equalTo(studentId).once('value').then(snap => {
                                 let displayName = studentId;
                                 if (snap.exists()) {
@@ -1504,40 +1530,61 @@
                                         }
                                     }
                                 }
-                                // Add to student list
                                 const studentList = document.getElementById('studentListContainer');
+                                // Remove placeholder if any
+                                const placeholder = studentList.querySelector('div[style]');
+                                if (placeholder) placeholder.remove();
+
                                 const studentDiv = document.createElement('div');
                                 studentDiv.id = 'student-' + studentId;
                                 studentDiv.className = 'student-item';
                                 studentDiv.style.cssText =
-                                    'display:flex;justify-content:space-between;align-items:center;padding:4px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.05);';
+                                    'display:flex;justify-content:space-between;align-items:center;padding:4px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.05);margin-bottom:4px;';
                                 studentDiv.innerHTML = `
                                     <span style="font-size:13px;color:rgba(255,255,255,0.7);">${displayName}</span>
                                     <div style="display:flex;gap:8px;">
-                                        <button class="micToggleBtn" data-student="${studentId}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
+                                        <button class="micToggleBtn" data-student="${studentId}" data-class="${className}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
                                             <i class="fas fa-microphone-slash"></i>
                                         </button>
-                                        <button class="videoToggleBtn" data-student="${studentId}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
+                                        <button class="videoToggleBtn" data-student="${studentId}" data-class="${className}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
                                             <i class="fas fa-video-slash"></i>
                                         </button>
                                     </div>
                                 `;
-                                // Remove placeholder
-                                const placeholder = studentList.querySelector('div[style]');
-                                if (placeholder) placeholder.remove();
                                 studentList.appendChild(studentDiv);
                                 studentCalls[studentId].element = studentDiv;
-
-                                // Update count
                                 updateStudentCount();
 
-                                // Handle stream
+                                // Attach event listeners for mic and video
+                                const micBtn = studentDiv.querySelector('.micToggleBtn');
+                                const vidBtn = studentDiv.querySelector('.videoToggleBtn');
+
+                                micBtn.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    const student = this.dataset.student;
+                                    const cls = this.dataset.class;
+                                    const ref = db.ref(`classControl/${cls}/students/${student}/audio`);
+                                    ref.once('value').then(snap => {
+                                        ref.set(!(snap.val() === true));
+                                    });
+                                });
+
+                                vidBtn.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    const student = this.dataset.student;
+                                    const cls = this.dataset.class;
+                                    const ref = db.ref(`classControl/${cls}/students/${student}/video`);
+                                    ref.once('value').then(snap => {
+                                        ref.set(!(snap.val() === true));
+                                    });
+                                });
+
+                                // Stream handling
                                 call.on('stream', (remoteStream) => {
                                     studentCalls[studentId].stream = remoteStream;
                                     remoteStream.getAudioTracks().forEach(t => t.enabled = false);
                                     remoteStream.getVideoTracks().forEach(t => t.enabled = false);
 
-                                    // Listen for controls
                                     const controlRef = db.ref(`classControl/${className}/students/${studentId}`);
                                     controlRef.on('value', (snap) => {
                                         if (!snap.exists()) return;
@@ -1564,7 +1611,7 @@
                                             vidBtn.style.color = '#f87171';
                                             vidBtn.innerHTML = '<i class="fas fa-video-slash"></i>';
                                         }
-                                        // Show video under student name
+                                        // Show video under name
                                         let vidContainer = document.getElementById('vid-' + studentId);
                                         if (videoOn) {
                                             if (!vidContainer) {
@@ -1593,39 +1640,13 @@
                                     });
                                 });
 
-                                // --- MIC TOGGLE (with event listener) ---
-                                const micBtn = studentDiv.querySelector('.micToggleBtn');
-                                micBtn.addEventListener('click', function(e) {
-                                    e.stopPropagation();
-                                    const student = this.dataset.student;
-                                    const ref = db.ref(`classControl/${className}/students/${student}/audio`);
-                                    ref.once('value').then(snap => {
-                                        ref.set(!(snap.val() === true));
-                                    });
-                                });
-
-                                // --- VIDEO TOGGLE ---
-                                const vidBtn = studentDiv.querySelector('.videoToggleBtn');
-                                vidBtn.addEventListener('click', function(e) {
-                                    e.stopPropagation();
-                                    const student = this.dataset.student;
-                                    const ref = db.ref(`classControl/${className}/students/${student}/video`);
-                                    ref.once('value').then(snap => {
-                                        ref.set(!(snap.val() === true));
-                                    });
-                                });
-
-                                // When call closes (student leaves)
                                 call.on('close', () => {
-                                    // Remove from UI
                                     const el = document.getElementById('student-' + studentId);
                                     if (el) el.remove();
                                     delete studentCalls[studentId];
                                     updateStudentCount();
-                                    // Remove video container if any
                                     const vidCont = document.getElementById('vid-' + studentId);
                                     if (vidCont) vidCont.remove();
-                                    // If no students left, show placeholder
                                     const studentList = document.getElementById('studentListContainer');
                                     if (studentList.children.length === 0) {
                                         studentList.innerHTML =
@@ -1639,7 +1660,6 @@
                             endClass(classKey);
                         });
 
-                        // Function to update student count
                         function updateStudentCount() {
                             const container = document.getElementById('studentListContainer');
                             const count = container.querySelectorAll('.student-item').length;
@@ -1668,7 +1688,6 @@
             }
 
             async function endClass(classKey) {
-                // Close all calls
                 Object.values(studentCalls).forEach(({ call }) => {
                     if (call) call.close();
                 });
@@ -1690,7 +1709,6 @@
                 await classesRef.child(classKey).update({ active: false });
                 loadClasses();
                 currentClassKey = null;
-                // Remove control node
                 if (currentClassKey) {
                     await db.ref(`classControl/${currentClassKey}`).remove();
                 }
@@ -1698,7 +1716,7 @@
         }
 
         // ================================================================
-        //  8. ATTENDANCE SYSTEM (FIXED)
+        //  8. ATTENDANCE
         // ================================================================
         function renderTeacherAttendance() {
             const today = new Date().toISOString().split('T')[0];
@@ -1713,7 +1731,6 @@
             const branch = currentBranch || '';
             const semester = currentSemester || 0;
 
-            // Listen for students with same branch/semester
             db.ref('users').orderByChild('role').equalTo('student').on('value', (snap) => {
                 container.innerHTML = '';
                 if (snap.exists()) {
@@ -1737,7 +1754,6 @@
                             found = true;
                             const studentEmail = user.email;
                             const studentName = user.name || studentEmail;
-                            // Read attendance for today
                             const attRef = db.ref(`attendance/${today}/${studentEmail}`);
                             attRef.once('value').then(snap2 => {
                                 const status = snap2.exists() ? snap2.val().status : 'Absent';
@@ -1756,7 +1772,6 @@
                                 `;
                                 container.appendChild(studentDiv);
 
-                                // Toggle attendance
                                 const toggleBtn = studentDiv.querySelector('.attendanceToggle');
                                 toggleBtn.addEventListener('click', function() {
                                     const email = this.dataset.email;
@@ -1765,7 +1780,6 @@
                                         status: newStatus,
                                         timestamp: Date.now()
                                     }).then(() => {
-                                        // Re-render this section to reflect change
                                         renderTeacherAttendance();
                                     });
                                 });
@@ -1775,8 +1789,6 @@
                     if (!found) {
                         container.innerHTML =
                             '<div class="text-muted">No students found for your branch & semester.</div>';
-                    } else {
-                        // Append closing div (already done in html)
                     }
                 } else {
                     container.innerHTML = '<div class="text-muted">No students registered.</div>';
@@ -1842,7 +1854,7 @@
         }
 
         // ================================================================
-        //  9. OTHER PAGES (Students, Homework, Ratings - unchanged)
+        //  9. OTHER PAGES
         // ================================================================
         function renderTeacherStudents() {
             dynamicContent.innerHTML = `
@@ -2059,7 +2071,7 @@
         }
 
         // ================================================================
-        //  10. STUDENT LIVE CLASS
+        //  10. STUDENT LIVE CLASS (with toast)
         // ================================================================
         function renderStudentLive() {
             dynamicContent.innerHTML = `
@@ -2122,6 +2134,7 @@
             let noFaceCount = 0;
             let notificationSent = false;
             let currentClassName = '';
+            let toastTimeout = null;
 
             async function initFaceDetection(videoElement, className) {
                 if (!window.FaceDetector) {
@@ -2141,10 +2154,17 @@
                             if (faces.length > 0) {
                                 noFaceCount = 0;
                                 notificationSent = false;
+                                // Hide toast if visible
+                                toast.style.display = 'none';
+                                if (toastTimeout) {
+                                    clearTimeout(toastTimeout);
+                                    toastTimeout = null;
+                                }
                             } else {
                                 noFaceCount++;
                                 if (noFaceCount > 5 && !notificationSent) {
                                     notificationSent = true;
+                                    // Send notification to teacher
                                     const notificationRef = db.ref(`notifications/${className}`);
                                     notificationRef.push({
                                         studentName: currentName || currentUser.email,
@@ -2153,12 +2173,13 @@
                                         timestamp: Date.now(),
                                         seen: false
                                     });
-                                    const statusDiv = document.createElement('div');
-                                    statusDiv.style.cssText =
-                                        'position:fixed;bottom:20px;right:20px;background:#f87171;color:#fff;padding:10px 20px;border-radius:10px;z-index:999;font-size:14px;box-shadow:0 4px 15px rgba(0,0,0,0.3);';
-                                    statusDiv.textContent = '⚠️ Your face is not visible. Please sit in front of the camera.';
-                                    document.body.appendChild(statusDiv);
-                                    setTimeout(() => statusDiv.remove(), 5000);
+                                    // Show toast on student screen
+                                    toast.textContent = '⚠️ Your face is not visible. Please sit in front of the camera.';
+                                    toast.style.display = 'block';
+                                    if (toastTimeout) clearTimeout(toastTimeout);
+                                    toastTimeout = setTimeout(() => {
+                                        toast.style.display = 'none';
+                                    }, 5000);
                                 }
                             }
                         } catch (err) {
@@ -2180,6 +2201,11 @@
                 }
                 noFaceCount = 0;
                 notificationSent = false;
+                toast.style.display = 'none';
+                if (toastTimeout) {
+                    clearTimeout(toastTimeout);
+                    toastTimeout = null;
+                }
             }
 
             async function joinStudentClass(className) {
@@ -2551,14 +2577,16 @@
         // ================================================================
         //  INIT
         // ================================================================
-        console.log('✅ Smart Classroom fully functional with working buttons and attendance.');
+        console.log('✅ Smart Classroom fully functional with working buttons, small notifications, and toast.');
         console.log('📌 Click avatar for profile.');
         console.log('📊 Attendance system works per day.');
         console.log('👥 Student list shows names and total count.');
-        console.log('🎤 Teacher can control mic and camera for each student (buttons work).');
+        console.log('🎤 Teacher can control mic and camera (buttons work).');
         console.log('📹 Student video appears under their name when enabled.');
-        console.log('🔔 Face detection sends notification to teacher.');
+        console.log('🔔 Face detection sends small notification to teacher.');
         console.log('🚪 Students leaving class are removed from teacher UI.');
+        console.log('📚 Homework upload & grading with similarity check.');
+        console.log('⭐ Ratings system.');
     </script>
 </body>
 </html>
