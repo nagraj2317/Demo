@@ -23,7 +23,6 @@
     </script>
 
     <style>
-        /* ===== FULL CSS (same as before – included in final code) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -891,9 +890,6 @@
         </aside>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- JAVASCRIPT – FIREBASE + PEERJS                              -->
-    <!-- ============================================================ -->
     <script>
         // ================================================================
         //  1. FIREBASE CONFIG
@@ -1275,7 +1271,7 @@
         }
 
         // ================================================================
-        //  7. TEACHER LIVE CLASS (with students list, mic & video toggle)
+        //  7. TEACHER LIVE CLASS
         // ================================================================
         function renderTeacherLive() {
             dynamicContent.innerHTML = `
@@ -1391,22 +1387,29 @@
                 newSubject.value = '';
             });
 
+            // ----- CAMERA SWITCH (FIXED) -----
             async function switchCamera() {
                 if (!localStream) return;
                 const newFacing = cameraFacing === 'user' ? 'environment' : 'user';
                 try {
+                    // Stop all existing video tracks
+                    localStream.getVideoTracks().forEach(t => t.stop());
+                    // Get new stream with new facing mode
                     const newStream = await navigator.mediaDevices.getUserMedia({
                         video: { facingMode: newFacing },
                         audio: true
                     });
-                    const videoTrack = newStream.getVideoTracks()[0];
+                    // Replace video track
+                    const newVideoTrack = newStream.getVideoTracks()[0];
                     const oldVideoTrack = localStream.getVideoTracks()[0];
                     localStream.removeTrack(oldVideoTrack);
-                    localStream.addTrack(videoTrack);
-                    oldVideoTrack.stop();
+                    localStream.addTrack(newVideoTrack);
                     cameraFacing = newFacing;
+                    // Update local video display
                     const localVideo = document.querySelector('#teacherVideoContainer .local-player video');
                     if (localVideo) localVideo.srcObject = localStream;
+                    // Also update for all students (stream is shared)
+                    console.log('Camera switched to:', newFacing);
                 } catch (err) {
                     alert('કેમેરો બદલવામાં ભૂલ: ' + err.message);
                 }
@@ -1504,9 +1507,9 @@
                                 return;
                             }
                             call.answer(localStream);
-                            studentCalls[studentId] = { call, stream: null, videoOn: false, audioOn: false };
+                            studentCalls[studentId] = { call, stream: null };
 
-                            // Add student to list
+                            // Add student to list (email only + icons)
                             const studentList = document.getElementById('studentListContainer');
                             const studentDiv = document.createElement('div');
                             studentDiv.id = 'student-' + studentId;
@@ -1529,28 +1532,38 @@
 
                             call.on('stream', (remoteStream) => {
                                 studentCalls[studentId].stream = remoteStream;
+                                // Initially mute audio & video
                                 remoteStream.getAudioTracks().forEach(t => t.enabled = false);
                                 remoteStream.getVideoTracks().forEach(t => t.enabled = false);
 
+                                // Listen to Firebase control node
                                 const controlRef = db.ref(`classControl/${className}/students/${studentId}`);
                                 controlRef.on('value', (snap) => {
                                     if (!snap.exists()) return;
                                     const data = snap.val();
-                                    // Audio
+                                    // Audio control
                                     const audioOn = data.audio === true;
                                     remoteStream.getAudioTracks().forEach(t => t.enabled = audioOn);
                                     const micBtn = studentDiv.querySelector('.micToggleBtn');
-                                    micBtn.style.color = audioOn ? '#34d399' : '#f87171';
-                                    micBtn.innerHTML = audioOn ? '<i class="fas fa-microphone"></i>' :
-                                        '<i class="fas fa-microphone-slash"></i>';
-                                    // Video
+                                    if (audioOn) {
+                                        micBtn.style.color = '#34d399';
+                                        micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                                    } else {
+                                        micBtn.style.color = '#f87171';
+                                        micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+                                    }
+                                    // Video control
                                     const videoOn = data.video === true;
                                     remoteStream.getVideoTracks().forEach(t => t.enabled = videoOn);
                                     const vidBtn = studentDiv.querySelector('.videoToggleBtn');
-                                    vidBtn.style.color = videoOn ? '#34d399' : '#f87171';
-                                    vidBtn.innerHTML = videoOn ? '<i class="fas fa-video"></i>' :
-                                        '<i class="fas fa-video-slash"></i>';
-                                    // Show/hide video
+                                    if (videoOn) {
+                                        vidBtn.style.color = '#34d399';
+                                        vidBtn.innerHTML = '<i class="fas fa-video"></i>';
+                                    } else {
+                                        vidBtn.style.color = '#f87171';
+                                        vidBtn.innerHTML = '<i class="fas fa-video-slash"></i>';
+                                    }
+                                    // Show video in a floating window if video is on
                                     let vidContainer = document.getElementById('vid-' + studentId);
                                     if (videoOn) {
                                         if (!vidContainer) {
@@ -1558,8 +1571,7 @@
                                             vidContainer.id = 'vid-' + studentId;
                                             vidContainer.style.cssText =
                                                 'position:absolute;bottom:10px;right:10px;width:200px;height:150px;border-radius:12px;overflow:hidden;border:2px solid rgba(167,139,250,0.4);z-index:10;background:#1a1f2e;';
-                                            document.getElementById('teacherVideoContainer').appendChild(
-                                                vidContainer);
+                                            document.getElementById('teacherVideoContainer').appendChild(vidContainer);
                                         }
                                         let vidEl = vidContainer.querySelector('video');
                                         if (!vidEl) {
@@ -1580,7 +1592,7 @@
                                 });
                             });
 
-                            // Mic toggle
+                            // MIC TOGGLE
                             studentDiv.querySelector('.micToggleBtn').addEventListener('click', (e) => {
                                 e.stopPropagation();
                                 const student = e.currentTarget.dataset.student;
@@ -1590,7 +1602,7 @@
                                 });
                             });
 
-                            // Video toggle
+                            // VIDEO TOGGLE
                             studentDiv.querySelector('.videoToggleBtn').addEventListener('click', (e) => {
                                 e.stopPropagation();
                                 const student = e.currentTarget.dataset.student;
@@ -1650,7 +1662,7 @@
         }
 
         // ================================================================
-        //  8. TEACHER OTHER PAGES
+        //  8. TEACHER OTHER PAGES (unchanged)
         // ================================================================
         function renderTeacherStudents() {
             dynamicContent.innerHTML = `
@@ -2200,7 +2212,7 @@
                         // Start face detection on local video
                         initFaceDetection(localVideo);
 
-                        // Listen for teacher's unmute command
+                        // Listen for teacher's audio command (unmute)
                         const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/audio`);
                         controlRef.on('value', (snap) => {
                             const audioOn = snap.val() === true;
@@ -2374,7 +2386,7 @@
                     if (!file) { status.textContent = 'કૃપા કરીને ફોટો પસંદ કરો.'; return; }
                     const snap = await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once(
                         'value');
-                   if (snap.exists()) {
+                    if (snap.exists()) {
                         status.textContent = 'તમે પહેલેથી સબમિટ કર્યું છે.';
                         return;
                     }
@@ -2478,10 +2490,9 @@
         // ================================================================
         console.log('✅ સ્માર્ટ ક્લાસરૂમ સંપૂર્ણપણે કાર્યરત છે.');
         console.log('📌 પ્રોફાઇલ માટે અવતાર પર ક્લિક કરો.');
-        console.log('💡 બ્રાન્ચ/સેમેસ્ટર સરખામણી હવે કેસ-ઇનસેન્સિટિવ છે.');
-        console.log('🔄 ટીચર કેમેરો બદલી શકે છે.');
-        console.log('🎤 ટીચર વિદ્યાર્થીના માઇક/કેમેરાને ટૉગલ કરી શકે છે.');
-        console.log('📹 વિદ્યાર્થી માટે ફેસ ટ્રેકિંગ + સાયરન સક્રિય છે.');
+        console.log('🔄 ટીચર "કેમેરો બદલો" બટન વડે કેમેરો સ્વિચ કરી શકે છે.');
+        console.log('🎤 ટીચર દરેક સ્ટુડન્ટના માઇક અને કેમેરાને ઓન/ઓફ કરી શકે છે.');
+        console.log('📹 સ્ટુડન્ટનો વિડિયો ફક્ત ત્યારે જ દેખાય છે જ્યારે ટીચર કેમેરા આઇકોન પર ક્લિક કરે.');
     </script>
 </body>
 </html>
