@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Smart Classroom · Final</title>
+    <title>Smart Classroom · Fixed</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -171,6 +171,7 @@
             justify-content: center;
             cursor: pointer;
             transition: 0.25s;
+            text-decoration: none;
         }
         .sidebar nav a:hover {
             color: #fff;
@@ -249,10 +250,6 @@
             color: #34d399;
             font-size: 7px;
         }
-        .top-bar .actions .avatar-group {
-            display: flex;
-            align-items: center;
-        }
         .top-bar .actions .avatar-group .avatar {
             width: 28px;
             height: 28px;
@@ -298,6 +295,7 @@
             border-radius: 16px;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
         }
         .video-wrapper .local-player {
             flex: 0 0 25%;
@@ -346,24 +344,24 @@
             gap: 3px;
             padding-right: 4px;
         }
-        .chat-messages .msg {
+        .chat-messages .msg-item {
             font-size: 12px;
             padding: 4px 10px;
             border-radius: 14px;
             max-width: 85%;
             word-wrap: break-word;
         }
-        .chat-messages .msg.teacher {
+        .chat-messages .msg-item.teacher {
             background: rgba(167, 139, 250, 0.2);
             align-self: flex-end;
             color: #e2e8f0;
         }
-        .chat-messages .msg.student {
+        .chat-messages .msg-item.student {
             background: rgba(255, 255, 255, 0.06);
             align-self: flex-start;
             color: #cbd5e1;
         }
-        .chat-messages .msg .sender {
+        .chat-messages .msg-item .sender {
             font-weight: 600;
             font-size: 9px;
             color: rgba(255, 255, 255, 0.4);
@@ -444,31 +442,29 @@
                 transform: scale(0.8);
             }
         }
-        .right-panel .placeholder {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255, 255, 255, 0.15);
-            font-size: 12px;
-            text-align: center;
-        }
-        .page-content {
-            padding: 2px 0;
+        .right-panel .panel-content {
             flex: 1;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
-        .page-content h2 {
-            font-weight: 600;
-            font-size: 20px;
-            margin-bottom: 12px;
-        }
-        .card {
+        .right-panel .panel-content .info-item {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 14px;
-            padding: 12px 14px;
-            margin-bottom: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .right-panel .panel-content .info-item strong {
+            color: #e2e8f0;
+        }
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 4px;
         }
         .btn {
             padding: 8px 18px;
@@ -479,6 +475,9 @@
             cursor: pointer;
             transition: 0.25s;
             font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
         .btn:hover {
             transform: scale(1.03);
@@ -492,9 +491,17 @@
         .btn-danger {
             background: linear-gradient(135deg, #f87171, #ef4444);
         }
+        .btn-warning {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
         .btn-sm {
             padding: 4px 14px;
             font-size: 11px;
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
         }
         .input-field {
             padding: 10px 16px;
@@ -525,110 +532,18 @@
             color: rgba(255, 255, 255, 0.35);
             font-size: 12px;
         }
-        .class-item {
+        .rating-stars {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 10px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 10px;
-            margin-bottom: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            font-size: 13px;
-        }
-        .class-item .name {
-            font-weight: 500;
-        }
-        .class-item .status {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.4);
-        }
-        .class-item .status.active {
-            color: #34d399;
-        }
-        .profile-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .profile-modal.active {
-            display: flex;
-        }
-        .profile-box {
-            background: #1a1f2e;
-            border-radius: 28px;
-            padding: 24px;
-            max-width: 440px;
-            width: 92%;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            position: relative;
-        }
-        .profile-close {
-            position: absolute;
-            top: 10px;
-            right: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: none;
-            color: #fff;
-            font-size: 20px;
-            cursor: pointer;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .profile-close:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .profile-box h2 {
+            gap: 4px;
             font-size: 22px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            cursor: pointer;
         }
-        .profile-box h2 i {
-            color: #a78bfa;
+        .rating-stars i {
+            color: rgba(255, 255, 255, 0.2);
+            transition: 0.2s;
         }
-        .profile-box .field {
-            margin-bottom: 10px;
-        }
-        .profile-box .field label {
-            display: block;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.4);
-            margin-bottom: 2px;
-        }
-        .profile-box .field .value {
-            padding: 6px 14px;
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            color: #fff;
-            width: 100%;
-            font-size: 13px;
-        }
-        .profile-box .field input {
-            padding: 6px 14px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.04);
-            color: #fff;
-            outline: none;
-            width: 100%;
-            font-size: 13px;
-        }
-        .profile-box .field input:focus {
-            border-color: rgba(167, 139, 250, 0.3);
+        .rating-stars i.active {
+            color: #fbbf24;
         }
         .toast {
             position: fixed;
@@ -644,6 +559,9 @@
             display: none;
             max-width: 300px;
             animation: slideIn 0.3s ease;
+        }
+        .toast.success {
+            background: rgba(52, 211, 153, 0.9);
         }
         @keyframes slideIn {
             from {
@@ -665,17 +583,16 @@
             }
             .sidebar {
                 flex-direction: row;
-                padding: 4px 12px;
-                border-right: none;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                gap: 8px;
-                overflow-x: auto;
+                padding: 0 12px;
                 height: 50px;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+                gap: 12px;
+                overflow-x: auto;
             }
             .sidebar .brand {
                 writing-mode: horizontal-tb;
-                font-size: 14px;
-                margin-right: auto;
+                font-size: 16px;
                 padding: 0;
             }
             .sidebar nav {
@@ -693,1896 +610,869 @@
                 margin-top: 0;
                 gap: 4px;
             }
-            .sidebar .bottom a {
-                width: 30px;
-                height: 30px;
-                font-size: 13px;
-                padding: 4px;
-            }
             .right-panel {
                 border-left: none;
-                border-top: 1px solid rgba(255, 255, 255, 0.05);
-                max-height: 160px;
-                padding: 10px 12px;
-            }
-            .main-area {
-                padding: 10px 12px;
-            }
-            .video-wrapper {
-                min-height: 180px;
-            }
-            .login-box {
-                padding: 24px 18px;
-                margin: 12px;
-            }
-            .chat-box {
-                height: 110px;
+                border-top: 1px solid rgba(255, 255, 255, 0.06);
+                max-height: 200px;
             }
             .video-wrapper .remote-player {
                 flex: 1 1 100%;
-                height: 50%;
-                min-height: 80px;
+                height: auto;
+                min-height: 100px;
             }
             .video-wrapper .local-player {
                 flex: 0 0 30%;
                 min-width: 80px;
-                height: 30%;
+                height: auto;
                 min-height: 60px;
-            }
-            .profile-box {
-                padding: 18px;
-            }
-        }
-        @media (max-width: 480px) {
-            .login-box {
-                padding: 18px 12px;
-            }
-            .login-box h2 {
-                font-size: 22px;
-            }
-            .main-area {
-                padding: 6px 8px;
-            }
-            .top-bar .page-title h2 {
-                font-size: 16px;
-            }
-            .btn {
-                font-size: 11px;
-                padding: 6px 14px;
-            }
-            .card {
-                padding: 8px 10px;
-            }
-            .video-wrapper {
-                min-height: 140px;
-            }
-            .video-wrapper .remote-player {
-                height: 45%;
-                min-height: 60px;
-            }
-            .video-wrapper .local-player {
-                height: 25%;
-                min-height: 50px;
-            }
-            .chat-box {
-                height: 90px;
-            }
-            .profile-box {
-                padding: 14px;
             }
         }
     </style>
 </head>
 <body>
 
-    <div id="profileModal" class="profile-modal">
-        <div class="profile-box">
-            <button class="profile-close" id="profileClose">&times;</button>
-            <h2><i class="fas fa-user-circle"></i> My Profile</h2>
-            <div class="field">
-                <label>Email</label>
-                <div class="value" id="profileEmail">-</div>
-            </div>
-            <div class="field">
-                <label>Full Name</label>
-                <input type="text" id="profileName" placeholder="Your full name" />
-            </div>
-            <div class="field">
-                <label>Mobile Number</label>
-                <input type="tel" id="profileMobile" placeholder="Mobile number" />
-            </div>
-            <div class="field">
-                <label>Branch</label>
-                <input type="text" id="profileBranch" placeholder="Branch" />
-            </div>
-            <div class="field">
-                <label>Semester</label>
-                <input type="number" id="profileSemester" placeholder="Semester" min="1" />
-            </div>
-            <div class="field">
-                <label>New Password (leave blank to keep current)</label>
-                <input type="password" id="profilePassword" placeholder="New password" />
-            </div>
-            <button class="btn btn-primary" id="profileSaveBtn">Save</button>
-            <div id="profileMsg" class="msg mt-10" style="color:#34d399;"></div>
-        </div>
-    </div>
+    <!-- ===== TOAST ===== -->
+    <div id="toast" class="toast"></div>
 
+    <!-- ===== LOGIN OVERLAY ===== -->
     <div id="loginOverlay">
         <div class="login-box">
             <h2>Smart Classroom</h2>
             <div id="loginForm">
                 <input type="email" id="loginEmail" placeholder="Email" />
                 <input type="password" id="loginPassword" placeholder="Password" />
-                <button class="btn-primary" id="loginBtn">Sign In</button>
-                <div class="toggle-link">New user? <span id="showSignup">Create account</span></div>
-                <div class="msg" id="loginMsg"></div>
+                <button class="btn-primary" onclick="login()">Login</button>
+                <div class="toggle-link">Don't have an account? <span onclick="showSignup()">Sign up</span></div>
+                <div id="loginMsg" class="msg"></div>
             </div>
             <div id="signupForm" style="display:none;">
-                <input type="email" id="signupEmail" placeholder="Email" />
-                <input type="password" id="signupPassword" placeholder="Password (6+) " />
                 <input type="text" id="signupName" placeholder="Full Name" />
-                <input type="text" id="signupBranch" placeholder="Branch" />
-                <input type="number" id="signupSemester" placeholder="Semester" min="1" />
+                <input type="email" id="signupEmail" placeholder="Email" />
+                <input type="password" id="signupPassword" placeholder="Password" />
                 <select id="signupRole">
                     <option value="student">Student</option>
                     <option value="teacher">Teacher</option>
                 </select>
-                <button class="btn-success" id="signupBtn">Create Account</button>
-                <div class="toggle-link">Already have account? <span id="showLogin">Sign in</span></div>
-                <div class="msg" id="signupMsg"></div>
+                <button class="btn-success" onclick="signup()">Sign Up</button>
+                <div class="toggle-link">Already have an account? <span onclick="showLogin()">Login</span></div>
+                <div id="signupMsg" class="msg"></div>
             </div>
         </div>
     </div>
 
+    <!-- ===== APP CONTAINER ===== -->
     <div id="appContainer">
-        <aside id="sidebar" class="sidebar"></aside>
-        <main class="main-area">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="brand">SC</div>
+            <nav>
+                <a href="#" class="active" onclick="switchPage('dashboard')"><i class="fas fa-th-large"></i></a>
+                <a href="#" onclick="switchPage('classroom')"><i class="fas fa-video"></i></a>
+                <a href="#" onclick="switchPage('attendance')"><i class="fas fa-clipboard-list"></i></a>
+                <a href="#" onclick="switchPage('rating')"><i class="fas fa-star"></i></a>
+            </nav>
+            <div class="bottom">
+                <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
+
+        <!-- Main Area -->
+        <div class="main-area">
+            <!-- Top Bar -->
             <div class="top-bar">
                 <div class="page-title">
                     <h2 id="pageTitle">Dashboard</h2>
-                    <p id="pageSubtitle">Welcome</p>
+                    <p id="pageSubtitle">Welcome, <span id="userNameDisplay">User</span></p>
                 </div>
                 <div class="actions">
-                    <span class="pill"><i class="fas fa-circle"></i> <span id="roleBadge">Student</span></span>
+                    <div class="pill"><i class="fas fa-circle"></i> Live</div>
                     <div class="avatar-group">
-                        <span class="avatar" id="avatarLetter">U</span>
+                        <div class="avatar" id="avatarLetter">U</div>
                     </div>
                 </div>
             </div>
-            <div id="dynamicContent" style="flex:1;overflow-y:auto;padding-bottom:6px;"></div>
-        </main>
-        <aside class="right-panel">
+
+            <!-- Dynamic Pages -->
+            <div id="pageContent" class="page-content">
+                <!-- Default: Dashboard -->
+                <div id="dashboardPage">
+                    <div class="card">
+                        <h3>📚 Quick Actions</h3>
+                        <div class="flex-row mt-10">
+                            <button class="btn btn-primary" id="startClassBtn" onclick="startClass()" style="display:none;">
+                                <i class="fas fa-play"></i> Start Class
+                            </button>
+                            <button class="btn btn-success" id="joinClassBtn" onclick="joinClass()" style="display:none;">
+                                <i class="fas fa-sign-in-alt"></i> Join Class
+                            </button>
+                            <button class="btn btn-danger" id="endClassBtn" onclick="endClass()" style="display:none;">
+                                <i class="fas fa-stop"></i> End Class
+                            </button>
+                        </div>
+                        <div class="mt-10">
+                            <label class="text-muted">Class ID</label>
+                            <input class="input-field" id="classIdInput" placeholder="Enter class ID (e.g., MATH101)" />
+                        </div>
+                        <div id="classStatus" class="mt-10 text-muted">No active class.</div>
+                    </div>
+                    <div class="card">
+                        <h3>👥 Participants</h3>
+                        <div id="participantList" class="mt-10">No one joined yet.</div>
+                    </div>
+                </div>
+
+                <!-- Classroom Page (video + chat) -->
+                <div id="classroomPage" style="display:none; flex:1; display:flex; flex-direction:column; gap:12px;">
+                    <div class="video-wrapper">
+                        <div id="videoContainer">
+                            <!-- Local video will be appended here -->
+                            <!-- Remote videos will be appended here -->
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <button class="btn btn-warning" id="toggleMicBtn" onclick="toggleMic()"><i class="fas fa-microphone"></i> Mic</button>
+                        <button class="btn btn-warning" id="toggleCamBtn" onclick="toggleCam()"><i class="fas fa-video"></i> Cam</button>
+                        <button class="btn btn-danger" onclick="leaveCall()"><i class="fas fa-phone-slash"></i> Leave</button>
+                    </div>
+                    <div class="chat-box">
+                        <div class="chat-messages" id="chatMessages"></div>
+                        <div class="chat-input">
+                            <input id="chatInput" placeholder="Type a message..." />
+                            <button onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Page -->
+                <div id="attendancePage" style="display:none;">
+                    <div class="card">
+                        <h3>📋 Attendance Records</h3>
+                        <div id="attendanceList" class="mt-10">No records yet.</div>
+                    </div>
+                </div>
+
+                <!-- Rating Page -->
+                <div id="ratingPage" style="display:none;">
+                    <div class="card">
+                        <h3>⭐ Rate the Lesson</h3>
+                        <p class="text-muted">Select your rating for the last class.</p>
+                        <div class="rating-stars" id="ratingStars">
+                            <i class="fas fa-star" data-value="1" onclick="setRating(1)"></i>
+                            <i class="fas fa-star" data-value="2" onclick="setRating(2)"></i>
+                            <i class="fas fa-star" data-value="3" onclick="setRating(3)"></i>
+                            <i class="fas fa-star" data-value="4" onclick="setRating(4)"></i>
+                            <i class="fas fa-star" data-value="5" onclick="setRating(5)"></i>
+                        </div>
+                        <button class="btn btn-primary mt-10" onclick="submitRating()">Submit Rating</button>
+                        <div id="ratingMsg" class="mt-10 text-muted"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
             <div class="panel-header">
-                <h4><i class="fas fa-robot"></i> AI Assistant <span class="dot"></span></h4>
-                <span style="font-size:9px;color:rgba(255,255,255,0.2);">Coming soon</span>
+                <h4><i class="fas fa-info-circle"></i> Class Info</h4>
+                <span class="dot"></span>
             </div>
-            <div class="placeholder">
-                <div>📚 AI chat &amp; alerts<br /><span style="font-size:10px;color:rgba(255,255,255,0.1);">will be available here</span></div>
+            <div class="panel-content" id="panelContent">
+                <div class="info-item"><strong>Class ID:</strong> <span id="panelClassId">-</span></div>
+                <div class="info-item"><strong>Teacher:</strong> <span id="panelTeacher">-</span></div>
+                <div class="info-item"><strong>Students:</strong> <span id="panelStudents">0</span></div>
+                <div class="info-item"><strong>Status:</strong> <span id="panelStatus">Inactive</span></div>
             </div>
-        </aside>
+        </div>
     </div>
 
-    <div id="toast" class="toast"></div>
-
     <script>
-        // ================================================================
-        //  1. FIREBASE
-        // ================================================================
+        // ===================================================================
+        // 1. FIREBASE CONFIG (YOUR PROVIDED CONFIG)
+        // ===================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyBurp3M6C4sgDIUX7H6eEGCAep9oBt24ss",
             authDomain: "aiclassdemo.firebaseapp.com",
-            projectId: "aiclassdemo",
             databaseURL: "https://aiclassdemo-default-rtdb.firebaseio.com",
+            projectId: "aiclassdemo",
             storageBucket: "aiclassdemo.firebasestorage.app",
             messagingSenderId: "851078707703",
             appId: "1:851078707703:web:656731ca0310ba878e56f2",
             measurementId: "G-R57HXZ4EK4"
         };
+
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // ================================================================
-        //  2. DOM REFS
-        // ================================================================
+        // ===================================================================
+        // 2. GLOBAL STATE
+        // ===================================================================
+        let currentUser = null; // { uid, name, email, role }
+        let localStream = null;
+        let peer = null;
+        let currentClassId = null;
+        let isTeacher = false;
+        let isInCall = false;
+        let connections = {}; // peerId -> MediaStream
+        let selectedRating = 0;
+
+        // DOM refs
         const loginOverlay = document.getElementById('loginOverlay');
+        const appContainer = document.getElementById('appContainer');
         const loginForm = document.getElementById('loginForm');
         const signupForm = document.getElementById('signupForm');
-        const loginEmail = document.getElementById('loginEmail');
-        const loginPassword = document.getElementById('loginPassword');
-        const loginBtn = document.getElementById('loginBtn');
         const loginMsg = document.getElementById('loginMsg');
-        const signupEmail = document.getElementById('signupEmail');
-        const signupPassword = document.getElementById('signupPassword');
-        const signupName = document.getElementById('signupName');
-        const signupBranch = document.getElementById('signupBranch');
-        const signupSemester = document.getElementById('signupSemester');
-        const signupRole = document.getElementById('signupRole');
-        const signupBtn = document.getElementById('signupBtn');
         const signupMsg = document.getElementById('signupMsg');
-        const showSignup = document.getElementById('showSignup');
-        const showLogin = document.getElementById('showLogin');
-        const appContainer = document.getElementById('appContainer');
-        const sidebar = document.getElementById('sidebar');
-        const dynamicContent = document.getElementById('dynamicContent');
-        const pageTitle = document.getElementById('pageTitle');
-        const pageSubtitle = document.getElementById('pageSubtitle');
-        const roleBadge = document.getElementById('roleBadge');
-        const avatarLetter = document.getElementById('avatarLetter');
-
-        const profileModal = document.getElementById('profileModal');
-        const profileClose = document.getElementById('profileClose');
-        const profileEmail = document.getElementById('profileEmail');
-        const profileName = document.getElementById('profileName');
-        const profileMobile = document.getElementById('profileMobile');
-        const profileBranch = document.getElementById('profileBranch');
-        const profileSemester = document.getElementById('profileSemester');
-        const profilePassword = document.getElementById('profilePassword');
-        const profileSaveBtn = document.getElementById('profileSaveBtn');
-        const profileMsg = document.getElementById('profileMsg');
         const toast = document.getElementById('toast');
 
-        let currentUser = null;
-        let currentRole = null;
-        let currentBranch = null;
-        let currentSemester = null;
-        let currentName = '';
-
-        // ================================================================
-        //  3. AUTH
-        // ================================================================
-        showSignup.addEventListener('click', () => {
+        // ===================================================================
+        // 3. AUTH FUNCTIONS
+        // ===================================================================
+        function showSignup() {
             loginForm.style.display = 'none';
             signupForm.style.display = 'block';
             loginMsg.textContent = '';
             signupMsg.textContent = '';
-        });
-        showLogin.addEventListener('click', () => {
+        }
+
+        function showLogin() {
             loginForm.style.display = 'block';
             signupForm.style.display = 'none';
             loginMsg.textContent = '';
             signupMsg.textContent = '';
-        });
+        }
 
-        loginBtn.addEventListener('click', async () => {
-            const email = loginEmail.value.trim();
-            const pass = loginPassword.value.trim();
-            if (!email || !pass) { loginMsg.textContent = 'Please enter email and password.'; return; }
-            loginMsg.textContent = '⏳ Signing in...';
-            loginMsg.style.color = 'rgba(255,255,255,0.5)';
-            try {
-                await auth.signInWithEmailAndPassword(email, pass);
-            } catch (err) {
-                let msg = '❌ ' + err.message;
-                if (err.code === 'auth/user-not-found') msg = '❌ No account found. Please sign up.';
-                else if (err.code === 'auth/wrong-password') msg = '❌ Incorrect password. Try again.';
-                else if (err.code === 'auth/too-many-requests') msg = '❌ Too many attempts. Try later.';
-                loginMsg.textContent = msg;
-                loginMsg.style.color = '#f87171';
-                alert(msg);
-            }
-        });
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPassword').value;
+            loginMsg.textContent = 'Logging in...';
+            auth.signInWithEmailAndPassword(email, pass)
+                .then(() => { loginMsg.textContent = ''; })
+                .catch(err => { loginMsg.textContent = err.message; });
+        }
 
-        signupBtn.addEventListener('click', async () => {
-            const email = signupEmail.value.trim();
-            const pass = signupPassword.value.trim();
-            const role = signupRole.value;
-            const name = signupName.value.trim();
-            const branch = signupBranch.value.trim();
-            const semester = parseInt(signupSemester.value);
-            if (!email || !pass || !name || !branch || isNaN(semester) || semester < 1) {
-                signupMsg.textContent = 'Please fill all fields correctly.';
+        function signup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const pass = document.getElementById('signupPassword').value;
+            const role = document.getElementById('signupRole').value;
+            if (!name || !email || !pass) {
+                signupMsg.textContent = 'Please fill all fields.';
                 return;
             }
-            if (pass.length < 6) { signupMsg.textContent = 'Password must be at least 6 characters.'; return; }
-            signupMsg.textContent = '⏳ Creating account...';
-            signupMsg.style.color = 'rgba(255,255,255,0.5)';
-            try {
-                const cred = await auth.createUserWithEmailAndPassword(email, pass);
-                await db.ref('users/' + cred.user.uid).set({
-                    email,
-                    role,
-                    name,
-                    branch,
-                    semester: role === 'student' ? semester : 0,
-                    mobile: '',
-                    createdAt: Date.now()
+            signupMsg.textContent = 'Creating account...';
+            auth.createUserWithEmailAndPassword(email, pass)
+                .then(cred => {
+                    // Save user profile in Realtime Database
+                    return db.ref('users/' + cred.user.uid).set({
+                        name: name,
+                        email: email,
+                        role: role
+                    });
+                })
+                .then(() => {
+                    signupMsg.textContent = 'Account created! You can now login.';
+                    showLogin();
+                    document.getElementById('loginEmail').value = email;
+                    document.getElementById('loginPassword').value = '';
+                })
+                .catch(err => {
+                    signupMsg.textContent = err.message;
                 });
-                signupMsg.textContent = '✅ Account created!';
-                signupMsg.style.color = '#34d399';
-            } catch (err) {
-                let msg = '❌ ' + err.message;
-                if (err.code === 'auth/email-already-in-use') msg = '❌ Email already registered. Please login.';
-                signupMsg.textContent = msg;
-                signupMsg.style.color = '#f87171';
-                alert(msg);
-            }
-        });
+        }
 
-        auth.onAuthStateChanged(async (user) => {
+        function logout() {
+            if (peer) peer.destroy();
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null;
+            }
+            auth.signOut();
+        }
+
+        // Auth state listener
+        auth.onAuthStateChanged(async user => {
             if (user) {
-                try {
-                    const snap = await db.ref('users/' + user.uid).once('value');
-                    if (snap.exists()) {
-                        const data = snap.val();
-                        currentRole = data.role || 'student';
-                        currentName = data.name || '';
-                        currentBranch = (data.branch || '').trim();
-                        currentSemester = data.semester || 0;
-                        currentUser = { uid: user.uid, email: user.email, ...data };
-                        loginOverlay.style.display = 'none';
-                        appContainer.style.display = 'grid';
-                        roleBadge.textContent = currentRole === 'teacher' ? 'Teacher' : 'Student';
-                        avatarLetter.textContent = (currentName || user.email.charAt(0)).toUpperCase();
-                        buildDashboard();
-                    } else {
-                        await auth.signOut();
-                        alert('User data not found. Please sign up again.');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert('Error loading user data: ' + err.message);
-                    await auth.signOut();
+                // Fetch user profile from DB
+                const snap = await db.ref('users/' + user.uid).once('value');
+                const data = snap.val();
+                if (!data) {
+                    // fallback: create profile if missing (should not happen)
+                    await db.ref('users/' + user.uid).set({
+                        name: user.displayName || user.email,
+                        email: user.email,
+                        role: 'student'
+                    });
+                    currentUser = { uid: user.uid, name: user.displayName || user.email, email: user.email, role: 'student' };
+                } else {
+                    currentUser = { uid: user.uid, ...data };
                 }
+                // Update UI
+                document.getElementById('userNameDisplay').textContent = currentUser.name;
+                document.getElementById('avatarLetter').textContent = currentUser.name.charAt(0).toUpperCase();
+                // Show/hide buttons based on role
+                document.getElementById('startClassBtn').style.display = (currentUser.role === 'teacher') ? 'inline-flex' :
+                'none';
+                document.getElementById('joinClassBtn').style.display = (currentUser.role === 'student') ? 'inline-flex' :
+                'none';
+                // Show app
+                loginOverlay.style.display = 'none';
+                appContainer.style.display = 'grid';
+                // Initialize PeerJS after login
+                initPeer();
+                // Switch to dashboard
+                switchPage('dashboard');
             } else {
+                // Logged out
                 loginOverlay.style.display = 'flex';
                 appContainer.style.display = 'none';
-                loginMsg.textContent = '';
-            }
-        });
-
-        // ================================================================
-        //  4. PROFILE
-        // ================================================================
-        avatarLetter.addEventListener('click', () => {
-            if (currentUser) {
-                profileEmail.textContent = currentUser.email || '';
-                profileName.value = currentUser.name || '';
-                profileMobile.value = currentUser.mobile || '';
-                profileBranch.value = currentBranch || '';
-                profileSemester.value = currentSemester || '';
-                profilePassword.value = '';
-                profileMsg.textContent = '';
-                profileModal.classList.add('active');
-            }
-        });
-        profileClose.addEventListener('click', () => {
-            profileModal.classList.remove('active');
-        });
-        profileModal.addEventListener('click', (e) => {
-            if (e.target === profileModal) profileModal.classList.remove('active');
-        });
-
-        profileSaveBtn.addEventListener('click', async () => {
-            const name = profileName.value.trim();
-            const mobile = profileMobile.value.trim();
-            const branch = profileBranch.value.trim();
-            const semester = parseInt(profileSemester.value);
-            const newPass = profilePassword.value.trim();
-
-            if (!name || !branch || isNaN(semester) || semester < 1) {
-                profileMsg.textContent = 'Please fill all fields correctly.';
-                profileMsg.style.color = '#f87171';
-                return;
-            }
-
-            profileMsg.textContent = '⏳ Saving...';
-            profileMsg.style.color = 'rgba(255,255,255,0.5)';
-
-            try {
-                await db.ref('users/' + currentUser.uid).update({
-                    name,
-                    mobile,
-                    branch,
-                    semester
-                });
-                if (newPass && newPass.length >= 6) {
-                    await auth.currentUser.updatePassword(newPass);
-                }
-                currentName = name;
-                currentBranch = branch;
-                currentSemester = semester;
-                currentUser.name = name;
-                currentUser.mobile = mobile;
-                currentUser.branch = branch;
-                currentUser.semester = semester;
-
-                profileMsg.textContent = '✅ Profile updated!';
-                profileMsg.style.color = '#34d399';
-                if (name) avatarLetter.textContent = name.charAt(0).toUpperCase();
-                buildDashboard();
-                setTimeout(() => profileModal.classList.remove('active'), 1500);
-            } catch (err) {
-                profileMsg.textContent = '❌ Error: ' + err.message;
-                profileMsg.style.color = '#f87171';
-            }
-        });
-
-        // ================================================================
-        //  5. DASHBOARD
-        // ================================================================
-        function buildDashboard() {
-            sidebar.innerHTML = '';
-            const brand = document.createElement('div');
-            brand.className = 'brand';
-            brand.textContent = 'AI';
-            sidebar.appendChild(brand);
-
-            const nav = document.createElement('nav');
-            const items = [];
-            if (currentRole === 'teacher') {
-                items.push({ icon: 'fa-chalkboard-teacher', label: 'Live Class', id: 't-live' });
-                items.push({ icon: 'fa-user-graduate', label: 'Students', id: 't-students' });
-                items.push({ icon: 'fa-clipboard-check', label: 'Attendance', id: 't-attendance' });
-                items.push({ icon: 'fa-pencil-alt', label: 'Homework', id: 't-homework' });
-                items.push({ icon: 'fa-star', label: 'Ratings', id: 't-ratings' });
-            } else {
-                items.push({ icon: 'fa-chalkboard-teacher', label: 'Live Class', id: 's-live' });
-                items.push({ icon: 'fa-calendar-check', label: 'My Attendance', id: 's-attendance' });
-                items.push({ icon: 'fa-pencil-alt', label: 'Homework', id: 's-homework' });
-                items.push({ icon: 'fa-star', label: 'My Rating', id: 's-rating' });
-            }
-            items.forEach(item => {
-                const a = document.createElement('a');
-                a.href = '#';
-                a.id = item.id;
-                a.innerHTML = `<i class="fas ${item.icon}"></i>`;
-                a.title = item.label;
-                a.addEventListener('click', (e) => { e.preventDefault();
-                    loadPage(item.id); });
-                nav.appendChild(a);
-            });
-            sidebar.appendChild(nav);
-
-            const bottom = document.createElement('div');
-            bottom.className = 'bottom';
-            const logoutBtn = document.createElement('a');
-            logoutBtn.href = '#';
-            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
-            logoutBtn.title = 'Logout';
-            logoutBtn.addEventListener('click', (e) => { e.preventDefault();
-                auth.signOut(); });
-            bottom.appendChild(logoutBtn);
-            sidebar.appendChild(bottom);
-
-            loadPage(currentRole === 'teacher' ? 't-live' : 's-live');
-        }
-
-        function loadPage(pageId) {
-            document.querySelectorAll('#sidebar nav a').forEach(a => a.classList.remove('active'));
-            const activeLink = document.getElementById(pageId);
-            if (activeLink) activeLink.classList.add('active');
-
-            const labels = {
-                't-live': 'Live Class',
-                't-students': 'Students',
-                't-attendance': 'Attendance',
-                't-homework': 'Homework',
-                't-ratings': 'Ratings',
-                's-live': 'Live Class',
-                's-attendance': 'My Attendance',
-                's-homework': 'Homework',
-                's-rating': 'My Rating'
-            };
-            pageTitle.textContent = labels[pageId] || 'Dashboard';
-            pageSubtitle.textContent = currentRole === 'teacher' ? 'Teacher Panel' : 'Student Panel';
-
-            switch (pageId) {
-                case 't-live':
-                    renderTeacherLive();
-                    break;
-                case 't-students':
-                    renderTeacherStudents();
-                    break;
-                case 't-attendance':
-                    renderTeacherAttendance();
-                    break;
-                case 't-homework':
-                    renderTeacherHomework();
-                    break;
-                case 't-ratings':
-                    renderTeacherRatings();
-                    break;
-                case 's-live':
-                    renderStudentLive();
-                    break;
-                case 's-attendance':
-                    renderStudentAttendance();
-                    break;
-                case 's-homework':
-                    renderStudentHomework();
-                    break;
-                case 's-rating':
-                    renderStudentRating();
-                    break;
-                default:
-                    dynamicContent.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center;">Page not found.</div>';
-            }
-        }
-
-        // ================================================================
-        //  6. HELPER
-        // ================================================================
-        function compareImagesBase64(base64_1, base64_2) {
-            return new Promise((resolve) => {
-                const img1 = new Image();
-                const img2 = new Image();
-                let loaded = 0;
-
-                function checkDone() {
-                    loaded++;
-                    if (loaded === 2) {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        const size = 80;
-                        canvas.width = size;
-                        canvas.height = size;
-                        ctx.drawImage(img1, 0, 0, size, size);
-                        const data1 = ctx.getImageData(0, 0, size, size).data;
-                        ctx.drawImage(img2, 0, 0, size, size);
-                        const data2 = ctx.getImageData(0, 0, size, size).data;
-                        let mse = 0;
-                        for (let i = 0; i < data1.length; i++) {
-                            mse += (data1[i] - data2[i]) ** 2;
-                        }
-                        mse = mse / (data1.length);
-                        const similarity = Math.max(0, (1 - Math.sqrt(mse) / 255) * 100);
-                        resolve(similarity);
-                    }
-                }
-                img1.onload = checkDone;
-                img2.onload = checkDone;
-                img1.onerror = () => { resolve(0); };
-                img2.onerror = () => { resolve(0); };
-                img1.src = base64_1;
-                img2.src = base64_2;
-            });
-        }
-
-        // ================================================================
-        //  7. TEACHER LIVE CLASS (WORKING)
-        // ================================================================
-        function renderTeacherLive() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>Live Class</h2>
-                    <div class="card">
-                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-                            <input type="text" id="newBranch" class="input-field" placeholder="Branch" style="flex:1;min-width:80px;" value="${currentBranch || ''}" />
-                            <input type="number" id="newSemester" class="input-field" placeholder="Semester" style="width:80px;" value="${currentSemester || 1}" />
-                            <input type="text" id="newSubject" class="input-field" placeholder="Subject" style="flex:1;min-width:80px;" />
-                            <input type="text" id="newClassName" class="input-field" placeholder="Class Name" style="flex:1;min-width:100px;" />
-                            <button id="createClassBtn" class="btn btn-primary">Create</button>
-                        </div>
-                        <div id="classListContainer"><div class="text-muted">Loading...</div></div>
-                    </div>
-                    <div id="liveSessionContainer"></div>
-                </div>
-            `;
-
-            const classListContainer = document.getElementById('classListContainer');
-            const newBranch = document.getElementById('newBranch');
-            const newSemester = document.getElementById('newSemester');
-            const newSubject = document.getElementById('newSubject');
-            const newClassName = document.getElementById('newClassName');
-            const createBtn = document.getElementById('createClassBtn');
-            const liveContainer = document.getElementById('liveSessionContainer');
-
-            let peer = null;
-            let localStream = null;
-            let currentClassKey = null;
-            let isTeacherLive = false;
-            let studentCalls = {};
-            let cameraFacing = 'user';
-            let notifRef = null;
-
-            const classesRef = db.ref('classes');
-
-            function loadClasses() {
-                classesRef.on('value', (snap) => {
-                    classListContainer.innerHTML = '';
-                    if (snap.exists()) {
-                        const classes = snap.val();
-                        let html = '<div style="font-weight:500;margin-bottom:6px;">All Classes:</div>';
-                        Object.keys(classes).forEach(key => {
-                            const cls = classes[key];
-                            const isActive = cls.active || false;
-                            html += `
-                                <div class="class-item" data-key="${key}">
-                                    <span class="name">${cls.className} (${cls.branch}, Sem ${cls.semester}, ${cls.subject})</span>
-                                    <span class="status ${isActive ? 'active' : ''}">${isActive ? '🟢 Live' : '🔴 Offline'}</span>
-                                    <div>
-                                        <button class="btn btn-success btn-sm startClassBtn" data-key="${key}" data-name="${cls.className}" ${isActive ? 'style="display:none;"' : ''}>Start</button>
-                                        <button class="btn btn-danger btn-sm endClassBtn" data-key="${key}" data-name="${cls.className}" ${!isActive ? 'style="display:none;"' : ''}>End</button>
-                                        <button class="btn btn-danger btn-sm deleteClassBtn" data-key="${key}" style="background:rgba(248,113,113,0.2);color:#f87171;border:1px solid rgba(248,113,113,0.2);">Delete</button>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        classListContainer.innerHTML = html;
-
-                        document.querySelectorAll('.startClassBtn').forEach(btn => {
-                            btn.addEventListener('click', () => {
-                                const key = btn.dataset.key;
-                                const name = btn.dataset.name;
-                                startClass(key, name);
-                            });
-                        });
-                        document.querySelectorAll('.endClassBtn').forEach(btn => {
-                            btn.addEventListener('click', () => {
-                                const key = btn.dataset.key;
-                                endClass(key);
-                            });
-                        });
-                        document.querySelectorAll('.deleteClassBtn').forEach(btn => {
-                            btn.addEventListener('click', async () => {
-                                if (confirm('Delete this class?')) {
-                                    await classesRef.child(btn.dataset.key).remove();
-                                }
-                            });
-                        });
-                    } else {
-                        classListContainer.innerHTML = '<div class="text-muted">No classes created yet.</div>';
-                    }
-                });
-            }
-            loadClasses();
-
-            createBtn.addEventListener('click', async () => {
-                const branch = newBranch.value.trim();
-                const semester = parseInt(newSemester.value);
-                const subject = newSubject.value.trim();
-                let className = newClassName.value.trim();
-                if (!branch || !semester || !subject || !className) {
-                    alert('Please fill all fields.');
-                    return;
-                }
-                className = className.replace(/\s+/g, '-');
-                const snap = await classesRef.orderByChild('className').equalTo(className).once('value');
-                if (snap.exists()) {
-                    alert('A class with this name already exists.');
-                    return;
-                }
-                const newRef = classesRef.push();
-                await newRef.set({
-                    branch,
-                    semester,
-                    subject,
-                    className,
-                    teacher: currentUser.uid,
-                    createdAt: Date.now(),
-                    active: false
-                });
-                newClassName.value = '';
-                newSubject.value = '';
-            });
-
-            async function switchCamera() {
-                if (!localStream) return;
-                const newFacing = cameraFacing === 'user' ? 'environment' : 'user';
-                try {
-                    localStream.getVideoTracks().forEach(t => t.stop());
-                    const newStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: newFacing },
-                        audio: true
-                    });
-                    const newVideoTrack = newStream.getVideoTracks()[0];
-                    const oldVideoTrack = localStream.getVideoTracks()[0];
-                    localStream.removeTrack(oldVideoTrack);
-                    localStream.addTrack(newVideoTrack);
-                    cameraFacing = newFacing;
-                    const localVideo = document.querySelector('#teacherVideoContainer .local-player video');
-                    if (localVideo) localVideo.srcObject = localStream;
-                } catch (err) {
-                    alert('Camera switch error: ' + err.message);
-                }
-            }
-
-            async function startClass(classKey, className) {
-                if (isTeacherLive) {
-                    await endClass(currentClassKey);
-                }
-                try {
-                    if (peer) { peer.destroy();
-                        peer = null; }
-                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                    peer = new Peer(className, { debug: 2 });
-
-                    peer.on('open', () => {
-                        isTeacherLive = true;
-                        currentClassKey = classKey;
-                        classesRef.child(classKey).update({ active: true });
-                        loadClasses();
-
-                        liveContainer.innerHTML = `
-                            <div class="card" style="margin-top:10px;">
-                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                                    <h3 style="font-size:16px;">🟢 Live: ${className}</h3>
-                                    <button id="switchCameraBtn" class="btn btn-sm btn-primary">🔄 Switch Camera</button>
-                                </div>
-                                <div class="video-wrapper" style="min-height:280px;position:relative;">
-                                    <div id="teacherVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-direction:column;gap:8px;padding:8px;overflow-y:auto;position:relative;">
-                                        <div class="local-player" style="flex:0 0 30%;min-width:120px;height:35%;min-height:80px;align-self:flex-start;"></div>
-                                        <div id="notificationContainer" style="max-height:80px;overflow-y:auto;margin-bottom:6px;background:rgba(0,0,0,0.2);border-radius:8px;padding:4px 8px;">
-                                            <div style="color:rgba(255,255,255,0.3);font-size:11px;text-align:center;">Notifications</div>
-                                        </div>
-                                        <div id="studentListContainer" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding:4px;background:rgba(0,0,0,0.2);border-radius:12px;min-height:100px;">
-                                            <div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:8px;">No students connected</div>
-                                        </div>
-                                    </div>
-                                    <div class="video-overlay-badge">
-                                        <i class="fas fa-circle" style="color:#34d399;"></i>
-                                        <span>Live (Teacher)</span>
-                                    </div>
-                                </div>
-                                <div class="chat-box" style="margin-top:8px;height:120px;">
-                                    <div class="chat-messages" id="teacher-chat-messages"></div>
-                                    <div class="chat-input">
-                                        <input type="text" id="teacher-chat-input" placeholder="Reply..." />
-                                        <button id="teacher-chat-send"><i class="fas fa-paper-plane"></i></button>
-                                    </div>
-                                </div>
-                                <button id="stopLiveBtn" class="btn btn-danger" style="margin-top:8px;">End Class</button>
-                            </div>
-                        `;
-
-                        document.getElementById('switchCameraBtn').addEventListener('click', switchCamera);
-
-                        // Local video
-                        const videoContainer = document.getElementById('teacherVideoContainer');
-                        const localDiv = videoContainer.querySelector('.local-player');
-                        const localVideo = document.createElement('video');
-                        localVideo.srcObject = localStream;
-                        localVideo.autoplay = true;
-                        localVideo.muted = true;
-                        localVideo.style.width = '100%';
-                        localVideo.style.height = '100%';
-                        localVideo.style.objectFit = 'cover';
-                        localDiv.appendChild(localVideo);
-
-                        // Chat
-                        const chatRef = db.ref('chat/' + className);
-                        chatRef.on('child_added', (snap) => {
-                            const data = snap.val();
-                            const msgDiv = document.createElement('div');
-                            msgDiv.className = 'msg ' + (data.role === 'teacher' ? 'teacher' : 'student');
-                            msgDiv.innerHTML = `<span class="sender">${data.sender}</span> ${data.text}`;
-                            const container = document.getElementById('teacher-chat-messages');
-                            container.appendChild(msgDiv);
-                            container.scrollTop = container.scrollHeight;
-                        });
-
-                        document.getElementById('teacher-chat-send').addEventListener('click', () => {
-                            const input = document.getElementById('teacher-chat-input');
-                            const text = input.value.trim();
-                            if (!text) return;
-                            chatRef.push({
-                                sender: currentUser.email,
-                                role: 'teacher',
-                                text: text,
-                                timestamp: Date.now()
-                            });
-                            input.value = '';
-                        });
-
-                        // NOTIFICATION LISTENER
-                        if (notifRef) notifRef.off();
-                        notifRef = db.ref(`notifications/${className}`);
-                        notifRef.on('child_added', (snap) => {
-                            const data = snap.val();
-                            if (!data.seen) {
-                                snap.ref.update({ seen: true });
-                                const notifContainer = document.getElementById('notificationContainer');
-                                if (notifContainer) {
-                                    const placeholder = notifContainer.querySelector('div[style]');
-                                    if (placeholder && notifContainer.children.length === 1) {
-                                        notifContainer.innerHTML = '';
-                                    }
-                                    const notifDiv = document.createElement('div');
-                                    notifDiv.style.cssText =
-                                        'background:rgba(248,113,113,0.15);border:1px solid #f87171;border-radius:10px;padding:6px 10px;margin-bottom:4px;color:#f1f5f9;font-size:12px;display:flex;justify-content:space-between;align-items:center;';
-                                    notifDiv.innerHTML = `
-                                        <span style="color:#f87171;">⚠️</span>
-                                        <span>${data.message}</span>
-                                        <span style="font-size:10px;color:rgba(255,255,255,0.3);">${new Date(data.timestamp).toLocaleTimeString()}</span>
-                                    `;
-                                    notifContainer.prepend(notifDiv);
-                                    while (notifContainer.children.length > 10) {
-                                        notifContainer.removeChild(notifContainer.lastChild);
-                                    }
-                                }
-                            }
-                        });
-
-                        // HANDLE STUDENT CALLS
-                        peer.on('call', (call) => {
-                            const studentId = call.peer;
-                            if (studentCalls[studentId]) {
-                                call.close();
-                                return;
-                            }
-                            call.answer(localStream);
-                            studentCalls[studentId] = { call, stream: null, element: null };
-
-                            // Get student name
-                            db.ref('users').orderByChild('email').equalTo(studentId).once('value').then(snap => {
-                                let displayName = studentId;
-                                if (snap.exists()) {
-                                    const users = snap.val();
-                                    for (const key in users) {
-                                        if (users[key].email === studentId) {
-                                            displayName = users[key].name || studentId;
-                                            break;
-                                        }
-                                    }
-                                }
-                                const studentList = document.getElementById('studentListContainer');
-                                const placeholder = studentList.querySelector('div[style]');
-                                if (placeholder) placeholder.remove();
-
-                                const studentDiv = document.createElement('div');
-                                studentDiv.id = 'student-' + studentId;
-                                studentDiv.className = 'student-item';
-                                studentDiv.style.cssText =
-                                    'display:flex;justify-content:space-between;align-items:center;padding:4px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.05);margin-bottom:4px;';
-                                studentDiv.innerHTML = `
-                                    <span style="font-size:13px;color:rgba(255,255,255,0.7);">${displayName}</span>
-                                    <div style="display:flex;gap:8px;">
-                                        <button class="micToggleBtn" data-student="${studentId}" data-class="${className}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
-                                            <i class="fas fa-microphone-slash"></i>
-                                        </button>
-                                        <button class="videoToggleBtn" data-student="${studentId}" data-class="${className}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
-                                            <i class="fas fa-video-slash"></i>
-                                        </button>
-                                    </div>
-                                `;
-                                studentList.appendChild(studentDiv);
-                                studentCalls[studentId].element = studentDiv;
-                                updateStudentCount();
-
-                                // --- ATTACH EVENT LISTENERS ---
-                                const micBtn = studentDiv.querySelector('.micToggleBtn');
-                                const vidBtn = studentDiv.querySelector('.videoToggleBtn');
-
-                                micBtn.addEventListener('click', function(e) {
-                                    e.stopPropagation();
-                                    const student = this.dataset.student;
-                                    const cls = this.dataset.class;
-                                    const ref = db.ref(`classControl/${cls}/students/${student}/audio`);
-                                    ref.once('value').then(snap => {
-                                        ref.set(!(snap.val() === true));
-                                    });
-                                });
-
-                                vidBtn.addEventListener('click', function(e) {
-                                    e.stopPropagation();
-                                    const student = this.dataset.student;
-                                    const cls = this.dataset.class;
-                                    const ref = db.ref(`classControl/${cls}/students/${student}/video`);
-                                    ref.once('value').then(snap => {
-                                        ref.set(!(snap.val() === true));
-                                    });
-                                });
-
-                                // --- STREAM HANDLING ---
-                                call.on('stream', (remoteStream) => {
-                                    studentCalls[studentId].stream = remoteStream;
-                                    remoteStream.getAudioTracks().forEach(t => t.enabled = false);
-                                    remoteStream.getVideoTracks().forEach(t => t.enabled = false);
-
-                                    const controlRef = db.ref(`classControl/${className}/students/${studentId}`);
-                                    controlRef.on('value', (snap) => {
-                                        if (!snap.exists()) return;
-                                        const data = snap.val();
-                                        // Audio
-                                        const audioOn = data.audio === true;
-                                        remoteStream.getAudioTracks().forEach(t => t.enabled = audioOn);
-                                        const micBtn = studentDiv.querySelector('.micToggleBtn');
-                                        if (audioOn) {
-                                            micBtn.style.color = '#34d399';
-                                            micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-                                        } else {
-                                            micBtn.style.color = '#f87171';
-                                            micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
-                                        }
-                                        // Video
-                                        const videoOn = data.video === true;
-                                        remoteStream.getVideoTracks().forEach(t => t.enabled = videoOn);
-                                        const vidBtn = studentDiv.querySelector('.videoToggleBtn');
-                                        if (videoOn) {
-                                            vidBtn.style.color = '#34d399';
-                                            vidBtn.innerHTML = '<i class="fas fa-video"></i>';
-                                        } else {
-                                            vidBtn.style.color = '#f87171';
-                                            vidBtn.innerHTML = '<i class="fas fa-video-slash"></i>';
-                                        }
-                                        // Show video under name
-                                        let vidContainer = document.getElementById('vid-' + studentId);
-                                        if (videoOn) {
-                                            if (!vidContainer) {
-                                                vidContainer = document.createElement('div');
-                                                vidContainer.id = 'vid-' + studentId;
-                                                vidContainer.style.cssText =
-                                                    'width:100%;max-width:200px;height:150px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);margin-top:4px;background:#0a0f1a;';
-                                                studentDiv.appendChild(vidContainer);
-                                            }
-                                            let vidEl = vidContainer.querySelector('video');
-                                            if (!vidEl) {
-                                                vidEl = document.createElement('video');
-                                                vidEl.autoplay = true;
-                                                vidEl.style.width = '100%';
-                                                vidEl.style.height = '100%';
-                                                vidEl.style.objectFit = 'cover';
-                                                vidContainer.appendChild(vidEl);
-                                            }
-                                            vidEl.srcObject = remoteStream;
-                                            vidContainer.style.display = 'block';
-                                        } else {
-                                            if (vidContainer) {
-                                                vidContainer.style.display = 'none';
-                                            }
-                                        }
-                                    });
-                                });
-
-                                // --- STUDENT LEAVES ---
-                                call.on('close', () => {
-                                    const el = document.getElementById('student-' + studentId);
-                                    if (el) el.remove();
-                                    delete studentCalls[studentId];
-                                    updateStudentCount();
-                                    const vidCont = document.getElementById('vid-' + studentId);
-                                    if (vidCont) vidCont.remove();
-                                    const studentList = document.getElementById('studentListContainer');
-                                    if (studentList.children.length === 0) {
-                                        studentList.innerHTML =
-                                            '<div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:8px;">No students connected</div>';
-                                    }
-                                });
-                            });
-                        });
-
-                        document.getElementById('stopLiveBtn').addEventListener('click', () => {
-                            endClass(classKey);
-                        });
-
-                        function updateStudentCount() {
-                            const container = document.getElementById('studentListContainer');
-                            const count = container.querySelectorAll('.student-item').length;
-                            let header = document.querySelector('.student-count');
-                            if (header) {
-                                header.textContent = `Students: ${count}`;
-                            } else {
-                                const h = document.createElement('div');
-                                h.className = 'student-count';
-                                h.style.cssText =
-                                    'font-weight:600;font-size:14px;padding:4px 8px;color:rgba(255,255,255,0.6);';
-                                h.textContent = `Students: ${count}`;
-                                container.prepend(h);
-                            }
-                        }
-                    });
-
-                    peer.on('error', (err) => {
-                        alert('PeerJS error: ' + err.message);
-                        endClass(classKey);
-                    });
-
-                } catch (err) {
-                    alert('Error starting class: ' + err.message);
-                }
-            }
-
-            async function endClass(classKey) {
-                Object.values(studentCalls).forEach(({ call }) => {
-                    if (call) call.close();
-                });
-                studentCalls = {};
+                currentUser = null;
+                if (peer) { peer.destroy();
+                    peer = null; }
                 if (localStream) {
                     localStream.getTracks().forEach(t => t.stop());
                     localStream = null;
                 }
-                if (peer) {
-                    peer.destroy();
-                    peer = null;
-                }
-                if (notifRef) {
-                    notifRef.off();
-                    notifRef = null;
-                }
-                isTeacherLive = false;
-                liveContainer.innerHTML = '';
-                await classesRef.child(classKey).update({ active: false });
-                loadClasses();
-                currentClassKey = null;
-                if (currentClassKey) {
-                    await db.ref(`classControl/${currentClassKey}`).remove();
-                }
+                connections = {};
+                isInCall = false;
+                currentClassId = null;
+                document.getElementById('videoContainer').innerHTML = '';
+                document.getElementById('chatMessages').innerHTML = '';
             }
-        }
+        });
 
-        // ================================================================
-        //  8. ATTENDANCE (FIXED)
-        // ================================================================
-        function renderTeacherAttendance() {
-            const today = new Date().toISOString().split('T')[0];
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>Attendance</h2>
-                    <div id="attendanceContainer"></div>
-                </div>
-            `;
-            const container = document.getElementById('attendanceContainer');
-
-            const branch = currentBranch || '';
-            const semester = currentSemester || 0;
-
-            db.ref('users').orderByChild('role').equalTo('student').on('value', (snap) => {
-                container.innerHTML = '';
-                if (snap.exists()) {
-                    const users = snap.val();
-                    let html = `
-                        <div class="card">
-                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                                <span><strong>Date:</strong> ${today}</span>
-                                <span><strong>Branch:</strong> ${branch} | <strong>Semester:</strong> ${semester}</span>
-                            </div>
-                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-weight:600;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <div>Student</div>
-                                <div>Status</div>
-                                <div>Action</div>
-                            </div>
-                    `;
-                    let found = false;
-                    for (const key in users) {
-                        const user = users[key];
-                        if (user.branch === branch && user.semester === semester) {
-                            found = true;
-                            const studentEmail = user.email;
-                            const studentName = user.name || studentEmail;
-                            const attRef = db.ref(`attendance/${today}/${studentEmail}`);
-                            attRef.once('value').then(snap2 => {
-                                const status = snap2.exists() ? snap2.val().status : 'Absent';
-                                const isPresent = status === 'Present';
-                                const studentDiv = document.createElement('div');
-                                studentDiv.style.cssText =
-                                    'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);align-items:center;';
-                                studentDiv.innerHTML = `
-                                    <div>${studentName}</div>
-                                    <div style="color:${isPresent ? '#34d399' : '#f87171'};">${status}</div>
-                                    <div>
-                                        <button class="attendanceToggle" data-email="${studentEmail}" style="padding:2px 12px;border-radius:20px;border:none;background:${isPresent ? '#f87171' : '#34d399'};color:#fff;cursor:pointer;font-size:11px;">
-                                            ${isPresent ? 'Mark Absent' : 'Mark Present'}
-                                        </button>
-                                    </div>
-                                `;
-                                container.appendChild(studentDiv);
-
-                                // Toggle button
-                                const toggleBtn = studentDiv.querySelector('.attendanceToggle');
-                                toggleBtn.addEventListener('click', function() {
-                                    const email = this.dataset.email;
-                                    const newStatus = isPresent ? 'Absent' : 'Present';
-                                    db.ref(`attendance/${today}/${email}`).set({
-                                        status: newStatus,
-                                        timestamp: Date.now()
-                                    }).then(() => {
-                                        // Re-render attendance page after update
-                                        renderTeacherAttendance();
-                                    });
-                                });
-                            });
-                        }
-                    }
-                    if (!found) {
-                        container.innerHTML =
-                            '<div class="text-muted">No students found for your branch & semester.</div>';
-                    }
-                } else {
-                    container.innerHTML = '<div class="text-muted">No students registered.</div>';
+        // ===================================================================
+        // 4. PEERJS INIT
+        // ===================================================================
+        function initPeer() {
+            if (peer) return;
+            // Use a unique peer ID based on user UID
+            const peerId = currentUser.uid;
+            peer = new Peer(peerId, {
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' }
+                    ]
                 }
             });
-        }
-
-        function renderStudentAttendance() {
-            const today = new Date().toISOString().split('T')[0];
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>My Attendance</h2>
-                    <div id="attendanceContainer"></div>
-                </div>
-            `;
-            const container = document.getElementById('attendanceContainer');
-
-            const email = currentUser.email;
-            db.ref('attendance').on('value', (snap) => {
-                container.innerHTML = '';
-                if (snap.exists()) {
-                    const data = snap.val();
-                    let totalDays = 0;
-                    let presentDays = 0;
-                    let html = '<div class="card">';
-                    for (const date in data) {
-                        if (data[date][email]) {
-                            totalDays++;
-                            if (data[date][email].status === 'Present') presentDays++;
-                        }
-                    }
-                    html += `
-                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                            <span><strong>Total Days:</strong> ${totalDays}</span>
-                            <span><strong>Present:</strong> ${presentDays}</span>
-                            <span><strong>Absent:</strong> ${totalDays - presentDays}</span>
-                            <span><strong>Attendance %:</strong> ${totalDays > 0 ? Math.round((presentDays/totalDays)*100) : 0}%</span>
-                        </div>
-                        <div style="margin-top:8px;max-height:200px;overflow-y:auto;">
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-weight:600;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <div>Date</div>
-                                <div>Status</div>
-                            </div>
-                    `;
-                    const dates = Object.keys(data).sort((a, b) => b.localeCompare(a));
-                    for (const date of dates) {
-                        if (data[date][email]) {
-                            const status = data[date][email].status;
-                            html += `
-                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
-                                    <div>${date}</div>
-                                    <div style="color:${status === 'Present' ? '#34d399' : '#f87171'};">${status}</div>
-                                </div>
-                            `;
-                        }
-                    }
-                    html += '</div></div>';
-                    container.innerHTML = html;
-                } else {
-                    container.innerHTML = '<div class="text-muted">No attendance records found.</div>';
-                }
+            peer.on('open', id => {
+                console.log('PeerJS open: ' + id);
             });
-        }
-
-        // ================================================================
-        //  9. RATINGS (FIXED)
-        // ================================================================
-        function renderTeacherRatings() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>Ratings</h2>
-                    <div id="ratingList"></div>
-                </div>
-            `;
-            const list = document.getElementById('ratingList');
-            const branch = currentBranch || '';
-            const semester = currentSemester || 0;
-
-            db.ref('users').orderByChild('role').equalTo('student').on('value', (snap) => {
-                list.innerHTML = '';
-                if (snap.exists()) {
-                    const users = snap.val();
-                    let html = '';
-                    let count = 0;
-                    for (const key in users) {
-                        const user = users[key];
-                        if (user.branch === branch && user.semester === semester) {
-                            count++;
-                            html += `
-                                <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-                                    <span>${user.name || user.email}</span>
-                                    <div>
-                                        <select class="ratingSelect" data-email="${user.email}" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px 10px;color:#fff;font-size:12px;">
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4" selected>4</option>
-                                            <option value="5">5</option>
-                                        </select>
-                                        <button class="btn btn-primary btn-sm saveRating" data-email="${user.email}" style="margin-left:4px;">Save</button>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    }
-                    if (count === 0) {
-                        list.innerHTML = '<div class="text-muted">No students found for your branch & semester.</div>';
-                    } else {
-                        list.innerHTML = html;
-                        // Load saved ratings
-                        db.ref('ratings/' + currentUser.uid).once('value').then(snap2 => {
-                            if (snap2.exists()) {
-                                const ratings = snap2.val();
-                                document.querySelectorAll('.ratingSelect').forEach(sel => {
-                                    const email = sel.dataset.email;
-                                    if (ratings[email]) sel.value = ratings[email];
-                                });
-                            }
-                        });
-                        document.querySelectorAll('.saveRating').forEach(btn => {
-                            btn.addEventListener('click', async () => {
-                                const email = btn.dataset.email;
-                                const sel = document.querySelector(`.ratingSelect[data-email="${email}"]`);
-                                await db.ref('ratings/' + currentUser.uid + '/' + email).set(parseInt(sel
-                                .value));
-                                alert('✅ Rating saved!');
-                            });
-                        });
-                    }
-                } else {
-                    list.innerHTML = '<div class="text-muted">No students.</div>';
-                }
+            peer.on('error', err => {
+                console.error('PeerJS error:', err);
+                showToast('PeerJS error: ' + err.message);
             });
-        }
-
-        function renderStudentRating() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>My Rating</h2>
-                    <div id="studentRatingDisplay"></div>
-                </div>
-            `;
-            const display = document.getElementById('studentRatingDisplay');
-            // Find teacher who rated this student (assuming teacher is nagrajmall2317@gmail.com)
-            const teacherEmail = 'nagrajmall2317@gmail.com';
-            db.ref('users').once('value').then(snap => {
-                if (snap.exists()) {
-                    const users = snap.val();
-                    let teacherUid = null;
-                    for (const [uid, data] of Object.entries(users)) {
-                        if (data.email === teacherEmail && data.role === 'teacher') {
-                            teacherUid = uid;
-                            break;
-                        }
-                    }
-                    if (teacherUid) {
-                        db.ref('ratings/' + teacherUid + '/' + currentUser.email).on('value', (snap2) => {
-                            if (snap2.exists()) {
-                                display.innerHTML = `<div style="font-size:40px;font-weight:700;color:#a78bfa;">${snap2.val()} / 5</div>`;
-                            } else {
-                                display.innerHTML = '<div class="text-muted">No rating given yet.</div>';
-                            }
-                        });
-                    } else {
-                        display.innerHTML = '<div class="text-muted">Teacher not found.</div>';
-                    }
-                }
-            });
-        }
-
-        // ================================================================
-        //  10. OTHER PAGES (unchanged)
-        // ================================================================
-        function renderTeacherStudents() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>Students</h2>
-                    <div id="studentList"></div>
-                </div>
-            `;
-            const list = document.getElementById('studentList');
-            const branch = currentBranch || '';
-            const semester = currentSemester || 0;
-
-            db.ref('users').orderByChild('role').equalTo('student').on('value', (snap) => {
-                list.innerHTML = '';
-                if (snap.exists()) {
-                    const users = snap.val();
-                    let html = '<div class="card">';
-                    let count = 0;
-                    for (const key in users) {
-                        const user = users[key];
-                        if (user.branch === branch && user.semester === semester) {
-                            count++;
-                            html += `
-                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
-                                    <span>${user.name || user.email}</span>
-                                    <span style="color:rgba(255,255,255,0.4);">${user.email}</span>
-                                </div>
-                            `;
-                        }
-                    }
-                    html += `<div style="margin-top:8px;font-weight:600;color:#a78bfa;">Total Students: ${count}</div>`;
-                    html += '</div>';
-                    list.innerHTML = html;
-                } else {
-                    list.innerHTML = '<div class="text-muted">No students found.</div>';
-                }
-            });
-        }
-
-        function renderTeacherHomework() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>Homework Management</h2>
-                    <div class="card">
-                        <h3 style="font-size:16px;margin-bottom:8px;">📤 Upload New Assignment</h3>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                            <input type="text" id="hwSubject" class="input-field" placeholder="Subject" />
-                            <input type="text" id="hwTopic" class="input-field" placeholder="Topic" />
-                            <input type="text" id="hwChapter" class="input-field" placeholder="Chapter" />
-                            <input type="datetime-local" id="hwDueDate" class="input-field" />
-                        </div>
-                        <input type="file" id="hwTeacherFile" accept="image/*" class="input-field" style="margin-top:8px;" />
-                        <button id="uploadHwBtn" class="btn btn-primary" style="margin-top:8px;">Upload Assignment</button>
-                        <div id="hwUploadStatus" class="text-muted mt-10"></div>
-                    </div>
-                    <div id="hwSubmissions"></div>
-                </div>
-            `;
-            const fileInput = document.getElementById('hwTeacherFile');
-            const uploadBtn = document.getElementById('uploadHwBtn');
-            const status = document.getElementById('hwUploadStatus');
-            const subsDiv = document.getElementById('hwSubmissions');
-            const subject = document.getElementById('hwSubject');
-            const topic = document.getElementById('hwTopic');
-            const chapter = document.getElementById('hwChapter');
-            const dueDate = document.getElementById('hwDueDate');
-
-            uploadBtn.addEventListener('click', async () => {
-                const file = fileInput.files[0];
-                const subj = subject.value.trim();
-                const top = topic.value.trim();
-                const chap = chapter.value.trim();
-                const due = dueDate.value;
-                if (!file || !subj || !top || !chap || !due) {
-                    status.textContent = 'Please fill all fields and select an image.';
+            // Handle incoming calls
+            peer.on('call', call => {
+                if (!localStream) {
+                    showToast('No local stream to answer call.');
                     return;
                 }
-                status.textContent = '⏳ Converting...';
-                try {
-                    const reader = new FileReader();
-                    const base64 = await new Promise((resolve) => {
-                        reader.onload = (e) => resolve(e.target.result);
-                        reader.readAsDataURL(file);
-                    });
-                    const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(base64));
-                    const hashArray = Array.from(new Uint8Array(hashBuffer));
-                    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-                    const hwRef = db.ref('homework/' + currentUser.uid).push();
-                    await hwRef.set({
-                        teacher: currentUser.uid,
-                        subject: subj,
-                        topic: top,
-                        chapter: chap,
-                        dueDate: due,
-                        imageBase64: base64,
-                        imageHash: hashHex,
-                        timestamp: Date.now(),
-                        branch: currentBranch || '',
-                        semester: currentSemester || 0
-                    });
-                    status.textContent = '✅ Assignment uploaded!';
-                    fileInput.value = '';
-                    subject.value = '';
-                    topic.value = '';
-                    chapter.value = '';
-                    dueDate.value = '';
-                    loadSubmissions();
-                } catch (err) {
-                    status.textContent = '❌ Error: ' + err.message;
-                }
-            });
-
-            function loadSubmissions() {
-                db.ref('homework/' + currentUser.uid).on('value', (snap) => {
-                    subsDiv.innerHTML = '';
-                    if (snap.exists()) {
-                        const data = snap.val();
-                        let html = '<h3 style="font-size:16px;margin:12px 0 8px;">📋 All Assignments</h3>';
-                        for (const [hwId, hw] of Object.entries(data)) {
-                            html += `<div class="card">
-                                <div><strong>${hw.subject}</strong> — ${hw.topic} (Ch. ${hw.chapter})</div>
-                                <div style="font-size:12px;color:rgba(255,255,255,0.5);">Due: ${new Date(hw.dueDate).toLocaleString()}</div>
-                                <div><strong>Assignment:</strong> <img src="${hw.imageBase64}" style="max-width:80px;max-height:80px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);" /></div>
-                                <div><strong>Submissions:</strong> ${hw.submissions ? Object.keys(hw.submissions).length : 0}</div>`;
-                            if (hw.submissions) {
-                                html += '<div style="margin-top:6px;">';
-                                for (const [sid, sub] of Object.entries(hw.submissions)) {
-                                    const sim = sub.similarity || 0;
-                                    const grade = sub.grade || 'N/A';
-                                    const warning = sim > 70 ? ' ⚠️ Possible Cheating' : '';
-                                    html += `<div style="display:flex;gap:10px;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px;flex-wrap:wrap;">
-                                        <span style="color:rgba(255,255,255,0.5);">${sid}</span>
-                                        <span style="color:#a78bfa;">Grade: ${grade}</span>
-                                        <span style="color:rgba(255,255,255,0.3);">Sim: ${sim.toFixed(1)}%</span>
-                                        ${warning}
-                                        <img src="${sub.imageBase64}" style="max-width:30px;max-height:30px;border-radius:4px;border:1px solid rgba(255,255,255,0.05);" />
-                                    </div>`;
-                                }
-                                html += '</div>';
-                            }
-                            html += '</div>';
-                        }
-                        subsDiv.innerHTML = html;
-                    } else {
-                        subsDiv.innerHTML = '<div class="text-muted">No assignments yet.</div>';
-                    }
+                call.answer(localStream);
+                call.on('stream', remoteStream => {
+                    addRemoteVideo(call.peer, remoteStream);
                 });
-            }
-            loadSubmissions();
+                call.on('close', () => {
+                    removeRemoteVideo(call.peer);
+                });
+                // Store connection
+                connections[call.peer] = call;
+            });
         }
 
-        // ================================================================
-        //  11. STUDENT LIVE CLASS (WITH TOAST)
-        // ================================================================
-        function renderStudentLive() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>Live Class</h2>
-                    <div id="studentClassList"></div>
-                    <div id="studentLiveContainer"></div>
-                </div>
-            `;
-            const classListDiv = document.getElementById('studentClassList');
-            const liveContainer = document.getElementById('studentLiveContainer');
+        // ===================================================================
+        // 5. LOCAL MEDIA & TOGGLES
+        // ===================================================================
+        async function getLocalMedia() {
+            if (localStream) return localStream;
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: { width: 320, height: 240, facingMode: 'user' }
+                });
+                localStream = stream;
+                // Display local video
+                const container = document.getElementById('videoContainer');
+                // Remove existing local player if any
+                const oldLocal = container.querySelector('.local-player');
+                if (oldLocal) oldLocal.remove();
+                const div = document.createElement('div');
+                div.className = 'local-player';
+                div.id = 'localVideoContainer';
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.autoplay = true;
+                video.muted = true;
+                video.playsInline = true;
+                div.appendChild(video);
+                // Badge
+                const badge = document.createElement('div');
+                badge.className = 'video-overlay-badge';
+                badge.innerHTML = '<i class="fas fa-circle" style="color:#34d399;"></i> You';
+                div.appendChild(badge);
+                container.prepend(div); // show local video first
+                return stream;
+            } catch (err) {
+                console.error('getUserMedia error:', err);
+                showToast('Cannot access camera/mic: ' + err.message);
+                return null;
+            }
+        }
 
-            const userBranch = (currentBranch || '').trim().toLowerCase();
-            const userSemester = currentSemester || 0;
+        function toggleMic() {
+            if (!localStream) {
+                showToast('Please start/join a class first.');
+                return;
+            }
+            const audioTrack = localStream.getAudioTracks()[0];
+            if (audioTrack) {
+                audioTrack.enabled = !audioTrack.enabled;
+                document.getElementById('toggleMicBtn').innerHTML =
+                    audioTrack.enabled ? '<i class="fas fa-microphone"></i> Mic' :
+                    '<i class="fas fa-microphone-slash"></i> Mic';
+            }
+        }
 
-            db.ref('classes').orderByChild('active').equalTo(true).on('value', (snap) => {
-                classListDiv.innerHTML = '';
-                if (snap.exists()) {
-                    const classes = snap.val();
-                    let found = false;
-                    let html = '<div style="margin-bottom:10px;">Available Live Classes:</div>';
+        function toggleCam() {
+            if (!localStream) {
+                showToast('Please start/join a class first.');
+                return;
+            }
+            const videoTrack = localStream.getVideoTracks()[0];
+            if (videoTrack) {
+                videoTrack.enabled = !videoTrack.enabled;
+                document.getElementById('toggleCamBtn').innerHTML =
+                    videoTrack.enabled ? '<i class="fas fa-video"></i> Cam' :
+                    '<i class="fas fa-video-slash"></i> Cam';
+            }
+        }
 
-                    Object.keys(classes).forEach(key => {
-                        const cls = classes[key];
-                        const clsBranch = (cls.branch || '').trim().toLowerCase();
-                        const clsSemester = cls.semester || 0;
-
-                        if (clsBranch === userBranch && clsSemester === userSemester) {
-                            found = true;
-                            html += `
-                                <div class="class-item" data-key="${key}">
-                                    <span class="name">${cls.className} (${cls.subject})</span>
-                                    <button class="btn btn-success btn-sm joinClassBtn" data-name="${cls.className}">Join</button>
-                                </div>
-                            `;
-                        }
-                    });
-
-                    if (!found) {
-                        html += `<div class="text-muted">No live classes for your branch & semester.</div>`;
-                    }
-                    classListDiv.innerHTML = html;
-
-                    document.querySelectorAll('.joinClassBtn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const name = btn.dataset.name;
-                            joinStudentClass(name);
-                        });
-                    });
-                } else {
-                    classListDiv.innerHTML = '<div class="text-muted">No live classes at the moment.</div>';
-                }
+        // ===================================================================
+        // 6. CLASS MANAGEMENT (Start / Join / End)
+        // ===================================================================
+        async function startClass() {
+            if (currentUser.role !== 'teacher') {
+                showToast('Only teachers can start a class.');
+                return;
+            }
+            const classId = document.getElementById('classIdInput').value.trim();
+            if (!classId) {
+                showToast('Please enter a Class ID.');
+                return;
+            }
+            // Check if class already exists
+            const snap = await db.ref('classes/' + classId).once('value');
+            if (snap.exists()) {
+                showToast('Class ID already exists. Choose another.');
+                return;
+            }
+            // Get local media
+            const stream = await getLocalMedia();
+            if (!stream) return;
+            // Create class node in DB
+            await db.ref('classes/' + classId).set({
+                teacherId: currentUser.uid,
+                teacherName: currentUser.name,
+                startTime: firebase.database.ServerValue.TIMESTAMP,
+                active: true
             });
+            currentClassId = classId;
+            isTeacher = true;
+            isInCall = true;
+            document.getElementById('panelClassId').textContent = classId;
+            document.getElementById('panelTeacher').textContent = currentUser.name;
+            document.getElementById('panelStatus').textContent = 'Active (Teacher)';
+            document.getElementById('classStatus').textContent = 'Class started: ' + classId;
+            // Show classroom page
+            switchPage('classroom');
+            // Listen for students joining (via DB presence)
+            listenForStudents(classId);
+            // Update UI
+            document.getElementById('startClassBtn').style.display = 'none';
+            document.getElementById('joinClassBtn').style.display = 'none';
+            document.getElementById('endClassBtn').style.display = 'inline-flex';
+            showToast('Class started! Share the Class ID with students.');
+            // Also start listening for chat messages
+            listenForChat(classId);
+        }
 
-            let studentPeer = null;
-            let studentCall = null;
-            let studentStream = null;
-            let faceDetector = null;
-            let faceCheckInterval = null;
-            let noFaceCount = 0;
-            let notificationSent = false;
-            let currentClassName = '';
-            let toastTimeout = null;
+        async function joinClass() {
+            if (currentUser.role !== 'student') {
+                showToast('Only students can join a class.');
+                return;
+            }
+            const classId = document.getElementById('classIdInput').value.trim();
+            if (!classId) {
+                showToast('Please enter a Class ID.');
+                return;
+            }
+            // Check if class exists and is active
+            const snap = await db.ref('classes/' + classId).once('value');
+            const classData = snap.val();
+            if (!classData || !classData.active) {
+                showToast('Class not found or inactive.');
+                return;
+            }
+            // Get local media
+            const stream = await getLocalMedia();
+            if (!stream) return;
+            // Add student to class participants
+            await db.ref('classes/' + classId + '/students/' + currentUser.uid).set({
+                name: currentUser.name,
+                joinedAt: firebase.database.ServerValue.TIMESTAMP
+            });
+            currentClassId = classId;
+            isTeacher = false;
+            isInCall = true;
+            document.getElementById('panelClassId').textContent = classId;
+            document.getElementById('panelTeacher').textContent = classData.teacherName || 'Unknown';
+            document.getElementById('panelStatus').textContent = 'Active (Student)';
+            document.getElementById('classStatus').textContent = 'Joined class: ' + classId;
+            // Mark attendance automatically
+            markAttendance(classId);
+            // Call the teacher
+            callTeacher(classData.teacherId);
+            // Switch to classroom
+            switchPage('classroom');
+            document.getElementById('startClassBtn').style.display = 'none';
+            document.getElementById('joinClassBtn').style.display = 'none';
+            document.getElementById('endClassBtn').style.display = 'none';
+            listenForChat(classId);
+            // Update participants list
+            updateParticipants(classId);
+            showToast('Joined class successfully!');
+        }
 
-            async function initFaceDetection(videoElement, className) {
-                if (!window.FaceDetector) {
-                    console.warn('FaceDetector not supported. Face tracking disabled.');
+        function endClass() {
+            if (!currentClassId) return;
+            if (isTeacher) {
+                // Mark class as inactive
+                db.ref('classes/' + currentClassId + '/active').set(false);
+                // Optionally, store end time
+                db.ref('classes/' + currentClassId + '/endTime').set(firebase.database.ServerValue.TIMESTAMP);
+                // Disconnect all students? We'll just stop
+            }
+            // Clean up
+            leaveCall();
+            // Remove class from UI
+            document.getElementById('classStatus').textContent = 'Class ended.';
+            document.getElementById('panelStatus').textContent = 'Inactive';
+            document.getElementById('startClassBtn').style.display = (currentUser.role === 'teacher') ? 'inline-flex' :
+            'none';
+            document.getElementById('joinClassBtn').style.display = (currentUser.role === 'student') ? 'inline-flex' : 'none';
+            document.getElementById('endClassBtn').style.display = 'none';
+            currentClassId = null;
+            isInCall = false;
+            // Remove all remote videos
+            document.querySelectorAll('.remote-player').forEach(el => el.remove());
+            // Stop listening to DB listeners (detach)
+            if (window._chatListener) {
+                window._chatListener.off();
+                window._chatListener = null;
+            }
+            if (window._studentsListener) {
+                window._studentsListener.off();
+                window._studentsListener = null;
+            }
+            showToast('Class ended.');
+            switchPage('dashboard');
+        }
+
+        function leaveCall() {
+            // Stop all connections
+            for (let pid in connections) {
+                connections[pid].close();
+                delete connections[pid];
+            }
+            // Remove remote videos
+            document.querySelectorAll('.remote-player').forEach(el => el.remove());
+            // Stop local stream but keep it for possible re-use? We'll keep it.
+            // But we can stop tracks if we want.
+            // We'll just hide local video? Actually we keep it.
+            // Reset UI
+            document.getElementById('toggleMicBtn').innerHTML = '<i class="fas fa-microphone"></i> Mic';
+            document.getElementById('toggleCamBtn').innerHTML = '<i class="fas fa-video"></i> Cam';
+            isInCall = false;
+            // If teacher ends, we might end class, but that's handled in endClass.
+            // For students, they just leave.
+            // Remove themselves from class participants
+            if (currentClassId && !isTeacher) {
+                db.ref('classes/' + currentClassId + '/students/' + currentUser.uid).remove();
+            }
+            // Detach listeners
+            if (window._chatListener) {
+                window._chatListener.off();
+                window._chatListener = null;
+            }
+            if (window._studentsListener) {
+                window._studentsListener.off();
+                window._studentsListener = null;
+            }
+            // Switch to dashboard
+            switchPage('dashboard');
+            document.getElementById('classStatus').textContent = 'Left class.';
+            document.getElementById('panelStatus').textContent = 'Inactive';
+        }
+
+        // ===================================================================
+        // 7. PEER CALL (Student -> Teacher)
+        // ===================================================================
+        function callTeacher(teacherId) {
+            if (!peer) {
+                showToast('Peer not ready.');
+                return;
+            }
+            // Get teacher's peer ID (same as teacher's uid)
+            const teacherPeerId = teacherId;
+            const call = peer.call(teacherPeerId, localStream);
+            call.on('stream', remoteStream => {
+                addRemoteVideo(teacherPeerId, remoteStream);
+            });
+            call.on('close', () => {
+                removeRemoteVideo(teacherPeerId);
+            });
+            connections[teacherPeerId] = call;
+        }
+
+        // ===================================================================
+        // 8. VIDEO HELPERS
+        // ===================================================================
+        function addRemoteVideo(peerId, stream) {
+            const container = document.getElementById('videoContainer');
+            // Check if already exists
+            let div = container.querySelector(`.remote-player[data-peer="${peerId}"]`);
+            if (!div) {
+                div = document.createElement('div');
+                div.className = 'remote-player';
+                div.dataset.peer = peerId;
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.autoplay = true;
+                video.playsInline = true;
+                div.appendChild(video);
+                const badge = document.createElement('div');
+                badge.className = 'video-overlay-badge';
+                badge.innerHTML = `<i class="fas fa-user"></i> Peer ${peerId.substr(0,6)}`;
+                div.appendChild(badge);
+                container.appendChild(div);
+            } else {
+                // Update stream if needed
+                const video = div.querySelector('video');
+                if (video) video.srcObject = stream;
+            }
+        }
+
+        function removeRemoteVideo(peerId) {
+            const el = document.querySelector(`.remote-player[data-peer="${peerId}"]`);
+            if (el) el.remove();
+            delete connections[peerId];
+        }
+
+        // ===================================================================
+        // 9. CHAT
+        // ===================================================================
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text || !currentClassId) return;
+            const msgRef = db.ref('classes/' + currentClassId + '/chat').push();
+            msgRef.set({
+                senderId: currentUser.uid,
+                senderName: currentUser.name,
+                role: currentUser.role,
+                text: text,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            input.value = '';
+        }
+
+        function listenForChat(classId) {
+            // Remove previous listener
+            if (window._chatListener) {
+                window._chatListener.off();
+                window._chatListener = null;
+            }
+            const chatRef = db.ref('classes/' + classId + '/chat');
+            window._chatListener = chatRef.orderByChild('timestamp').limitToLast(50);
+            window._chatListener.on('child_added', snap => {
+                const data = snap.val();
+                if (!data) return;
+                // Skip if message is from self? We'll show all.
+                const messagesDiv = document.getElementById('chatMessages');
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'msg-item ' + (data.role === 'teacher' ? 'teacher' : 'student');
+                msgDiv.innerHTML = `<span class="sender">${data.senderName} (${data.role})</span>${data.text}`;
+                messagesDiv.appendChild(msgDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            });
+        }
+
+        // ===================================================================
+        // 10. ATTENDANCE
+        // ===================================================================
+        function markAttendance(classId) {
+            // Mark the current user's attendance
+            const attRef = db.ref('classes/' + classId + '/attendance/' + currentUser.uid);
+            attRef.set({
+                name: currentUser.name,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            showToast('Attendance marked for ' + currentUser.name);
+        }
+
+        function loadAttendance(classId) {
+            const attRef = db.ref('classes/' + classId + '/attendance');
+            attRef.once('value').then(snap => {
+                const data = snap.val();
+                const list = document.getElementById('attendanceList');
+                if (!data) {
+                    list.innerHTML = 'No attendance records.';
                     return;
                 }
-                currentClassName = className;
-                try {
-                    faceDetector = new FaceDetector({
-                        maxDetectedFaces: 1,
-                        fastMode: true
-                    });
-                    faceCheckInterval = setInterval(async () => {
-                        if (!videoElement || videoElement.readyState < 2) return;
-                        try {
-                            const faces = await faceDetector.detect(videoElement);
-                            if (faces.length > 0) {
-                                noFaceCount = 0;
-                                notificationSent = false;
-                                toast.style.display = 'none';
-                                if (toastTimeout) {
-                                    clearTimeout(toastTimeout);
-                                    toastTimeout = null;
-                                }
-                            } else {
-                                noFaceCount++;
-                                if (noFaceCount > 5 && !notificationSent) {
-                                    notificationSent = true;
-                                    const notificationRef = db.ref(`notifications/${className}`);
-                                    notificationRef.push({
-                                        studentName: currentName || currentUser.email,
-                                        studentEmail: currentUser.email,
-                                        message: `${currentName || currentUser.email} is not visible on camera!`,
-                                        timestamp: Date.now(),
-                                        seen: false
-                                    });
-                                    toast.textContent = '⚠️ Your face is not visible. Please sit in front of the camera.';
-                                    toast.style.display = 'block';
-                                    if (toastTimeout) clearTimeout(toastTimeout);
-                                    toastTimeout = setTimeout(() => {
-                                        toast.style.display = 'none';
-                                    }, 5000);
-                                }
-                            }
-                        } catch (err) {
-                            console.warn('Face detection error:', err);
-                        }
-                    }, 1000);
-                } catch (err) {
-                    console.warn('FaceDetector error:', err);
+                let html = '';
+                for (let uid in data) {
+                    const rec = data[uid];
+                    html += `<div class="info-item"><strong>${rec.name}</strong> - ${new Date(rec.timestamp).toLocaleString()}</div>`;
                 }
-            }
+                list.innerHTML = html || 'No records.';
+            });
+        }
 
-            function stopFaceDetection() {
-                if (faceCheckInterval) {
-                    clearInterval(faceCheckInterval);
-                    faceCheckInterval = null;
+        // ===================================================================
+        // 11. RATING
+        // ===================================================================
+        function setRating(val) {
+            selectedRating = val;
+            const stars = document.querySelectorAll('#ratingStars i');
+            stars.forEach((star, idx) => {
+                star.classList.toggle('active', idx < val);
+            });
+        }
+
+        function submitRating() {
+            if (!currentClassId) {
+                document.getElementById('ratingMsg').textContent = 'No active class to rate.';
+                return;
+            }
+            if (selectedRating === 0) {
+                document.getElementById('ratingMsg').textContent = 'Please select a rating.';
+                return;
+            }
+            // Store rating under classId/ratings/uid
+            const ratingRef = db.ref('classes/' + currentClassId + '/ratings/' + currentUser.uid);
+            ratingRef.set({
+                rating: selectedRating,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                document.getElementById('ratingMsg').textContent = 'Rating submitted! Thank you.';
+                setRating(0); // reset
+                // clear stars
+                document.querySelectorAll('#ratingStars i').forEach(i => i.classList.remove('active'));
+            }).catch(err => {
+                document.getElementById('ratingMsg').textContent = 'Error: ' + err.message;
+            });
+        }
+
+        // ===================================================================
+        // 12. PARTICIPANTS LIST (Real-time)
+        // ===================================================================
+        function listenForStudents(classId) {
+            if (window._studentsListener) {
+                window._studentsListener.off();
+                window._studentsListener = null;
+            }
+            const studentsRef = db.ref('classes/' + classId + '/students');
+            window._studentsListener = studentsRef;
+            studentsRef.on('value', snap => {
+                const data = snap.val();
+                const list = document.getElementById('participantList');
+                if (!data) {
+                    list.innerHTML = 'No students joined yet.';
+                    document.getElementById('panelStudents').textContent = '0';
+                    return;
                 }
-                if (faceDetector) {
-                    faceDetector = null;
+                const count = Object.keys(data).length;
+                document.getElementById('panelStudents').textContent = count;
+                let html = '';
+                for (let uid in data) {
+                    const s = data[uid];
+                    html += `<div class="info-item">${s.name} (joined ${new Date(s.joinedAt).toLocaleTimeString()})</div>`;
                 }
-                noFaceCount = 0;
-                notificationSent = false;
+                list.innerHTML = html || 'No students.';
+                // Also update attendance view if on attendance page
+                if (document.getElementById('attendancePage').style.display !== 'none') {
+                    loadAttendance(classId);
+                }
+            });
+        }
+
+        function updateParticipants(classId) {
+            // Called when joining, but listener will update
+            listenForStudents(classId);
+        }
+
+        // ===================================================================
+        // 13. PAGE SWITCHING
+        // ===================================================================
+        function switchPage(page) {
+            // Hide all pages
+            document.querySelectorAll('#pageContent > div').forEach(div => div.style.display = 'none');
+            // Show selected
+            if (page === 'dashboard') {
+                document.getElementById('dashboardPage').style.display = 'block';
+                document.getElementById('pageTitle').textContent = 'Dashboard';
+                document.getElementById('pageSubtitle').textContent = 'Welcome, ' + (currentUser ? currentUser.name : 'User');
+                // Update participants if class active
+                if (currentClassId) {
+                    listenForStudents(currentClassId);
+                    loadAttendance(currentClassId);
+                }
+            } else if (page === 'classroom') {
+                document.getElementById('classroomPage').style.display = 'flex';
+                document.getElementById('pageTitle').textContent = 'Classroom';
+                document.getElementById('pageSubtitle').textContent = 'Class ID: ' + (currentClassId || 'None');
+            } else if (page === 'attendance') {
+                document.getElementById('attendancePage').style.display = 'block';
+                document.getElementById('pageTitle').textContent = 'Attendance';
+                document.getElementById('pageSubtitle').textContent = 'Records for current class';
+                if (currentClassId) loadAttendance(currentClassId);
+            } else if (page === 'rating') {
+                document.getElementById('ratingPage').style.display = 'block';
+                document.getElementById('pageTitle').textContent = 'Rating';
+                document.getElementById('pageSubtitle').textContent = 'Rate the last lesson';
+            }
+            // Update active nav
+            document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+            const navMap = { 'dashboard': 0, 'classroom': 1, 'attendance': 2, 'rating': 3 };
+            const idx = navMap[page] || 0;
+            const navLinks = document.querySelectorAll('.sidebar nav a');
+            if (navLinks[idx]) navLinks[idx].classList.add('active');
+        }
+
+        // ===================================================================
+        // 14. TOAST HELPER
+        // ===================================================================
+        function showToast(msg, type = 'error') {
+            toast.textContent = msg;
+            toast.className = 'toast ' + (type === 'success' ? 'success' : '');
+            toast.style.display = 'block';
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => {
                 toast.style.display = 'none';
-                if (toastTimeout) {
-                    clearTimeout(toastTimeout);
-                    toastTimeout = null;
-                }
-            }
-
-            async function joinStudentClass(className) {
-                if (studentCall) {
-                    studentCall.close();
-                    studentCall = null;
-                    if (studentStream) {
-                        studentStream.getTracks().forEach(t => t.stop());
-                        studentStream = null;
-                    }
-                    if (studentPeer) {
-                        studentPeer.destroy();
-                        studentPeer = null;
-                    }
-                    liveContainer.innerHTML = '';
-                    stopFaceDetection();
-                    return;
-                }
-
-                try {
-                    studentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                    studentStream.getAudioTracks().forEach(t => t.enabled = false);
-
-                    const randomId = 'student-' + Date.now();
-                    studentPeer = new Peer(randomId, { debug: 2 });
-
-                    await new Promise((resolve, reject) => {
-                        const timeout = setTimeout(() => reject(new Error('Peer connection timeout')), 10000);
-                        studentPeer.on('open', () => {
-                            clearTimeout(timeout);
-                            resolve();
-                        });
-                        studentPeer.on('error', reject);
-                    });
-
-                    const call = studentPeer.call(className, studentStream);
-                    studentCall = call;
-
-                    call.on('stream', (remoteStream) => {
-                        liveContainer.innerHTML = `
-                            <div class="card" style="margin-top:10px;">
-                                <h3 style="font-size:16px;margin-bottom:6px;">🟢 Joined: ${className}</h3>
-                                <div class="video-wrapper" style="min-height:280px;position:relative;">
-                                    <div id="studentVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:8px;padding:8px;overflow-y:auto;position:relative;">
-                                        <div class="remote-player" style="flex:2 1 60%;min-width:180px;height:60%;min-height:140px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.05);"></div>
-                                        <div class="local-player" style="flex:0 0 25%;min-width:100px;height:30%;min-height:70px;border-radius:10px;overflow:hidden;border:2px solid rgba(167,139,250,0.4);"></div>
-                                    </div>
-                                    <div class="video-overlay-badge">
-                                        <i class="fas fa-circle" style="color:#34d399;"></i>
-                                        <span>Connected</span>
-                                    </div>
-                                </div>
-                                <div class="chat-box" style="margin-top:8px;height:120px;">
-                                    <div class="chat-messages" id="student-chat-messages"></div>
-                                    <div class="chat-input">
-                                        <input type="text" id="student-chat-input" placeholder="Ask question..." />
-                                        <button id="student-chat-send"><i class="fas fa-paper-plane"></i></button>
-                                    </div>
-                                </div>
-                                <button id="leaveClassBtn" class="btn btn-danger" style="margin-top:8px;">Leave Class</button>
-                            </div>
-                        `;
-
-                        const videoContainer = document.getElementById('studentVideoContainer');
-                        const remoteDiv = videoContainer.querySelector('.remote-player');
-                        const localDiv = videoContainer.querySelector('.local-player');
-
-                        // Remote (teacher) video
-                        const remoteVideo = document.createElement('video');
-                        remoteVideo.srcObject = remoteStream;
-                        remoteVideo.autoplay = true;
-                        remoteVideo.style.width = '100%';
-                        remoteVideo.style.height = '100%';
-                        remoteVideo.style.objectFit = 'cover';
-                        remoteDiv.appendChild(remoteVideo);
-
-                        // Local (student) video
-                        const localVideo = document.createElement('video');
-                        localVideo.srcObject = studentStream;
-                        localVideo.autoplay = true;
-                        localVideo.muted = true;
-                        localVideo.style.width = '100%';
-                        localVideo.style.height = '100%';
-                        localVideo.style.objectFit = 'cover';
-                        localDiv.appendChild(localVideo);
-
-                        // Chat
-                        const chatRef = db.ref('chat/' + className);
-                        chatRef.on('child_added', (snap) => {
-                            const data = snap.val();
-                            const msgDiv = document.createElement('div');
-                            msgDiv.className = 'msg ' + (data.role === 'teacher' ? 'teacher' :
-                            'student');
-                            msgDiv.innerHTML =
-                                `<span class="sender">${data.sender}</span> ${data.text}`;
-                            const container = document.getElementById('student-chat-messages');
-                            container.appendChild(msgDiv);
-                            container.scrollTop = container.scrollHeight;
-                        });
-
-                        document.getElementById('student-chat-send').addEventListener('click', () => {
-                            const input = document.getElementById('student-chat-input');
-                            const text = input.value.trim();
-                            if (!text) return;
-                            chatRef.push({
-                                sender: currentUser.email,
-                                role: 'student',
-                                text: text,
-                                timestamp: Date.now()
-                            });
-                            input.value = '';
-                        });
-
-                        document.getElementById('leaveClassBtn').addEventListener('click', () => {
-                            joinStudentClass(className);
-                        });
-
-                        db.ref('attendance/' + className + '/' + currentUser.uid).set({
-                            joined: Date.now()
-                        });
-
-                        initFaceDetection(localVideo, className);
-
-                        const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/audio`);
-                        controlRef.on('value', (snap) => {
-                            const audioOn = snap.val() === true;
-                            if (studentStream) {
-                                studentStream.getAudioTracks().forEach(t => t.enabled = audioOn);
-                            }
-                        });
-                    });
-
-                    call.on('close', () => {
-                        liveContainer.innerHTML = '';
-                        stopFaceDetection();
-                        if (studentPeer) studentPeer.destroy();
-                        studentPeer = null;
-                        studentCall = null;
-                        const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/audio`);
-                        controlRef.off();
-                    });
-
-                    call.on('error', (err) => {
-                        alert('❌ Connection error: ' + err.message);
-                        stopFaceDetection();
-                        if (studentPeer) studentPeer.destroy();
-                        studentPeer = null;
-                        if (studentStream) {
-                            studentStream.getTracks().forEach(t => t.stop());
-                            studentStream = null;
-                        }
-                        liveContainer.innerHTML = '';
-                    });
-
-                } catch (err) {
-                    alert('❌ Join error: ' + err.message);
-                    stopFaceDetection();
-                    if (studentPeer) {
-                        studentPeer.destroy();
-                        studentPeer = null;
-                    }
-                    if (studentStream) {
-                        studentStream.getTracks().forEach(t => t.stop());
-                        studentStream = null;
-                    }
-                    liveContainer.innerHTML = '';
-                }
-            }
-
-            window.addEventListener('beforeunload', () => {
-                stopFaceDetection();
-            });
+            }, 4000);
         }
 
-        // ================================================================
-        //  12. STUDENT OTHER PAGES
-        // ================================================================
-        function renderStudentHomework() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>Homework</h2>
-                    <div id="studentHomeworkList"></div>
-                    <div id="studentHomeworkDetail" style="margin-top:12px;"></div>
-                </div>
-            `;
+        // ===================================================================
+        // 15. INIT ON LOAD
+        // ===================================================================
+        // The auth listener will handle initial state.
+        // Also, attach enter key to chat input
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
 
-            const listDiv = document.getElementById('studentHomeworkList');
-            const detailDiv = document.getElementById('studentHomeworkDetail');
-
-            const teacherEmail = 'nagrajmall2317@gmail.com';
-            db.ref('users').once('value').then(snap => {
-                if (snap.exists()) {
-                    const users = snap.val();
-                    let teacherUid = null;
-                    for (const [uid, data] of Object.entries(users)) {
-                        if (data.email === teacherEmail && data.role === 'teacher') {
-                            teacherUid = uid;
-                            break;
-                        }
-                    }
-                    if (teacherUid) {
-                        db.ref('homework/' + teacherUid).on('value', (snap2) => {
-                            listDiv.innerHTML = '';
-                            if (snap2.exists()) {
-                                const hws = snap2.val();
-                                let html = '<div style="display:flex;flex-wrap:wrap;gap:10px;">';
-                                for (const [hwId, hw] of Object.entries(hws)) {
-                                    html += `
-                                        <div class="card" style="cursor:pointer;max-width:200px;" data-hwid="${hwId}">
-                                            <div><strong>${hw.subject}</strong></div>
-                                            <div style="font-size:12px;">${hw.topic}</div>
-                                            <div style="font-size:11px;color:rgba(255,255,255,0.4);">Ch. ${hw.chapter}</div>
-                                            <div style="font-size:11px;color:rgba(255,255,255,0.4);">Due: ${new Date(hw.dueDate).toLocaleDateString()}</div>
-                                            <button class="btn btn-primary btn-sm selectHwBtn" data-hwid="${hwId}">Select</button>
-                                        </div>
-                                    `;
-                                }
-                                html += '</div>';
-                                listDiv.innerHTML = html;
-
-                                document.querySelectorAll('.selectHwBtn').forEach(btn => {
-                                    btn.addEventListener('click', (e) => {
-                                        const hwId = btn.dataset.hwid;
-                                        showHomeworkDetail(hwId, hws[hwId]);
-                                    });
-                                });
-                            } else {
-                                listDiv.innerHTML = '<div class="text-muted">No assignments posted.</div>';
-                            }
-                        });
-                    }
-                }
-            });
-
-            function showHomeworkDetail(hwId, hw) {
-                detailDiv.innerHTML = `
-                    <div class="card">
-                        <h3 style="font-size:16px;">${hw.subject} — ${hw.topic}</h3>
-                        <p style="font-size:13px;">Chapter: ${hw.chapter}</p>
-                        <p style="font-size:13px;color:rgba(255,255,255,0.5);">Due: ${new Date(hw.dueDate).toLocaleString()}</p>
-                        <div><strong>Assignment Image:</strong> <img src="${hw.imageBase64}" style="max-width:120px;max-height:120px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);" /></div>
-                        <div style="margin-top:10px;">
-                            <h4 style="font-size:14px;">Submit Your Work</h4>
-                            <input type="file" id="studentHwFile" accept="image/*" class="input-field" style="margin-bottom:6px;" />
-                            <button id="submitHwBtn" class="btn btn-primary">Submit</button>
-                            <div id="studentHwStatus" class="text-muted mt-10"></div>
-                            <div id="studentHwResult" class="mt-10"></div>
-                        </div>
-                    </div>
-                `;
-
-                const fileInput = document.getElementById('studentHwFile');
-                const submitBtn = document.getElementById('submitHwBtn');
-                const status = document.getElementById('studentHwStatus');
-                const resultDiv = document.getElementById('studentHwResult');
-
-                db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once('value').then(snap => {
-                    if (snap.exists()) {
-                        status.textContent = '✅ You already submitted this assignment.';
-                        status.style.color = '#34d399';
-                        submitBtn.disabled = true;
-                    }
-                });
-
-                submitBtn.addEventListener('click', async () => {
-                    const file = fileInput.files[0];
-                    if (!file) { status.textContent = 'Select an image first.'; return; }
-                    const snap = await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once(
-                        'value');
-                    if (snap.exists()) {
-                        status.textContent = 'You already submitted this assignment.';
-                        return;
-                    }
-                    status.textContent = '⏳ Processing...';
-                    try {
-                        const reader = new FileReader();
-                        const studentBase64 = await new Promise((resolve) => {
-                            reader.onload = (e) => resolve(e.target.result);
-                            reader.readAsDataURL(file);
-                        });
-                        const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(
-                            studentBase64));
-                        const hashArray = Array.from(new Uint8Array(hashBuffer));
-                        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-                        const existing = await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`)
-                            .once('value');
-                        if (existing.exists()) {
-                            status.textContent = 'You already submitted this assignment.';
-                            return;
-                        }
-
-                        const teacherBase64 = hw.imageBase64;
-                        const similarity = await compareImagesBase64(teacherBase64, studentBase64);
-                        let grade;
-                        if (similarity >= 50) grade = 5;
-                        else if (similarity >= 40) grade = 4;
-                        else if (similarity >= 30) grade = 3;
-                        else if (similarity >= 20) grade = 2;
-                        else grade = 1;
-
-                        const finalGrade = Math.min(5, Math.max(1, grade));
-
-                        await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).set({
-                            imageBase64: studentBase64,
-                            hash: hashHex,
-                            similarity: similarity,
-                            grade: finalGrade,
-                            timestamp: Date.now()
-                        });
-
-                        await db.ref(`homework/${hw.teacher}/${hwId}/submissions/${currentUser.email}`).set({
-                            imageBase64: studentBase64,
-                            hash: hashHex,
-                            similarity: similarity,
-                            grade: finalGrade,
-                            timestamp: Date.now()
-                        });
-
-                        status.textContent = '✅ Submitted! Grade: ' + finalGrade + '/5';
-                        resultDiv.innerHTML = `
-                            <div style="background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.1);border-radius:14px;padding:14px;text-align:center;">
-                                <div style="font-size:13px;color:rgba(255,255,255,0.5);">Similarity: ${similarity.toFixed(1)}%</div>
-                                <div style="font-size:32px;font-weight:700;color:#a78bfa;">${finalGrade} / 5</div>
-                                ${similarity > 70 ? '<div style="color:#f87171;margin-top:4px;font-size:12px;">⚠️ High similarity detected. Your submission may be flagged.</div>' : ''}
-                            </div>
-                        `;
-                        submitBtn.disabled = true;
-                    } catch (err) {
-                        status.textContent = '❌ Error: ' + err.message;
-                        console.error(err);
-                    }
-                });
-            }
-        }
-
-        function renderStudentRating() {
-            // already defined above, but we'll keep it here for clarity
-        }
-
-        // ================================================================
-        //  INIT
-        // ================================================================
-        console.log('✅ Smart Classroom FINAL with all fixes.');
-        console.log('📌 Attendance: teacher can mark, student can view.');
-        console.log('📌 Ratings: default 4, teacher can save, student can view.');
-        console.log('📌 All buttons (mic/video) work.');
-        console.log('📌 Face detection sends notification to teacher and toast to student.');
+        console.log('Smart Classroom initialized with your Firebase config.');
     </script>
 </body>
 </html>
