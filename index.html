@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Smart Classroom · Full System</title>
 
-    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
@@ -38,7 +37,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 10px;
         }
         #loginOverlay {
             position: fixed;
@@ -52,16 +51,16 @@
         }
         .login-box {
             background: #1a1f2e;
-            border-radius: 48px;
-            padding: 40px;
-            max-width: 420px;
+            border-radius: 32px;
+            padding: 30px 24px;
+            max-width: 400px;
             width: 100%;
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
         }
         .login-box h2 {
-            font-size: 28px;
-            margin-bottom: 24px;
+            font-size: 26px;
+            margin-bottom: 20px;
             text-align: center;
             background: linear-gradient(135deg, #a78bfa, #60a5fa);
             -webkit-background-clip: text;
@@ -70,12 +69,12 @@
         .login-box input,
         .login-box select {
             width: 100%;
-            padding: 14px 18px;
+            padding: 12px 16px;
             border-radius: 30px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             background: rgba(255, 255, 255, 0.04);
             color: #fff;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             outline: none;
             font-family: 'Inter', sans-serif;
             font-size: 14px;
@@ -87,7 +86,7 @@
         }
         .login-box button {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             border-radius: 30px;
             border: none;
             color: #fff;
@@ -108,7 +107,7 @@
         }
         .toggle-link {
             text-align: center;
-            margin-top: 16px;
+            margin-top: 14px;
             font-size: 14px;
             color: rgba(255, 255, 255, 0.4);
         }
@@ -119,36 +118,37 @@
         }
         .msg {
             text-align: center;
-            margin-top: 12px;
+            margin-top: 10px;
             font-size: 13px;
             color: #f87171;
             min-height: 20px;
         }
         #appContainer {
             display: none;
-            width: 1440px;
-            max-width: 100%;
+            width: 100%;
+            max-width: 1400px;
             height: 92vh;
             max-height: 900px;
             background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(24px);
-            border-radius: 48px;
+            border-radius: 28px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
             display: grid;
-            grid-template-columns: 72px 1fr 320px;
+            grid-template-columns: 60px 1fr 280px;
             grid-template-rows: 1fr;
             overflow: hidden;
         }
+        /* ===== SIDEBAR ===== */
         .sidebar {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(12px);
             border-right: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 28px 0 20px;
+            padding: 20px 0 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 32px;
+            gap: 24px;
             overflow-y: auto;
             scrollbar-width: none;
         }
@@ -156,29 +156,29 @@
             display: none;
         }
         .sidebar .brand {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             background: linear-gradient(135deg, #a78bfa, #60a5fa);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             writing-mode: vertical-rl;
             text-orientation: mixed;
-            padding: 4px 0;
+            padding: 2px 0;
             letter-spacing: -2px;
         }
         .sidebar nav {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
         .sidebar nav a {
             color: rgba(255, 255, 255, 0.35);
-            font-size: 20px;
-            padding: 12px;
-            border-radius: 16px;
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 14px;
             transition: 0.25s ease;
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -199,15 +199,15 @@
             margin-top: auto;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
         .sidebar .bottom a {
             color: rgba(255, 255, 255, 0.25);
-            font-size: 18px;
-            padding: 10px;
-            border-radius: 12px;
-            width: 44px;
-            height: 44px;
+            font-size: 16px;
+            padding: 8px;
+            border-radius: 10px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -218,12 +218,12 @@
             color: #fff;
             background: rgba(255, 255, 255, 0.06);
         }
-
+        /* ===== MAIN CONTENT ===== */
         .main-area {
-            padding: 24px 28px;
+            padding: 16px 20px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
             overflow-y: auto;
             min-width: 0;
         }
@@ -232,66 +232,65 @@
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 12px;
-            padding-bottom: 8px;
+            gap: 8px;
+            padding-bottom: 6px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
         .top-bar .page-title h2 {
             font-weight: 600;
-            font-size: 20px;
+            font-size: 18px;
             color: #f1f5f9;
         }
         .top-bar .page-title p {
-            font-size: 12px;
+            font-size: 11px;
             color: rgba(255, 255, 255, 0.35);
             margin-top: 2px;
         }
         .top-bar .actions {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
         }
         .top-bar .actions .pill {
             background: rgba(255, 255, 255, 0.06);
-            padding: 6px 16px 6px 12px;
-            border-radius: 40px;
-            font-size: 11px;
+            padding: 4px 12px 4px 8px;
+            border-radius: 30px;
+            font-size: 10px;
             font-weight: 500;
             color: rgba(255, 255, 255, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
         .top-bar .actions .pill i {
             color: #34d399;
-            font-size: 8px;
+            font-size: 7px;
         }
         .top-bar .actions .avatar-group {
             display: flex;
             align-items: center;
         }
         .top-bar .actions .avatar-group .avatar {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: linear-gradient(135deg, #818cf8, #a78bfa);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
             color: #fff;
             border: 2px solid rgba(15, 23, 42, 0.6);
             cursor: pointer;
         }
-
-        /* ===== VIDEO LAYOUT (FULL SCREEN FIX) ===== */
+        /* ===== VIDEO WRAPPER ===== */
         .video-wrapper {
             flex: 1;
             min-height: 0;
             background: rgba(0, 0, 0, 0.5);
-            border-radius: 28px;
+            border-radius: 24px;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
@@ -305,61 +304,60 @@
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            padding: 12px;
+            gap: 10px;
+            padding: 10px;
             overflow-y: auto;
             position: relative;
         }
         .video-wrapper .remote-player {
-            width: 45%;
-            min-width: 200px;
-            height: 45%;
-            min-height: 150px;
+            flex: 1 1 40%;
+            min-width: 160px;
+            height: 55%;
+            min-height: 120px;
             background: #1a1f2e;
             border-radius: 16px;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
         .video-wrapper .local-player {
-            width: 30%;
-            min-width: 160px;
-            height: 30%;
-            min-height: 120px;
+            flex: 0 0 25%;
+            min-width: 120px;
+            height: 35%;
+            min-height: 90px;
             background: #1a1f2e;
-            border-radius: 16px;
+            border-radius: 14px;
             overflow: hidden;
             border: 2px solid rgba(167, 139, 250, 0.4);
             position: relative;
         }
         .video-overlay-badge {
             position: absolute;
-            bottom: 16px;
-            left: 20px;
+            bottom: 12px;
+            left: 16px;
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(8px);
-            padding: 6px 16px 6px 12px;
-            border-radius: 40px;
-            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 10px;
             font-weight: 500;
             color: rgba(255, 255, 255, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             pointer-events: none;
         }
         .video-overlay-badge i {
-            font-size: 8px;
+            font-size: 7px;
         }
-
         /* ===== CHAT ===== */
         .chat-box {
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 20px;
-            padding: 12px;
+            border-radius: 18px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
-            height: 160px;
+            height: 140px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
         .chat-messages {
@@ -367,13 +365,13 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
             padding-right: 4px;
         }
         .chat-messages .msg {
-            font-size: 13px;
-            padding: 4px 12px;
-            border-radius: 16px;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 14px;
             max-width: 85%;
             word-wrap: break-word;
         }
@@ -389,39 +387,39 @@
         }
         .chat-messages .msg .sender {
             font-weight: 600;
-            font-size: 10px;
+            font-size: 9px;
             color: rgba(255, 255, 255, 0.4);
             display: block;
         }
         .chat-input {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             margin-top: 6px;
         }
         .chat-input input {
             flex: 1;
-            padding: 6px 14px;
+            padding: 5px 12px;
             border-radius: 30px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             background: rgba(255, 255, 255, 0.04);
             color: #fff;
             outline: none;
             font-family: 'Inter', sans-serif;
-            font-size: 13px;
+            font-size: 12px;
         }
         .chat-input button {
             background: linear-gradient(135deg, #818cf8, #a78bfa);
             border: none;
             color: #fff;
-            width: 34px;
-            height: 34px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 12px;
         }
-
         /* ===== WARNING OVERLAY ===== */
         .warning-overlay {
             position: fixed;
@@ -441,57 +439,58 @@
         }
         .warning-overlay .content {
             background: rgba(0, 0, 0, 0.8);
-            padding: 30px 40px;
-            border-radius: 30px;
+            padding: 24px 30px;
+            border-radius: 28px;
             text-align: center;
             border: 2px solid #f87171;
         }
         .warning-overlay .content i {
-            font-size: 60px;
+            font-size: 48px;
             color: #f87171;
             display: block;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
         .warning-overlay .content h2 {
             color: #f87171;
-            font-size: 24px;
+            font-size: 20px;
         }
         .warning-overlay .content p {
             color: rgba(255, 255, 255, 0.6);
-            margin-top: 8px;
+            margin-top: 6px;
+            font-size: 14px;
         }
-
+        /* ===== RIGHT PANEL ===== */
         .right-panel {
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(12px);
             border-left: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             flex-direction: column;
-            padding: 24px 18px;
-            gap: 16px;
+            padding: 18px 14px;
+            gap: 12px;
             overflow: hidden;
         }
         .right-panel .panel-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-bottom: 12px;
+            padding-bottom: 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
         .right-panel .panel-header h4 {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             color: #e2e8f0;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         .right-panel .panel-header h4 i {
             color: #a78bfa;
         }
         .right-panel .panel-header .dot {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             background: #34d399;
             border-radius: 50%;
             display: inline-block;
@@ -514,26 +513,26 @@
             align-items: center;
             justify-content: center;
             color: rgba(255, 255, 255, 0.15);
-            font-size: 13px;
+            font-size: 12px;
             text-align: center;
             line-height: 1.6;
         }
-
+        /* ===== PAGE CONTENT ===== */
         .page-content {
-            padding: 4px 0;
+            padding: 2px 0;
             flex: 1;
             overflow-y: auto;
         }
         .page-content h2 {
             font-weight: 600;
-            font-size: 22px;
-            margin-bottom: 16px;
+            font-size: 20px;
+            margin-bottom: 12px;
         }
         .card {
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            padding: 14px 18px;
-            margin-bottom: 10px;
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: 0.2s;
         }
@@ -541,14 +540,14 @@
             background: rgba(255, 255, 255, 0.05);
         }
         .btn {
-            padding: 10px 24px;
+            padding: 8px 18px;
             border-radius: 30px;
             border: none;
             color: #fff;
             font-weight: 600;
             cursor: pointer;
             transition: 0.25s;
-            font-size: 14px;
+            font-size: 13px;
             font-family: 'Inter', sans-serif;
         }
         .btn:hover {
@@ -565,11 +564,11 @@
             background: linear-gradient(135deg, #f87171, #ef4444);
         }
         .btn-sm {
-            padding: 6px 16px;
-            font-size: 12px;
+            padding: 4px 14px;
+            font-size: 11px;
         }
         .input-field {
-            padding: 12px 18px;
+            padding: 10px 16px;
             border-radius: 30px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             background: rgba(255, 255, 255, 0.04);
@@ -577,7 +576,7 @@
             outline: none;
             width: 100%;
             font-family: 'Inter', sans-serif;
-            font-size: 14px;
+            font-size: 13px;
             transition: 0.3s;
         }
         .input-field:focus {
@@ -586,7 +585,7 @@
         }
         .flex-row {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
             flex-wrap: wrap;
         }
@@ -598,29 +597,29 @@
         }
         .text-muted {
             color: rgba(255, 255, 255, 0.35);
-            font-size: 13px;
+            font-size: 12px;
         }
         .class-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 12px;
+            padding: 6px 10px;
             background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-            margin-bottom: 6px;
+            border-radius: 10px;
+            margin-bottom: 4px;
             border: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 13px;
         }
         .class-item .name {
             font-weight: 500;
         }
         .class-item .status {
-            font-size: 12px;
+            font-size: 11px;
             color: rgba(255, 255, 255, 0.4);
         }
         .class-item .status.active {
             color: #34d399;
         }
-
         /* ===== PROFILE MODAL ===== */
         .profile-modal {
             display: none;
@@ -637,10 +636,10 @@
         }
         .profile-box {
             background: #1a1f2e;
-            border-radius: 32px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
+            border-radius: 28px;
+            padding: 24px;
+            max-width: 440px;
+            width: 92%;
             max-height: 90vh;
             overflow-y: auto;
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -649,15 +648,15 @@
         }
         .profile-close {
             position: absolute;
-            top: 12px;
-            right: 16px;
+            top: 10px;
+            right: 14px;
             background: rgba(255, 255, 255, 0.05);
             border: none;
             color: #fff;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
-            width: 40px;
-            height: 40px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -667,36 +666,36 @@
             background: rgba(255, 255, 255, 0.1);
         }
         .profile-box h2 {
-            font-size: 24px;
-            margin-bottom: 20px;
+            font-size: 22px;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
         .profile-box h2 i {
             color: #a78bfa;
         }
         .profile-box .field {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         .profile-box .field label {
             display: block;
-            font-size: 12px;
+            font-size: 11px;
             color: rgba(255, 255, 255, 0.4);
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
         .profile-box .field .value {
-            padding: 8px 14px;
+            padding: 6px 14px;
             background: rgba(255, 255, 255, 0.04);
             border-radius: 30px;
             border: 1px solid rgba(255, 255, 255, 0.06);
             color: #fff;
             width: 100%;
-            font-size: 14px;
+            font-size: 13px;
         }
         .profile-box .field input,
         .profile-box .field select {
-            padding: 8px 14px;
+            padding: 6px 14px;
             border-radius: 30px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             background: rgba(255, 255, 255, 0.04);
@@ -704,43 +703,43 @@
             outline: none;
             width: 100%;
             font-family: 'Inter', sans-serif;
-            font-size: 14px;
+            font-size: 13px;
         }
         .profile-box .field input:focus,
         .profile-box .field select:focus {
             border-color: rgba(167, 139, 250, 0.3);
         }
         .profile-box .btn {
-            margin-top: 6px;
+            margin-top: 4px;
         }
-
         /* ===== RESPONSIVE ===== */
         @media (max-width: 1100px) {
             #appContainer {
-                grid-template-columns: 64px 1fr 260px;
+                grid-template-columns: 54px 1fr 220px;
                 height: 96vh;
             }
         }
         @media (max-width: 860px) {
             #appContainer {
                 grid-template-columns: 1fr;
-                grid-template-rows: 56px 1fr auto;
+                grid-template-rows: 50px 1fr auto;
                 height: auto;
-                border-radius: 28px;
+                border-radius: 20px;
+                max-height: none;
             }
             .sidebar {
                 flex-direction: row;
-                padding: 6px 16px;
+                padding: 4px 12px;
                 border-right: none;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                gap: 12px;
+                gap: 8px;
                 overflow-x: auto;
-                height: 56px;
+                height: 50px;
                 align-items: center;
             }
             .sidebar .brand {
                 writing-mode: horizontal-tb;
-                font-size: 15px;
+                font-size: 14px;
                 margin-right: auto;
                 padding: 0;
             }
@@ -749,10 +748,10 @@
                 gap: 4px;
             }
             .sidebar nav a {
-                width: 36px;
-                height: 36px;
-                font-size: 16px;
-                padding: 6px;
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+                padding: 4px;
             }
             .sidebar .bottom {
                 flex-direction: row;
@@ -760,59 +759,81 @@
                 gap: 4px;
             }
             .sidebar .bottom a {
-                width: 34px;
-                height: 34px;
-                font-size: 14px;
-                padding: 6px;
+                width: 30px;
+                height: 30px;
+                font-size: 13px;
+                padding: 4px;
             }
             .right-panel {
                 border-left: none;
                 border-top: 1px solid rgba(255, 255, 255, 0.05);
-                max-height: 180px;
-                padding: 14px;
+                max-height: 160px;
+                padding: 10px 12px;
             }
             .main-area {
-                padding: 14px;
+                padding: 10px 12px;
             }
             .video-wrapper {
-                min-height: 200px;
+                min-height: 180px;
             }
             .login-box {
-                padding: 28px 20px;
-                margin: 16px;
+                padding: 24px 18px;
+                margin: 12px;
             }
             .chat-box {
-                height: 130px;
+                height: 110px;
+            }
+            .video-wrapper .remote-player {
+                flex: 1 1 100%;
+                height: 50%;
+                min-height: 80px;
+            }
+            .video-wrapper .local-player {
+                flex: 0 0 30%;
+                min-width: 80px;
+                height: 30%;
+                min-height: 60px;
             }
             .profile-box {
-                padding: 20px;
+                padding: 18px;
             }
         }
         @media (max-width: 480px) {
             .login-box {
-                padding: 20px 16px;
+                padding: 18px 12px;
             }
             .login-box h2 {
                 font-size: 22px;
             }
             .main-area {
-                padding: 10px;
+                padding: 6px 8px;
             }
             .top-bar .page-title h2 {
-                font-size: 17px;
+                font-size: 16px;
             }
             .btn {
-                font-size: 12px;
-                padding: 8px 16px;
+                font-size: 11px;
+                padding: 6px 14px;
             }
             .card {
-                padding: 10px 12px;
+                padding: 8px 10px;
             }
             .video-wrapper {
-                min-height: 150px;
+                min-height: 140px;
+            }
+            .video-wrapper .remote-player {
+                height: 45%;
+                min-height: 60px;
+            }
+            .video-wrapper .local-player {
+                height: 25%;
+                min-height: 50px;
+            }
+            .chat-box {
+                height: 90px;
             }
             .profile-box {
-                padding: 16px;
+                padding: 14px;
             }
         }
     </style>
@@ -823,8 +844,8 @@
     <div id="warningOverlay" class="warning-overlay">
         <div class="content">
             <i class="fas fa-exclamation-triangle"></i>
-            <h2>⚠️ Attention!</h2>
-            <p>Your face is not visible. Please sit in front of the camera.</p>
+            <h2>⚠️ ધ્યાન આપો!</h2>
+            <p>તમારો ચહેરો કેમેરામાં દેખાતો નથી. કૃપા કરીને કેમેરા સામે બેસો.</p>
         </div>
     </div>
 
@@ -832,32 +853,32 @@
     <div id="profileModal" class="profile-modal">
         <div class="profile-box">
             <button class="profile-close" id="profileClose">&times;</button>
-            <h2><i class="fas fa-user-circle"></i> My Profile</h2>
+            <h2><i class="fas fa-user-circle"></i> મારી પ્રોફાઇલ</h2>
             <div class="field">
-                <label>Email</label>
+                <label>ઇમેઇલ</label>
                 <div class="value" id="profileEmail">-</div>
             </div>
             <div class="field">
-                <label>Full Name</label>
-                <input type="text" id="profileName" placeholder="Your full name" />
+                <label>પૂરું નામ</label>
+                <input type="text" id="profileName" placeholder="તમારું પૂરું નામ" />
             </div>
             <div class="field">
-                <label>Mobile Number</label>
-                <input type="tel" id="profileMobile" placeholder="Enter mobile number" />
+                <label>મોબાઇલ નંબર</label>
+                <input type="tel" id="profileMobile" placeholder="મોબાઇલ નંબર નાખો" />
             </div>
             <div class="field">
-                <label>Branch</label>
-                <input type="text" id="profileBranch" placeholder="Branch" />
+                <label>બ્રાન્ચ</label>
+                <input type="text" id="profileBranch" placeholder="બ્રાન્ચ (દા.ત. Computer Engineering)" />
             </div>
             <div class="field">
-                <label>Semester</label>
-                <input type="number" id="profileSemester" placeholder="Semester" min="1" />
+                <label>સેમેસ્ટર</label>
+                <input type="number" id="profileSemester" placeholder="સેમેસ્ટર (દા.ત. 1)" min="1" />
             </div>
             <div class="field">
-                <label>New Password (leave blank to keep current)</label>
-                <input type="password" id="profilePassword" placeholder="New password (min 6 chars)" />
+                <label>નવો પાસવર્ડ (ખાલી રાખો તો જૂનો રહેશે)</label>
+                <input type="password" id="profilePassword" placeholder="નવો પાસવર્ડ (ઓછામાં ઓછા 6 અક્ષર)" />
             </div>
-            <button class="btn btn-primary" id="profileSaveBtn">Save Changes</button>
+            <button class="btn btn-primary" id="profileSaveBtn">સેવ કરો</button>
             <div id="profileMsg" class="msg mt-10" style="color:#34d399;"></div>
         </div>
     </div>
@@ -865,26 +886,26 @@
     <!-- ===== LOGIN OVERLAY ===== -->
     <div id="loginOverlay">
         <div class="login-box">
-            <h2>Smart Classroom</h2>
+            <h2>સ્માર્ટ ક્લાસરૂમ</h2>
             <div id="loginForm">
-                <input type="email" id="loginEmail" placeholder="Email address" />
-                <input type="password" id="loginPassword" placeholder="Password" />
-                <button class="btn-primary" id="loginBtn">Sign In</button>
-                <div class="toggle-link">New user? <span id="showSignup">Create account</span></div>
+                <input type="email" id="loginEmail" placeholder="ઇમેઇલ સરનામું" />
+                <input type="password" id="loginPassword" placeholder="પાસવર્ડ" />
+                <button class="btn-primary" id="loginBtn">સાઇન ઇન કરો</button>
+                <div class="toggle-link">નવા યુઝર? <span id="showSignup">એકાઉન્ટ બનાવો</span></div>
                 <div class="msg" id="loginMsg"></div>
             </div>
             <div id="signupForm" style="display:none;">
-                <input type="email" id="signupEmail" placeholder="Email address" />
-                <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" />
-                <input type="text" id="signupName" placeholder="Full Name" />
-                <input type="text" id="signupBranch" placeholder="Branch (e.g. Computer Engineering)" />
-                <input type="number" id="signupSemester" placeholder="Semester (e.g. 1)" min="1" />
+                <input type="email" id="signupEmail" placeholder="ઇમેઇલ સરનામું" />
+                <input type="password" id="signupPassword" placeholder="પાસવર્ડ (ઓછામાં ઓછા 6 અક્ષર)" />
+                <input type="text" id="signupName" placeholder="પૂરું નામ" />
+                <input type="text" id="signupBranch" placeholder="બ્રાન્ચ (દા.ત. Computer Engineering)" />
+                <input type="number" id="signupSemester" placeholder="સેમેસ્ટર (દા.ત. 1)" min="1" />
                 <select id="signupRole">
-                    <option value="student">Student</option>
-                    <option value="teacher">Teacher</option>
+                    <option value="student">વિદ્યાર્થી</option>
+                    <option value="teacher">શિક્ષક</option>
                 </select>
-                <button class="btn-success" id="signupBtn">Create Account</button>
-                <div class="toggle-link">Already have account? <span id="showLogin">Sign in</span></div>
+                <button class="btn-success" id="signupBtn">એકાઉન્ટ બનાવો</button>
+                <div class="toggle-link">પહેલેથી એકાઉન્ટ છે? <span id="showLogin">સાઇન ઇન કરો</span></div>
                 <div class="msg" id="signupMsg"></div>
             </div>
         </div>
@@ -896,25 +917,25 @@
         <main class="main-area">
             <div class="top-bar">
                 <div class="page-title">
-                    <h2 id="pageTitle">Dashboard</h2>
-                    <p id="pageSubtitle">Welcome</p>
+                    <h2 id="pageTitle">ડેશબોર્ડ</h2>
+                    <p id="pageSubtitle">સ્વાગત છે</p>
                 </div>
                 <div class="actions">
-                    <span class="pill"><i class="fas fa-circle"></i> <span id="roleBadge">Student</span></span>
+                    <span class="pill"><i class="fas fa-circle"></i> <span id="roleBadge">વિદ્યાર્થી</span></span>
                     <div class="avatar-group">
-                        <span class="avatar" id="avatarLetter" title="Profile">U</span>
+                        <span class="avatar" id="avatarLetter" title="પ્રોફાઇલ">U</span>
                     </div>
                 </div>
             </div>
-            <div id="dynamicContent" style="flex:1;overflow-y:auto;padding-bottom:8px;"></div>
+            <div id="dynamicContent" style="flex:1;overflow-y:auto;padding-bottom:6px;"></div>
         </main>
         <aside class="right-panel">
             <div class="panel-header">
-                <h4><i class="fas fa-robot"></i> AI Assistant <span class="dot"></span></h4>
-                <span style="font-size:10px;color:rgba(255,255,255,0.2);">Coming soon</span>
+                <h4><i class="fas fa-robot"></i> AI સહાયક <span class="dot"></span></h4>
+                <span style="font-size:9px;color:rgba(255,255,255,0.2);">ટૂંક સમયમાં</span>
             </div>
             <div class="placeholder">
-                <div>📚 AI chat &amp; alerts<br /><span style="font-size:11px;color:rgba(255,255,255,0.1);">will be available here</span></div>
+                <div>📚 AI ચેટ &amp; સૂચનાઓ<br /><span style="font-size:10px;color:rgba(255,255,255,0.1);">અહીં ઉપલબ્ધ થશે</span></div>
             </div>
         </aside>
     </div>
@@ -987,7 +1008,7 @@
         let currentName = '';
 
         // ================================================================
-        //  3. AUTH
+        //  3. AUTH – LOGIN & SIGNUP WITH DATABASE
         // ================================================================
         showSignup.addEventListener('click', () => {
             loginForm.style.display = 'none';
@@ -1006,18 +1027,18 @@
             const email = loginEmail.value.trim();
             const pass = loginPassword.value.trim();
             if (!email || !pass) {
-                loginMsg.textContent = 'Please enter email and password.';
+                loginMsg.textContent = 'કૃપા કરીને ઇમેઇલ અને પાસવર્ડ નાખો.';
                 return;
             }
-            loginMsg.textContent = '⏳ Signing in...';
+            loginMsg.textContent = '⏳ સાઇન ઇન થઈ રહ્યું છે...';
             loginMsg.style.color = 'rgba(255,255,255,0.5)';
             try {
                 await auth.signInWithEmailAndPassword(email, pass);
             } catch (err) {
                 let msg = '❌ ' + err.message;
-                if (err.code === 'auth/user-not-found') msg = '❌ No account found. Please sign up.';
-                else if (err.code === 'auth/wrong-password') msg = '❌ Incorrect password.';
-                else if (err.code === 'auth/too-many-requests') msg = '❌ Too many attempts. Try later.';
+                if (err.code === 'auth/user-not-found') msg = '❌ આ ઇમેઇલ સાથે કોઈ એકાઉન્ટ નથી. કૃપા કરીને સાઇન અપ કરો.';
+                else if (err.code === 'auth/wrong-password') msg = '❌ પાસવર્ડ ખોટો છે. ફરી પ્રયાસ કરો.';
+                else if (err.code === 'auth/too-many-requests') msg = '❌ ઘણા બધા પ્રયાસો. થોડીવાર પછી પ્રયાસ કરો.';
                 loginMsg.textContent = msg;
                 loginMsg.style.color = '#f87171';
                 alert(msg);
@@ -1032,59 +1053,66 @@
             const branch = signupBranch.value.trim();
             const semester = parseInt(signupSemester.value);
             if (!email || !pass || !name || !branch || isNaN(semester) || semester < 1) {
-                signupMsg.textContent = 'Please fill all fields correctly.';
+                signupMsg.textContent = 'કૃપા કરીને બધી ફીલ્ડ યોગ્ય રીતે ભરો.';
                 return;
             }
             if (pass.length < 6) {
-                signupMsg.textContent = 'Password must be at least 6 characters.';
+                signupMsg.textContent = 'પાસવર્ડ ઓછામાં ઓછા 6 અક્ષરનો હોવો જોઈએ.';
                 return;
             }
-            signupMsg.textContent = '⏳ Creating account...';
+            signupMsg.textContent = '⏳ એકાઉન્ટ બની રહ્યું છે...';
             signupMsg.style.color = 'rgba(255,255,255,0.5)';
             try {
                 const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                // Save user to database with role
                 await db.ref('users/' + cred.user.uid).set({
                     email,
                     role,
                     name,
                     branch,
                     semester: role === 'student' ? semester : 0,
-                    mobile: ''
+                    mobile: '',
+                    createdAt: Date.now()
                 });
-                signupMsg.textContent = '✅ Account created! You are now signed in.';
+                signupMsg.textContent = '✅ એકાઉન્ટ બની ગયું! તમે સાઇન ઇન થઈ ગયા છો.';
                 signupMsg.style.color = '#34d399';
             } catch (err) {
                 let msg = '❌ ' + err.message;
-                if (err.code === 'auth/email-already-in-use') msg = '❌ Email already registered. Please login.';
+                if (err.code === 'auth/email-already-in-use') msg = '❌ આ ઇમેઇલ પહેલેથી નોંધાયેલ છે. કૃપા કરીને લોગિન કરો.';
                 signupMsg.textContent = msg;
                 signupMsg.style.color = '#f87171';
                 alert(msg);
             }
         });
 
+        // ================================================================
+        //  4. AUTH STATE – LOAD USER DATA FROM DATABASE
+        // ================================================================
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 try {
                     const snap = await db.ref('users/' + user.uid).once('value');
                     if (snap.exists()) {
                         const data = snap.val();
-                        currentRole = data.role;
+                        currentRole = data.role || 'student';
                         currentName = data.name || '';
                         currentBranch = (data.branch || '').trim();
                         currentSemester = data.semester || 0;
                         currentUser = { uid: user.uid, email: user.email, ...data };
+                        // Show app
                         loginOverlay.style.display = 'none';
                         appContainer.style.display = 'grid';
-                        roleBadge.textContent = currentRole.charAt(0).toUpperCase() + currentRole.slice(1);
-                        avatarLetter.textContent = user.email.charAt(0).toUpperCase();
+                        roleBadge.textContent = currentRole === 'teacher' ? 'શિક્ષક' : 'વિદ્યાર્થી';
+                        avatarLetter.textContent = (currentName || user.email.charAt(0)).toUpperCase();
                         buildDashboard();
                     } else {
+                        // User exists in Auth but not in DB – sign out
                         await auth.signOut();
-                        alert('User data not found. Please sign up again.');
+                        alert('યુઝર ડેટા મળ્યો નહીં. કૃપા કરીને ફરી સાઇન અપ કરો.');
                     }
                 } catch (err) {
-                    console.error(err);
-                    alert('Error loading user data: ' + err.message);
+                    console.error('Error loading user data:', err);
+                    alert('યુઝર ડેટા લોડ કરવામાં ભૂલ: ' + err.message);
                     await auth.signOut();
                 }
             } else {
@@ -1095,7 +1123,7 @@
         });
 
         // ================================================================
-        //  4. PROFILE MODAL
+        //  5. PROFILE MODAL
         // ================================================================
         avatarLetter.addEventListener('click', () => {
             if (currentUser) {
@@ -1124,29 +1152,24 @@
             const newPass = profilePassword.value.trim();
 
             if (!name || !branch || isNaN(semester) || semester < 1) {
-                profileMsg.textContent = 'Please fill all fields correctly.';
+                profileMsg.textContent = 'કૃપા કરીને બધી ફીલ્ડ યોગ્ય રીતે ભરો.';
                 profileMsg.style.color = '#f87171';
                 return;
             }
 
-            profileMsg.textContent = '⏳ Saving...';
+            profileMsg.textContent = '⏳ સેવ થઈ રહ્યું છે...';
             profileMsg.style.color = 'rgba(255,255,255,0.5)';
 
             try {
-                // Update DB
                 await db.ref('users/' + currentUser.uid).update({
                     name,
                     mobile,
                     branch,
                     semester
                 });
-
-                // Update password if provided
                 if (newPass && newPass.length >= 6) {
                     await auth.currentUser.updatePassword(newPass);
                 }
-
-                // Update local variables
                 currentName = name;
                 currentBranch = branch;
                 currentSemester = semester;
@@ -1155,21 +1178,19 @@
                 currentUser.branch = branch;
                 currentUser.semester = semester;
 
-                profileMsg.textContent = '✅ Profile updated successfully!';
+                profileMsg.textContent = '✅ પ્રોફાઇલ અપડેટ થઈ ગઈ!';
                 profileMsg.style.color = '#34d399';
-                // Update avatar letter if name changed
                 if (name) avatarLetter.textContent = name.charAt(0).toUpperCase();
-                // Rebuild sidebar to reflect branch/semester changes
                 buildDashboard();
                 setTimeout(() => profileModal.classList.remove('active'), 1500);
             } catch (err) {
-                profileMsg.textContent = '❌ Error: ' + err.message;
+                profileMsg.textContent = '❌ ભૂલ: ' + err.message;
                 profileMsg.style.color = '#f87171';
             }
         });
 
         // ================================================================
-        //  5. DASHBOARD BUILDER
+        //  6. DASHBOARD BUILDER
         // ================================================================
         function buildDashboard() {
             sidebar.innerHTML = '';
@@ -1181,16 +1202,16 @@
             const nav = document.createElement('nav');
             const items = [];
             if (currentRole === 'teacher') {
-                items.push({ icon: 'fa-chalkboard-teacher', label: 'Live Class', id: 't-live' });
-                items.push({ icon: 'fa-user-graduate', label: 'Students', id: 't-students' });
-                items.push({ icon: 'fa-clipboard-check', label: 'Attendance', id: 't-attendance' });
-                items.push({ icon: 'fa-pencil-alt', label: 'Homework', id: 't-homework' });
-                items.push({ icon: 'fa-star', label: 'Ratings', id: 't-ratings' });
+                items.push({ icon: 'fa-chalkboard-teacher', label: 'લાઈવ ક્લાસ', id: 't-live' });
+                items.push({ icon: 'fa-user-graduate', label: 'વિદ્યાર્થીઓ', id: 't-students' });
+                items.push({ icon: 'fa-clipboard-check', label: 'હાજરી', id: 't-attendance' });
+                items.push({ icon: 'fa-pencil-alt', label: 'હોમવર્ક', id: 't-homework' });
+                items.push({ icon: 'fa-star', label: 'રેટિંગ', id: 't-ratings' });
             } else {
-                items.push({ icon: 'fa-chalkboard-teacher', label: 'Live Class', id: 's-live' });
-                items.push({ icon: 'fa-calendar-check', label: 'My Attendance', id: 's-attendance' });
-                items.push({ icon: 'fa-pencil-alt', label: 'Homework', id: 's-homework' });
-                items.push({ icon: 'fa-star', label: 'My Rating', id: 's-rating' });
+                items.push({ icon: 'fa-chalkboard-teacher', label: 'લાઈવ ક્લાસ', id: 's-live' });
+                items.push({ icon: 'fa-calendar-check', label: 'મારી હાજરી', id: 's-attendance' });
+                items.push({ icon: 'fa-pencil-alt', label: 'હોમવર્ક', id: 's-homework' });
+                items.push({ icon: 'fa-star', label: 'મારું રેટિંગ', id: 's-rating' });
             }
             items.forEach(item => {
                 const a = document.createElement('a');
@@ -1209,7 +1230,7 @@
             const logoutBtn = document.createElement('a');
             logoutBtn.href = '#';
             logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
-            logoutBtn.title = 'Logout';
+            logoutBtn.title = 'લોગઆઉટ';
             logoutBtn.addEventListener('click', (e) => { e.preventDefault();
                 auth.signOut(); });
             bottom.appendChild(logoutBtn);
@@ -1224,18 +1245,18 @@
             if (activeLink) activeLink.classList.add('active');
 
             const labels = {
-                't-live': 'Live Class',
-                't-students': 'Manage Students',
-                't-attendance': 'Attendance',
-                't-homework': 'Homework',
-                't-ratings': 'Ratings',
-                's-live': 'Live Class',
-                's-attendance': 'My Attendance',
-                's-homework': 'Homework',
-                's-rating': 'My Rating'
+                't-live': 'લાઈવ ક્લાસ',
+                't-students': 'વિદ્યાર્થીઓ',
+                't-attendance': 'હાજરી',
+                't-homework': 'હોમવર્ક',
+                't-ratings': 'રેટિંગ',
+                's-live': 'લાઈવ ક્લાસ',
+                's-attendance': 'મારી હાજરી',
+                's-homework': 'હોમવર્ક',
+                's-rating': 'મારું રેટિંગ'
             };
-            pageTitle.textContent = labels[pageId] || 'Dashboard';
-            pageSubtitle.textContent = currentRole === 'teacher' ? 'Teacher Panel' : 'Student Panel';
+            pageTitle.textContent = labels[pageId] || 'ડેશબોર્ડ';
+            pageSubtitle.textContent = currentRole === 'teacher' ? 'શિક્ષક પેનલ' : 'વિદ્યાર્થી પેનલ';
 
             switch (pageId) {
                 case 't-live':
@@ -1266,12 +1287,12 @@
                     renderStudentRating();
                     break;
                 default:
-                    dynamicContent.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center;">Page not found.</div>';
+                    dynamicContent.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center;">પેજ મળ્યું નહીં.</div>';
             }
         }
 
         // ================================================================
-        //  6. HELPER: IMAGE COMPARE (for homework)
+        //  7. HELPER: IMAGE COMPARE (for homework)
         // ================================================================
         function compareImagesBase64(base64_1, base64_2) {
             return new Promise((resolve) => {
@@ -1310,22 +1331,21 @@
         }
 
         // ================================================================
-        //  7. TEACHER PAGES
+        //  8. TEACHER PAGES
         // ================================================================
-
         function renderTeacherLive() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>Live Class</h2>
+                    <h2>લાઈવ ક્લાસ</h2>
                     <div class="card">
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-                            <input type="text" id="newBranch" class="input-field" placeholder="Branch" style="flex:1;min-width:100px;" value="${currentBranch || ''}" />
-                            <input type="number" id="newSemester" class="input-field" placeholder="Semester" style="width:100px;" value="${currentSemester || 1}" />
-                            <input type="text" id="newSubject" class="input-field" placeholder="Subject" style="flex:1;min-width:100px;" />
-                            <input type="text" id="newClassName" class="input-field" placeholder="Class Name" style="flex:1;min-width:120px;" />
-                            <button id="createClassBtn" class="btn btn-primary">Create</button>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+                            <input type="text" id="newBranch" class="input-field" placeholder="બ્રાન્ચ" style="flex:1;min-width:80px;" value="${currentBranch || ''}" />
+                            <input type="number" id="newSemester" class="input-field" placeholder="સેમેસ્ટર" style="width:80px;" value="${currentSemester || 1}" />
+                            <input type="text" id="newSubject" class="input-field" placeholder="વિષય" style="flex:1;min-width:80px;" />
+                            <input type="text" id="newClassName" class="input-field" placeholder="ક્લાસનું નામ" style="flex:1;min-width:100px;" />
+                            <button id="createClassBtn" class="btn btn-primary">બનાવો</button>
                         </div>
-                        <div id="classListContainer"><div class="text-muted">Loading...</div></div>
+                        <div id="classListContainer"><div class="text-muted">લોડ થઈ રહ્યું છે...</div></div>
                     </div>
                     <div id="liveSessionContainer"></div>
                 </div>
@@ -1352,18 +1372,18 @@
                     classListContainer.innerHTML = '';
                     if (snap.exists()) {
                         const classes = snap.val();
-                        let html = '<div style="font-weight:500;margin-bottom:6px;">All Classes:</div>';
+                        let html = '<div style="font-weight:500;margin-bottom:6px;">બધા ક્લાસ:</div>';
                         Object.keys(classes).forEach(key => {
                             const cls = classes[key];
                             const isActive = cls.active || false;
                             html += `
                                 <div class="class-item" data-key="${key}">
                                     <span class="name">${cls.className} (${cls.branch}, Sem ${cls.semester}, ${cls.subject})</span>
-                                    <span class="status ${isActive ? 'active' : ''}">${isActive ? '🟢 Live' : '🔴 Offline'}</span>
+                                    <span class="status ${isActive ? 'active' : ''}">${isActive ? '🟢 લાઈવ' : '🔴 ઑફલાઈન'}</span>
                                     <div>
-                                        <button class="btn btn-success btn-sm startClassBtn" data-key="${key}" data-name="${cls.className}" ${isActive ? 'style="display:none;"' : ''}>Start</button>
-                                        <button class="btn btn-danger btn-sm endClassBtn" data-key="${key}" data-name="${cls.className}" ${!isActive ? 'style="display:none;"' : ''}>End</button>
-                                        <button class="btn btn-danger btn-sm deleteClassBtn" data-key="${key}" style="background:rgba(248,113,113,0.2);color:#f87171;border:1px solid rgba(248,113,113,0.2);">Delete</button>
+                                        <button class="btn btn-success btn-sm startClassBtn" data-key="${key}" data-name="${cls.className}" ${isActive ? 'style="display:none;"' : ''}>શરૂ કરો</button>
+                                        <button class="btn btn-danger btn-sm endClassBtn" data-key="${key}" data-name="${cls.className}" ${!isActive ? 'style="display:none;"' : ''}>બંધ કરો</button>
+                                        <button class="btn btn-danger btn-sm deleteClassBtn" data-key="${key}" style="background:rgba(248,113,113,0.2);color:#f87171;border:1px solid rgba(248,113,113,0.2);">રદ કરો</button>
                                     </div>
                                 </div>
                             `;
@@ -1385,13 +1405,13 @@
                         });
                         document.querySelectorAll('.deleteClassBtn').forEach(btn => {
                             btn.addEventListener('click', async () => {
-                                if (confirm('Delete this class?')) {
+                                if (confirm('આ ક્લાસને રદ કરવો છે?')) {
                                     await classesRef.child(btn.dataset.key).remove();
                                 }
                             });
                         });
                     } else {
-                        classListContainer.innerHTML = '<div class="text-muted">No classes created yet.</div>';
+                        classListContainer.innerHTML = '<div class="text-muted">હજી કોઈ ક્લાસ બનાવ્યો નથી.</div>';
                     }
                 });
             }
@@ -1401,14 +1421,16 @@
                 const branch = newBranch.value.trim();
                 const semester = parseInt(newSemester.value);
                 const subject = newSubject.value.trim();
-                const className = newClassName.value.trim();
+                let className = newClassName.value.trim();
                 if (!branch || !semester || !subject || !className) {
-                    alert('Please fill all fields.');
+                    alert('કૃપા કરીને બધી ફીલ્ડ ભરો.');
                     return;
                 }
+                // Make PeerJS-friendly: replace spaces with hyphens
+                className = className.replace(/\s+/g, '-');
                 const snap = await classesRef.orderByChild('className').equalTo(className).once('value');
                 if (snap.exists()) {
-                    alert('Class with this name already exists.');
+                    alert('આ નામ સાથેનો ક્લાસ પહેલેથી છે.');
                     return;
                 }
                 const newRef = classesRef.push();
@@ -1433,6 +1455,7 @@
                     if (peer) { peer.destroy();
                         peer = null; }
                     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    // Use className as Peer ID (already sanitized)
                     peer = new Peer(className, { debug: 2 });
 
                     peer.on('open', () => {
@@ -1442,25 +1465,25 @@
                         loadClasses();
 
                         liveContainer.innerHTML = `
-                            <div class="card" style="margin-top:12px;">
-                                <h3 style="font-size:17px;margin-bottom:8px;">🟢 Live: ${className}</h3>
-                                <div class="video-wrapper" style="min-height:350px;position:relative;">
-                                    <div id="teacherVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:12px;padding:12px;overflow-y:auto;position:relative;">
-                                        <div class="local-player" style="width:30%;min-width:150px;height:30%;min-height:120px;"></div>
+                            <div class="card" style="margin-top:10px;">
+                                <h3 style="font-size:16px;margin-bottom:6px;">🟢 લાઈવ: ${className}</h3>
+                                <div class="video-wrapper" style="min-height:280px;position:relative;">
+                                    <div id="teacherVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:8px;padding:8px;overflow-y:auto;position:relative;">
+                                        <div class="local-player" style="flex:0 0 30%;min-width:120px;height:35%;min-height:80px;"></div>
                                     </div>
                                     <div class="video-overlay-badge">
                                         <i class="fas fa-circle" style="color:#34d399;"></i>
-                                        <span>Live (Teacher)</span>
+                                        <span>લાઈવ (શિક્ષક)</span>
                                     </div>
                                 </div>
-                                <div class="chat-box" style="margin-top:10px;height:140px;">
+                                <div class="chat-box" style="margin-top:8px;height:120px;">
                                     <div class="chat-messages" id="teacher-chat-messages"></div>
                                     <div class="chat-input">
-                                        <input type="text" id="teacher-chat-input" placeholder="Reply..." />
+                                        <input type="text" id="teacher-chat-input" placeholder="જવાબ આપો..." />
                                         <button id="teacher-chat-send"><i class="fas fa-paper-plane"></i></button>
                                     </div>
                                 </div>
-                                <button id="stopLiveBtn" class="btn btn-danger" style="margin-top:10px;">Stop Class</button>
+                                <button id="stopLiveBtn" class="btn btn-danger" style="margin-top:8px;">ક્લાસ બંધ કરો</button>
                             </div>
                         `;
 
@@ -1509,15 +1532,14 @@
                             call.answer(localStream);
                             studentCalls[studentId] = { call, stream: null };
 
-                            // Add student thumbnail
                             const thumbDiv = document.createElement('div');
                             thumbDiv.className = 'remote-player';
                             thumbDiv.id = 'thumb-' + studentId;
                             thumbDiv.style.cssText =
-                                'width:25%;min-width:140px;height:40%;min-height:100px;position:relative;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);';
+                                'flex:1 1 30%;min-width:120px;height:40%;min-height:80px;position:relative;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);';
                             thumbDiv.innerHTML = `
-                                <div style="position:absolute;bottom:4px;left:6px;background:rgba(0,0,0,0.7);font-size:10px;padding:2px 8px;border-radius:12px;color:#fff;pointer-events:none;">${studentId}</div>
-                                <button class="mic-btn" data-student="${studentId}" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);border:none;color:#f87171;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;z-index:5;">
+                                <div style="position:absolute;bottom:3px;left:5px;background:rgba(0,0,0,0.7);font-size:9px;padding:1px 6px;border-radius:10px;color:#fff;pointer-events:none;">${studentId}</div>
+                                <button class="mic-btn" data-student="${studentId}" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.6);border:none;color:#f87171;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;z-index:5;">
                                     <i class="fas fa-microphone-slash"></i>
                                 </button>
                             `;
@@ -1534,7 +1556,6 @@
                                 studentCalls[studentId].stream = remoteStream;
                                 remoteStream.getAudioTracks().forEach(t => t.enabled = false);
 
-                                // Listen for unmute toggle
                                 const controlRef = db.ref(`classControl/${className}/students/${studentId}/unmute`);
                                 controlRef.on('value', (snap) => {
                                     const unmute = snap.val() === true;
@@ -1573,12 +1594,12 @@
                     });
 
                     peer.on('error', (err) => {
-                        alert('PeerJS error: ' + err.message);
+                        alert('PeerJS ભૂલ: ' + err.message);
                         endClass(classKey);
                     });
 
                 } catch (err) {
-                    alert('Error starting class: ' + err.message);
+                    alert('ક્લાસ શરૂ કરવામાં ભૂલ: ' + err.message);
                 }
             }
 
@@ -1602,14 +1623,14 @@
             }
         }
 
-        // --- Teacher other pages (simplified, same as before) ---
+        // --- Teacher other pages (simplified) ---
         function renderTeacherStudents() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>Manage Students</h2>
+                    <h2>વિદ્યાર્થીઓ</h2>
                     <div class="flex-row mb-10">
-                        <input type="email" id="studentEmailInput" class="input-field" placeholder="Student email" style="flex:1;" />
-                        <button id="addStudentBtn" class="btn btn-primary">Add</button>
+                        <input type="email" id="studentEmailInput" class="input-field" placeholder="વિદ્યાર્થીનું ઇમેઇલ" style="flex:1;" />
+                        <button id="addStudentBtn" class="btn btn-primary">ઉમેરો</button>
                     </div>
                     <div id="studentList"></div>
                 </div>
@@ -1631,7 +1652,7 @@
                             'display:flex;justify-content:space-between;align-items:center;';
                             div.innerHTML = `
                                 <span>${s.email}</span>
-                                <button class="btn btn-danger btn-sm removeStudent" data-key="${key}">Remove</button>
+                                <button class="btn btn-danger btn-sm removeStudent" data-key="${key}">દૂર કરો</button>
                             `;
                             list.appendChild(div);
                         });
@@ -1641,7 +1662,7 @@
                             });
                         });
                     } else {
-                        list.innerHTML = '<div class="text-muted">No students added yet.</div>';
+                        list.innerHTML = '<div class="text-muted">હજી કોઈ વિદ્યાર્થી ઉમેર્યો નથી.</div>';
                     }
                 });
             }
@@ -1659,7 +1680,7 @@
         function renderTeacherAttendance() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>Attendance</h2>
+                    <h2>હાજરી</h2>
                     <div id="attendanceList"></div>
                 </div>
             `;
@@ -1669,19 +1690,19 @@
                 if (snap.exists()) {
                     const data = snap.val();
                     let html =
-                        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-weight:500;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;">';
-                    html += '<div>Student</div><div>Status</div><div>Time</div></div>';
+                        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-weight:500;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;">';
+                    html += '<div>વિદ્યાર્થી</div><div>સ્થિતિ</div><div>સમય</div></div>';
                     Object.values(data).forEach(s => {
                         html +=
-                            `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;">
+                            `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px;">
                                 <div>${s.email}</div>
-                                <div style="color:#34d399;">Present</div>
-                                <div style="color:rgba(255,255,255,0.3);">Just now</div>
+                                <div style="color:#34d399;">હાજર</div>
+                                <div style="color:rgba(255,255,255,0.3);">હમણાં</div>
                             </div>`;
                     });
                     list.innerHTML = html;
                 } else {
-                    list.innerHTML = '<div class="text-muted">No students enrolled.</div>';
+                    list.innerHTML = '<div class="text-muted">કોઈ વિદ્યાર્થી નોંધાયો નથી.</div>';
                 }
             });
         }
@@ -1689,17 +1710,17 @@
         function renderTeacherHomework() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>Homework Management</h2>
+                    <h2>હોમવર્ક વ્યવસ્થાપન</h2>
                     <div class="card">
-                        <h3 style="font-size:17px;margin-bottom:10px;">📤 Upload New Assignment</h3>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                            <input type="text" id="hwSubject" class="input-field" placeholder="Subject" />
-                            <input type="text" id="hwTopic" class="input-field" placeholder="Topic" />
-                            <input type="text" id="hwChapter" class="input-field" placeholder="Chapter" />
+                        <h3 style="font-size:16px;margin-bottom:8px;">📤 નવું હોમવર્ક અપલોડ કરો</h3>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                            <input type="text" id="hwSubject" class="input-field" placeholder="વિષય" />
+                            <input type="text" id="hwTopic" class="input-field" placeholder="ટોપિક" />
+                            <input type="text" id="hwChapter" class="input-field" placeholder="પ્રકરણ" />
                             <input type="datetime-local" id="hwDueDate" class="input-field" />
                         </div>
-                        <input type="file" id="hwTeacherFile" accept="image/*" class="input-field" style="margin-top:10px;" />
-                        <button id="uploadHwBtn" class="btn btn-primary" style="margin-top:10px;">Upload Assignment</button>
+                        <input type="file" id="hwTeacherFile" accept="image/*" class="input-field" style="margin-top:8px;" />
+                        <button id="uploadHwBtn" class="btn btn-primary" style="margin-top:8px;">અપલોડ કરો</button>
                         <div id="hwUploadStatus" class="text-muted mt-10"></div>
                     </div>
                     <div id="hwSubmissions"></div>
@@ -1721,10 +1742,10 @@
                 const chap = chapter.value.trim();
                 const due = dueDate.value;
                 if (!file || !subj || !top || !chap || !due) {
-                    status.textContent = 'Please fill all fields and select an image.';
+                    status.textContent = 'કૃપા કરીને બધી ફીલ્ડ ભરો અને ફોટો પસંદ કરો.';
                     return;
                 }
-                status.textContent = '⏳ Converting...';
+                status.textContent = '⏳ કન્વર્ટ થઈ રહ્યું છે...';
                 try {
                     const reader = new FileReader();
                     const base64 = await new Promise((resolve) => {
@@ -1748,7 +1769,7 @@
                         branch: currentBranch || '',
                         semester: currentSemester || 0
                     });
-                    status.textContent = '✅ Assignment uploaded!';
+                    status.textContent = '✅ હોમવર્ક અપલોડ થઈ ગયું!';
                     fileInput.value = '';
                     subject.value = '';
                     topic.value = '';
@@ -1756,7 +1777,7 @@
                     dueDate.value = '';
                     loadSubmissions();
                 } catch (err) {
-                    status.textContent = '❌ Error: ' + err.message;
+                    status.textContent = '❌ ભૂલ: ' + err.message;
                 }
             });
 
@@ -1765,25 +1786,25 @@
                     subsDiv.innerHTML = '';
                     if (snap.exists()) {
                         const data = snap.val();
-                        let html = '<h3 style="font-size:17px;margin:16px 0 10px;">📋 All Assignments</h3>';
+                        let html = '<h3 style="font-size:16px;margin:12px 0 8px;">📋 બધા હોમવર્ક</h3>';
                         for (const [hwId, hw] of Object.entries(data)) {
                             html += `<div class="card">
-                                <div><strong>${hw.subject}</strong> — ${hw.topic} (Ch. ${hw.chapter})</div>
-                                <div style="font-size:13px;color:rgba(255,255,255,0.5);">Due: ${new Date(hw.dueDate).toLocaleString()}</div>
-                                <div><strong>Assignment:</strong> <img src="${hw.imageBase64}" style="max-width:100px;max-height:100px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);" /></div>
-                                <div><strong>Submissions:</strong> ${hw.submissions ? Object.keys(hw.submissions).length : 0}</div>`;
+                                <div><strong>${hw.subject}</strong> — ${hw.topic} (પ્રક. ${hw.chapter})</div>
+                                <div style="font-size:12px;color:rgba(255,255,255,0.5);">છેલ્લી તારીખ: ${new Date(hw.dueDate).toLocaleString()}</div>
+                                <div><strong>હોમવર્ક:</strong> <img src="${hw.imageBase64}" style="max-width:80px;max-height:80px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);" /></div>
+                                <div><strong>સબમિશન:</strong> ${hw.submissions ? Object.keys(hw.submissions).length : 0}</div>`;
                             if (hw.submissions) {
-                                html += '<div style="margin-top:8px;">';
+                                html += '<div style="margin-top:6px;">';
                                 for (const [sid, sub] of Object.entries(hw.submissions)) {
                                     const sim = sub.similarity || 0;
                                     const grade = sub.grade || 'N/A';
-                                    const warning = sim > 70 ? ' ⚠️ Possible Cheating' : '';
-                                    html += `<div style="display:flex;gap:12px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;flex-wrap:wrap;">
+                                    const warning = sim > 70 ? ' ⚠️ શક્ય નકલ' : '';
+                                    html += `<div style="display:flex;gap:10px;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px;flex-wrap:wrap;">
                                         <span style="color:rgba(255,255,255,0.5);">${sid}</span>
-                                        <span style="color:#a78bfa;">Grade: ${grade}</span>
-                                        <span style="color:rgba(255,255,255,0.3);">Sim: ${sim.toFixed(1)}%</span>
+                                        <span style="color:#a78bfa;">ગ્રેડ: ${grade}</span>
+                                        <span style="color:rgba(255,255,255,0.3);">સમાનતા: ${sim.toFixed(1)}%</span>
                                         ${warning}
-                                        <img src="${sub.imageBase64}" style="max-width:40px;max-height:40px;border-radius:4px;border:1px solid rgba(255,255,255,0.05);" />
+                                        <img src="${sub.imageBase64}" style="max-width:30px;max-height:30px;border-radius:4px;border:1px solid rgba(255,255,255,0.05);" />
                                     </div>`;
                                 }
                                 html += '</div>';
@@ -1792,7 +1813,7 @@
                         }
                         subsDiv.innerHTML = html;
                     } else {
-                        subsDiv.innerHTML = '<div class="text-muted">No assignments yet.</div>';
+                        subsDiv.innerHTML = '<div class="text-muted">હજી કોઈ હોમવર્ક નથી.</div>';
                     }
                 });
             }
@@ -1802,7 +1823,7 @@
         function renderTeacherRatings() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>Ratings</h2>
+                    <h2>રેટિંગ</h2>
                     <div id="ratingList"></div>
                 </div>
             `;
@@ -1814,14 +1835,14 @@
                     Object.values(data).forEach(s => {
                         const div = document.createElement('div');
                         div.className = 'card';
-                        div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;';
+                        div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;';
                         div.innerHTML = `
                             <span>${s.email}</span>
                             <div>
-                                <select class="ratingSelect" data-email="${s.email}" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:4px 12px;color:#fff;font-size:13px;">
+                                <select class="ratingSelect" data-email="${s.email}" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px 10px;color:#fff;font-size:12px;">
                                     <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
                                 </select>
-                                <button class="btn btn-primary btn-sm saveRating" data-email="${s.email}" style="margin-left:6px;">Save</button>
+                                <button class="btn btn-primary btn-sm saveRating" data-email="${s.email}" style="margin-left:4px;">સેવ કરો</button>
                             </div>
                         `;
                         list.appendChild(div);
@@ -1841,23 +1862,24 @@
                             const sel = document.querySelector(`.ratingSelect[data-email="${email}"]`);
                             await db.ref('ratings/' + currentUser.uid + '/' + email).set(parseInt(sel
                             .value));
-                            alert('✅ Rating saved!');
+                            alert('✅ રેટિંગ સેવ થઈ ગયું!');
                         });
                     });
                 } else {
-                    list.innerHTML = '<div class="text-muted">No students.</div>';
+                    list.innerHTML = '<div class="text-muted">કોઈ વિદ્યાર્થી નથી.</div>';
                 }
             });
         }
 
         // ================================================================
-        //  8. STUDENT PAGES
+        //  9. STUDENT PAGES
         // ================================================================
 
+        // --- Student Live Class (with case-insensitive filtering & retry) ---
         function renderStudentLive() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>Live Class</h2>
+                    <h2>લાઈવ ક્લાસ</h2>
                     <div id="studentClassList"></div>
                     <div id="studentLiveContainer"></div>
                 </div>
@@ -1865,34 +1887,47 @@
             const classListDiv = document.getElementById('studentClassList');
             const liveContainer = document.getElementById('studentLiveContainer');
 
-            const branch = (currentBranch || '').trim();
-            const semester = currentSemester || 0;
+            const userBranch = (currentBranch || '').trim().toLowerCase();
+            const userSemester = currentSemester || 0;
 
-            // Listen to active classes
+            console.log('વિદ્યાર્થી બ્રાન્ચ (નાના અક્ષર):', userBranch, 'સેમેસ્ટર:', userSemester);
+
             db.ref('classes').orderByChild('active').equalTo(true).on('value', (snap) => {
                 classListDiv.innerHTML = '';
                 if (snap.exists()) {
                     const classes = snap.val();
                     let found = false;
-                    let html = '<div style="margin-bottom:12px;">Available Live Classes:</div>';
+                    let html = '<div style="margin-bottom:10px;">ઉપલબ્ધ લાઈવ ક્લાસ:</div>';
+                    let allClassesHtml = '';
+
                     Object.keys(classes).forEach(key => {
                         const cls = classes[key];
-                        const clsBranch = (cls.branch || '').trim();
+                        const clsBranch = (cls.branch || '').trim().toLowerCase();
                         const clsSemester = cls.semester || 0;
-                        if (clsBranch === branch && clsSemester === semester) {
+
+                        console.log(`ક્લાસ: ${cls.className}, બ્રાન્ચ: ${clsBranch}, સેમેસ્ટર: ${clsSemester}`);
+
+                        if (clsBranch === userBranch && clsSemester === userSemester) {
                             found = true;
                             html += `
                                 <div class="class-item" data-key="${key}">
                                     <span class="name">${cls.className} (${cls.subject})</span>
-                                    <button class="btn btn-success btn-sm joinClassBtn" data-name="${cls.className}">Join</button>
+                                    <button class="btn btn-success btn-sm joinClassBtn" data-name="${cls.className}">જોડાઓ</button>
                                 </div>
                             `;
                         }
+                        allClassesHtml += `<div class="class-item">${cls.className} (બ્રાન્ચ: ${cls.branch}, સેમે: ${cls.semester})</div>`;
                     });
+
                     if (!found) {
-                        html += '<div class="text-muted">No live classes for your branch & semester.</div>';
+                        html += `<div class="text-muted">તમારી બ્રાન્ચ અને સેમેસ્ટર માટે કોઈ લાઈવ ક્લાસ નથી.</div>`;
+                        html += `<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.05);padding-top:8px;">
+                                    <div style="font-size:12px;color:rgba(255,255,255,0.3);">ડીબગ: બધા એક્ટિવ ક્લાસ:</div>
+                                    ${allClassesHtml}
+                                </div>`;
                     }
                     classListDiv.innerHTML = html;
+
                     document.querySelectorAll('.joinClassBtn').forEach(btn => {
                         btn.addEventListener('click', () => {
                             const name = btn.dataset.name;
@@ -1900,10 +1935,11 @@
                         });
                     });
                 } else {
-                    classListDiv.innerHTML = '<div class="text-muted">No live classes at the moment.</div>';
+                    classListDiv.innerHTML = '<div class="text-muted">હમણાં કોઈ લાઈવ ક્લાસ નથી.</div>';
                 }
             });
 
+            // --- Face tracking and join logic with retry ---
             let studentPeer = null;
             let studentCall = null;
             let studentStream = null;
@@ -1972,13 +2008,13 @@
                         }
                     }, 1600);
                 } catch (e) {
-                    console.warn('Siren not supported:', e);
+                    console.warn('સાયરન સપોર્ટેડ નથી:', e);
                 }
             }
 
             async function initFaceDetection(videoElement) {
                 if (!window.FaceDetector) {
-                    console.warn('FaceDetector not supported. Face tracking disabled.');
+                    console.warn('FaceDetector સપોર્ટેડ નથી. ચહેરો ટ્રેકિંગ બંધ.');
                     return;
                 }
                 try {
@@ -2003,11 +2039,11 @@
                                 }
                             }
                         } catch (err) {
-                            console.warn('Face detection error:', err);
+                            console.warn('ચહેરો શોધમાં ભૂલ:', err);
                         }
                     }, 1000);
                 } catch (err) {
-                    console.warn('FaceDetector init error:', err);
+                    console.warn('FaceDetector ભૂલ:', err);
                 }
             }
 
@@ -2025,7 +2061,7 @@
                 sirenTriggered = false;
             }
 
-            async function joinStudentClass(className) {
+            async function joinStudentClass(className, retryCount = 0) {
                 if (studentCall) {
                     studentCall.close();
                     studentCall = null;
@@ -2048,39 +2084,42 @@
                     studentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                     studentStream.getAudioTracks().forEach(t => t.enabled = false);
 
+                    // Use email as Peer ID
                     studentPeer = new Peer(currentUser.email, { debug: 2 });
 
                     await new Promise((resolve, reject) => {
                         studentPeer.on('open', resolve);
                         studentPeer.on('error', reject);
-                        setTimeout(() => reject(new Error('Peer connection timeout')), 10000);
+                        setTimeout(() => reject(new Error('Peer કનેક્શન ટાઇમઆઉટ')), 10000);
                     });
 
+                    console.log('📞 કૉલ કરી રહ્યા છે:', className);
                     const call = studentPeer.call(className, studentStream);
                     studentCall = call;
 
+                    // Handle call events
                     call.on('stream', (remoteStream) => {
                         liveContainer.innerHTML = `
-                            <div class="card" style="margin-top:12px;">
-                                <h3 style="font-size:17px;margin-bottom:8px;">🟢 Joined: ${className}</h3>
-                                <div class="video-wrapper" style="min-height:350px;position:relative;">
-                                    <div id="studentVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:12px;padding:12px;overflow-y:auto;position:relative;">
-                                        <div class="remote-player" style="width:60%;min-width:250px;height:60%;min-height:200px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.05);"></div>
-                                        <div class="local-player" style="width:25%;min-width:130px;height:30%;min-height:100px;border-radius:12px;overflow:hidden;border:2px solid rgba(167,139,250,0.4);"></div>
+                            <div class="card" style="margin-top:10px;">
+                                <h3 style="font-size:16px;margin-bottom:6px;">🟢 જોડાયા: ${className}</h3>
+                                <div class="video-wrapper" style="min-height:280px;position:relative;">
+                                    <div id="studentVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:8px;padding:8px;overflow-y:auto;position:relative;">
+                                        <div class="remote-player" style="flex:2 1 60%;min-width:180px;height:60%;min-height:140px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.05);"></div>
+                                        <div class="local-player" style="flex:0 0 25%;min-width:100px;height:30%;min-height:70px;border-radius:10px;overflow:hidden;border:2px solid rgba(167,139,250,0.4);"></div>
                                     </div>
                                     <div class="video-overlay-badge">
                                         <i class="fas fa-circle" style="color:#34d399;"></i>
-                                        <span>Connected</span>
+                                        <span>કનેક્ટેડ</span>
                                     </div>
                                 </div>
-                                <div class="chat-box" style="margin-top:10px;height:140px;">
+                                <div class="chat-box" style="margin-top:8px;height:120px;">
                                     <div class="chat-messages" id="student-chat-messages"></div>
                                     <div class="chat-input">
-                                        <input type="text" id="student-chat-input" placeholder="Ask question..." />
+                                        <input type="text" id="student-chat-input" placeholder="પ્રશ્ન પૂછો..." />
                                         <button id="student-chat-send"><i class="fas fa-paper-plane"></i></button>
                                     </div>
                                 </div>
-                                <button id="leaveClassBtn" class="btn btn-danger" style="margin-top:10px;">Leave Class</button>
+                                <button id="leaveClassBtn" class="btn btn-danger" style="margin-top:8px;">ક્લાસ છોડો</button>
                             </div>
                         `;
 
@@ -2105,14 +2144,13 @@
                         localVideo.style.objectFit = 'cover';
                         localDiv.appendChild(localVideo);
 
+                        // Chat
                         const chatRef = db.ref('chat/' + className);
                         chatRef.on('child_added', (snap) => {
                             const data = snap.val();
                             const msgDiv = document.createElement('div');
-                            msgDiv.className = 'msg ' + (data.role === 'teacher' ? 'teacher' :
-                                'student');
-                            msgDiv.innerHTML =
-                                `<span class="sender">${data.sender}</span> ${data.text}`;
+                            msgDiv.className = 'msg ' + (data.role === 'teacher' ? 'teacher' : 'student');
+                            msgDiv.innerHTML = `<span class="sender">${data.sender}</span> ${data.text}`;
                             const container = document.getElementById('student-chat-messages');
                             container.appendChild(msgDiv);
                             container.scrollTop = container.scrollHeight;
@@ -2135,12 +2173,15 @@
                             joinStudentClass(className);
                         });
 
+                        // Attendance
                         db.ref('attendance/' + className + '/' + currentUser.uid).set({
                             joined: Date.now()
                         });
 
+                        // Face detection
                         initFaceDetection(localVideo);
 
+                        // Listen for teacher's unmute command
                         const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/unmute`);
                         controlRef.on('value', (snap) => {
                             const unmute = snap.val() === true;
@@ -2161,21 +2202,44 @@
                     });
 
                     call.on('error', (err) => {
-                        alert('Connection error: ' + err.message);
-                        joinStudentClass(className);
+                        console.error('કૉલ ભૂલ:', err);
+                        // Retry up to 3 times
+                        if (retryCount < 3) {
+                            setTimeout(() => {
+                                console.log(`🔄 ફરી પ્રયાસ ${retryCount + 1}/3...`);
+                                joinStudentClass(className, retryCount + 1);
+                            }, 2000);
+                        } else {
+                            alert('❌ કનેક્શન ફેલ: ' + err.message + '\nકૃપા કરીને ફરી પ્રયાસ કરો.');
+                            if (studentPeer) studentPeer.destroy();
+                            studentPeer = null;
+                            if (studentStream) {
+                                studentStream.getTracks().forEach(t => t.stop());
+                                studentStream = null;
+                            }
+                            liveContainer.innerHTML = '';
+                        }
                     });
 
                 } catch (err) {
-                    alert('❌ Failed to join: ' + err.message);
-                    if (studentPeer) {
-                        studentPeer.destroy();
-                        studentPeer = null;
+                    console.error('જોડાવામાં ભૂલ:', err);
+                    if (retryCount < 3) {
+                        setTimeout(() => {
+                            console.log(`🔄 ફરી પ્રયાસ ${retryCount + 1}/3...`);
+                            joinStudentClass(className, retryCount + 1);
+                        }, 2000);
+                    } else {
+                        alert('❌ જોડાવામાં ભૂલ: ' + err.message + '\nકૃપા કરીને ફરી પ્રયાસ કરો.');
+                        if (studentPeer) {
+                            studentPeer.destroy();
+                            studentPeer = null;
+                        }
+                        if (studentStream) {
+                            studentStream.getTracks().forEach(t => t.stop());
+                            studentStream = null;
+                        }
+                        liveContainer.innerHTML = '';
                     }
-                    if (studentStream) {
-                        studentStream.getTracks().forEach(t => t.stop());
-                        studentStream = null;
-                    }
-                    liveContainer.innerHTML = '';
                 }
             }
 
@@ -2188,7 +2252,7 @@
         function renderStudentAttendance() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>My Attendance</h2>
+                    <h2>મારી હાજરી</h2>
                     <div id="studentAttendanceList"></div>
                 </div>
             `;
@@ -2202,12 +2266,12 @@
                         if (students[currentUser.uid]) {
                             found = true;
                             const date = new Date(students[currentUser.uid].joined).toLocaleString();
-                            list.innerHTML += `<div class="card">📅 ${session} — <span style="color:#34d399;">Joined</span> at ${date}</div>`;
+                            list.innerHTML += `<div class="card">📅 ${session} — <span style="color:#34d399;">જોડાયા</span> at ${date}</div>`;
                         }
                     }
-                    if (!found) list.innerHTML = '<div class="text-muted">No attendance records found.</div>';
+                    if (!found) list.innerHTML = '<div class="text-muted">કોઈ હાજરી મળી નહીં.</div>';
                 } else {
-                    list.innerHTML = '<div class="text-muted">No records.</div>';
+                    list.innerHTML = '<div class="text-muted">કોઈ રેકોર્ડ નથી.</div>';
                 }
             });
         }
@@ -2215,9 +2279,9 @@
         function renderStudentHomework() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>Homework</h2>
+                    <h2>હોમવર્ક</h2>
                     <div id="studentHomeworkList"></div>
-                    <div id="studentHomeworkDetail" style="margin-top:16px;"></div>
+                    <div id="studentHomeworkDetail" style="margin-top:12px;"></div>
                 </div>
             `;
 
@@ -2240,15 +2304,15 @@
                             listDiv.innerHTML = '';
                             if (snap2.exists()) {
                                 const hws = snap2.val();
-                                let html = '<div style="display:flex;flex-wrap:wrap;gap:12px;">';
+                                let html = '<div style="display:flex;flex-wrap:wrap;gap:10px;">';
                                 for (const [hwId, hw] of Object.entries(hws)) {
                                     html += `
-                                        <div class="card" style="cursor:pointer;max-width:220px;" data-hwid="${hwId}">
+                                        <div class="card" style="cursor:pointer;max-width:200px;" data-hwid="${hwId}">
                                             <div><strong>${hw.subject}</strong></div>
-                                            <div style="font-size:13px;">${hw.topic}</div>
-                                            <div style="font-size:12px;color:rgba(255,255,255,0.4);">Ch. ${hw.chapter}</div>
-                                            <div style="font-size:12px;color:rgba(255,255,255,0.4);">Due: ${new Date(hw.dueDate).toLocaleDateString()}</div>
-                                            <button class="btn btn-primary btn-sm selectHwBtn" data-hwid="${hwId}">Select</button>
+                                            <div style="font-size:12px;">${hw.topic}</div>
+                                            <div style="font-size:11px;color:rgba(255,255,255,0.4);">પ્રક. ${hw.chapter}</div>
+                                            <div style="font-size:11px;color:rgba(255,255,255,0.4);">છેલ્લી તારીખ: ${new Date(hw.dueDate).toLocaleDateString()}</div>
+                                            <button class="btn btn-primary btn-sm selectHwBtn" data-hwid="${hwId}">પસંદ કરો</button>
                                         </div>
                                     `;
                                 }
@@ -2262,7 +2326,7 @@
                                     });
                                 });
                             } else {
-                                listDiv.innerHTML = '<div class="text-muted">No assignments posted.</div>';
+                                listDiv.innerHTML = '<div class="text-muted">કોઈ હોમવર્ક પોસ્ટ થયું નથી.</div>';
                             }
                         });
                     }
@@ -2272,14 +2336,14 @@
             function showHomeworkDetail(hwId, hw) {
                 detailDiv.innerHTML = `
                     <div class="card">
-                        <h3 style="font-size:17px;">${hw.subject} — ${hw.topic}</h3>
-                        <p>Chapter: ${hw.chapter}</p>
-                        <p>Due: ${new Date(hw.dueDate).toLocaleString()}</p>
-                        <div><strong>Assignment Image:</strong> <img src="${hw.imageBase64}" style="max-width:150px;max-height:150px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);" /></div>
-                        <div style="margin-top:12px;">
-                            <h4>Submit Your Work</h4>
-                            <input type="file" id="studentHwFile" accept="image/*" class="input-field" style="margin-bottom:8px;" />
-                            <button id="submitHwBtn" class="btn btn-primary">Submit & Grade</button>
+                        <h3 style="font-size:16px;">${hw.subject} — ${hw.topic}</h3>
+                        <p style="font-size:13px;">પ્રકરણ: ${hw.chapter}</p>
+                        <p style="font-size:13px;color:rgba(255,255,255,0.5);">છેલ્લી તારીખ: ${new Date(hw.dueDate).toLocaleString()}</p>
+                        <div><strong>હોમવર્ક ફોટો:</strong> <img src="${hw.imageBase64}" style="max-width:120px;max-height:120px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);" /></div>
+                        <div style="margin-top:10px;">
+                            <h4 style="font-size:14px;">તમારું કામ સબમિટ કરો</h4>
+                            <input type="file" id="studentHwFile" accept="image/*" class="input-field" style="margin-bottom:6px;" />
+                            <button id="submitHwBtn" class="btn btn-primary">સબમિટ કરો</button>
                             <div id="studentHwStatus" class="text-muted mt-10"></div>
                             <div id="studentHwResult" class="mt-10"></div>
                         </div>
@@ -2293,7 +2357,7 @@
 
                 db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once('value').then(snap => {
                     if (snap.exists()) {
-                        status.textContent = '✅ You already submitted this assignment.';
+                        status.textContent = '✅ તમે પહેલેથી સબમિટ કર્યું છે.';
                         status.style.color = '#34d399';
                         submitBtn.disabled = true;
                     }
@@ -2301,14 +2365,14 @@
 
                 submitBtn.addEventListener('click', async () => {
                     const file = fileInput.files[0];
-                    if (!file) { status.textContent = 'Select an image first.'; return; }
+                    if (!file) { status.textContent = 'કૃપા કરીને ફોટો પસંદ કરો.'; return; }
                     const snap = await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once(
-                    'value');
+                        'value');
                     if (snap.exists()) {
-                        status.textContent = 'You already submitted this assignment.';
+                        status.textContent = 'તમે પહેલેથી સબમિટ કર્યું છે.';
                         return;
                     }
-                    status.textContent = '⏳ Processing...';
+                    status.textContent = '⏳ પ્રોસેસ થઈ રહ્યું છે...';
                     try {
                         const reader = new FileReader();
                         const studentBase64 = await new Promise((resolve) => {
@@ -2323,7 +2387,7 @@
                         const existing = await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`)
                             .once('value');
                         if (existing.exists()) {
-                            status.textContent = 'You already submitted this assignment.';
+                            status.textContent = 'તમે પહેલેથી સબમિટ કર્યું છે.';
                             return;
                         }
 
@@ -2354,17 +2418,17 @@
                             timestamp: Date.now()
                         });
 
-                        status.textContent = '✅ Submitted! Grade: ' + finalGrade + '/5';
+                        status.textContent = '✅ સબમિટ થઈ ગયું! ગ્રેડ: ' + finalGrade + '/5';
                         resultDiv.innerHTML = `
-                            <div style="background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.1);border-radius:16px;padding:16px;text-align:center;">
-                                <div style="font-size:14px;color:rgba(255,255,255,0.5);">Similarity: ${similarity.toFixed(1)}%</div>
-                                <div style="font-size:42px;font-weight:700;color:#a78bfa;">${finalGrade} / 5</div>
-                                ${similarity > 70 ? '<div style="color:#f87171;margin-top:6px;">⚠️ High similarity detected. Your submission may be flagged.</div>' : ''}
+                            <div style="background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.1);border-radius:14px;padding:14px;text-align:center;">
+                                <div style="font-size:13px;color:rgba(255,255,255,0.5);">સમાનતા: ${similarity.toFixed(1)}%</div>
+                                <div style="font-size:32px;font-weight:700;color:#a78bfa;">${finalGrade} / 5</div>
+                                ${similarity > 70 ? '<div style="color:#f87171;margin-top:4px;font-size:12px;">⚠️ ઉચ્ચ સમાનતા મળી. તમારું સબમિશન ફ્લેગ થઈ શકે છે.</div>' : ''}
                             </div>
                         `;
                         submitBtn.disabled = true;
                     } catch (err) {
-                        status.textContent = '❌ Error: ' + err.message;
+                        status.textContent = '❌ ભૂલ: ' + err.message;
                         console.error(err);
                     }
                 });
@@ -2374,7 +2438,7 @@
         function renderStudentRating() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
-                    <h2>My Rating</h2>
+                    <h2>મારું રેટિંગ</h2>
                     <div id="studentRatingDisplay"></div>
                 </div>
             `;
@@ -2393,9 +2457,9 @@
                     if (teacherUid) {
                         db.ref('ratings/' + teacherUid + '/' + currentUser.email).on('value', (snap2) => {
                             if (snap2.exists()) {
-                                display.innerHTML = `<div class="grade-big">${snap2.val()} / 5</div>`;
+                                display.innerHTML = `<div style="font-size:40px;font-weight:700;color:#a78bfa;">${snap2.val()} / 5</div>`;
                             } else {
-                                display.innerHTML = '<div class="text-muted">No rating given yet.</div>';
+                                display.innerHTML = '<div class="text-muted">હજી કોઈ રેટિંગ મળ્યું નથી.</div>';
                             }
                         });
                     }
@@ -2406,9 +2470,10 @@
         // ================================================================
         //  INIT
         // ================================================================
-        console.log('✅ Smart Classroom fully functional with profile, full video, and fixed unmute.');
-        console.log('📌 Click on avatar to open profile.');
-        console.log('💡 Teacher can unmute student from the mic button on student thumbnail.');
+        console.log('✅ સ્માર્ટ ક્લાસરૂમ સંપૂર્ણપણે કાર્યરત છે.');
+        console.log('📌 પ્રોફાઇલ માટે અવતાર પર ક્લિક કરો.');
+        console.log('💡 બ્રાન્ચ/સેમેસ્ટર સરખામણી હવે કેસ-ઇનસેન્સિટિવ છે.');
+        console.log('🔄 જોડાવા દરમિયાન 3 વખત રિટ્રાય થશે.');
     </script>
 </body>
 </html>
