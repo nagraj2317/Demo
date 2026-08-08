@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Smart Classroom · Fixed</title>
+    <title>Smart Classroom · PeerJS</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
+    <!-- Firebase Compat -->
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-database-compat.js">
     </script>
+
+    <!-- PeerJS -->
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js">
     </script>
 
@@ -396,44 +399,6 @@
             justify-content: center;
             font-size: 12px;
         }
-        .warning-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(255, 0, 0, 0.3);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-        .warning-overlay.active {
-            opacity: 1;
-        }
-        .warning-overlay .content {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 24px 30px;
-            border-radius: 28px;
-            text-align: center;
-            border: 2px solid #f87171;
-        }
-        .warning-overlay .content i {
-            font-size: 48px;
-            color: #f87171;
-            display: block;
-            margin-bottom: 8px;
-        }
-        .warning-overlay .content h2 {
-            color: #f87171;
-            font-size: 20px;
-        }
-        .warning-overlay .content p {
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 6px;
-            font-size: 14px;
-        }
         .right-panel {
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(12px);
@@ -786,14 +751,6 @@
     </style>
 </head>
 <body>
-
-    <div id="warningOverlay" class="warning-overlay">
-        <div class="content">
-            <i class="fas fa-exclamation-triangle"></i>
-            <h2>⚠️ ધ્યાન આપો!</h2>
-            <p>તમારો ચહેરો કેમેરામાં દેખાતો નથી. કૃપા કરીને કેમેરા સામે બેસો.</p>
-        </div>
-    </div>
 
     <div id="profileModal" class="profile-modal">
         <div class="profile-box">
@@ -1264,9 +1221,8 @@
         }
 
         // ================================================================
-        //  7. TEACHER PAGES
+        //  7. TEACHER LIVE CLASS (with dual display fix & camera switch)
         // ================================================================
-
         function renderTeacherLive() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
@@ -1293,11 +1249,13 @@
             const createBtn = document.getElementById('createClassBtn');
             const liveContainer = document.getElementById('liveSessionContainer');
 
+            // PeerJS state
             let peer = null;
             let localStream = null;
             let currentClassKey = null;
             let isTeacherLive = false;
-            let studentCalls = {};
+            let studentCalls = {}; // key: studentId, value: { call, stream, thumbDiv }
+            let cameraFacing = 'user'; // 'user' for front, 'environment' for back
 
             const classesRef = db.ref('classes');
 
@@ -1380,6 +1338,30 @@
                 newSubject.value = '';
             });
 
+            // Camera switch function
+            async function switchCamera() {
+                if (!localStream) return;
+                const newFacing = cameraFacing === 'user' ? 'environment' : 'user';
+                try {
+                    const newStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: newFacing },
+                        audio: true
+                    });
+                    // Replace video track
+                    const videoTrack = newStream.getVideoTracks()[0];
+                    const oldVideoTrack = localStream.getVideoTracks()[0];
+                    localStream.removeTrack(oldVideoTrack);
+                    localStream.addTrack(videoTrack);
+                    oldVideoTrack.stop();
+                    cameraFacing = newFacing;
+                    // Update local video display
+                    const localVideo = document.querySelector('#teacherVideoContainer .local-player video');
+                    if (localVideo) localVideo.srcObject = localStream;
+                } catch (err) {
+                    alert('કેમેરો બદલવામાં ભૂલ: ' + err.message);
+                }
+            }
+
             async function startClass(classKey, className) {
                 if (isTeacherLive) {
                     await endClass(currentClassKey);
@@ -1387,6 +1369,7 @@
                 try {
                     if (peer) { peer.destroy();
                         peer = null; }
+                    // Get stream with default camera
                     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                     peer = new Peer(className, { debug: 2 });
 
@@ -1398,7 +1381,10 @@
 
                         liveContainer.innerHTML = `
                             <div class="card" style="margin-top:10px;">
-                                <h3 style="font-size:16px;margin-bottom:6px;">🟢 લાઈવ: ${className}</h3>
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                                    <h3 style="font-size:16px;">🟢 લાઈવ: ${className}</h3>
+                                    <button id="switchCameraBtn" class="btn btn-sm btn-primary">🔄 કેમેરો બદલો</button>
+                                </div>
                                 <div class="video-wrapper" style="min-height:280px;position:relative;">
                                     <div id="teacherVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:8px;padding:8px;overflow-y:auto;position:relative;">
                                         <div class="local-player" style="flex:0 0 30%;min-width:120px;height:35%;min-height:80px;"></div>
@@ -1419,6 +1405,10 @@
                             </div>
                         `;
 
+                        // Camera switch button
+                        document.getElementById('switchCameraBtn').addEventListener('click', switchCamera);
+
+                        // Local video
                         const videoContainer = document.getElementById('teacherVideoContainer');
                         const localDiv = videoContainer.querySelector('.local-player');
                         const localVideo = document.createElement('video');
@@ -1430,6 +1420,7 @@
                         localVideo.style.objectFit = 'cover';
                         localDiv.appendChild(localVideo);
 
+                        // Chat
                         const chatRef = db.ref('chat/' + className);
                         chatRef.on('child_added', (snap) => {
                             const data = snap.val();
@@ -1455,15 +1446,15 @@
                             input.value = '';
                         });
 
+                        // Handle incoming calls from students
                         peer.on('call', (call) => {
                             const studentId = call.peer;
+                            // If already connected, ignore duplicate
                             if (studentCalls[studentId]) {
                                 call.close();
                                 return;
                             }
                             call.answer(localStream);
-                            studentCalls[studentId] = { call, stream: null };
-
                             const thumbDiv = document.createElement('div');
                             thumbDiv.className = 'remote-player';
                             thumbDiv.id = 'thumb-' + studentId;
@@ -1476,8 +1467,12 @@
                                 </button>
                             `;
                             videoContainer.appendChild(thumbDiv);
+                            studentCalls[studentId] = { call, stream: null, thumbDiv };
 
                             call.on('stream', (remoteStream) => {
+                                // Remove any existing video element in thumb
+                                const existingVideo = thumbDiv.querySelector('video');
+                                if (existingVideo) existingVideo.remove();
                                 const video = document.createElement('video');
                                 video.srcObject = remoteStream;
                                 video.autoplay = true;
@@ -1488,6 +1483,7 @@
                                 studentCalls[studentId].stream = remoteStream;
                                 remoteStream.getAudioTracks().forEach(t => t.enabled = false);
 
+                                // Listen for unmute toggle
                                 const controlRef = db.ref(`classControl/${className}/students/${studentId}/unmute`);
                                 controlRef.on('value', (snap) => {
                                     const unmute = snap.val() === true;
@@ -1503,6 +1499,7 @@
                                 });
                             });
 
+                            // Mute/unmute button
                             const micBtn = thumbDiv.querySelector('.mic-btn');
                             micBtn.addEventListener('click', (e) => {
                                 e.stopPropagation();
@@ -1555,7 +1552,232 @@
             }
         }
 
-        // --- Teacher other pages (simplified) ---
+        // ================================================================
+        //  8. STUDENT LIVE CLASS (with dual display fix)
+        // ================================================================
+        function renderStudentLive() {
+            dynamicContent.innerHTML = `
+                <div class="page-content">
+                    <h2>લાઈવ ક્લાસ</h2>
+                    <div id="studentClassList"></div>
+                    <div id="studentLiveContainer"></div>
+                </div>
+            `;
+            const classListDiv = document.getElementById('studentClassList');
+            const liveContainer = document.getElementById('studentLiveContainer');
+
+            const userBranch = (currentBranch || '').trim().toLowerCase();
+            const userSemester = currentSemester || 0;
+
+            db.ref('classes').orderByChild('active').equalTo(true).on('value', (snap) => {
+                classListDiv.innerHTML = '';
+                if (snap.exists()) {
+                    const classes = snap.val();
+                    let found = false;
+                    let html = '<div style="margin-bottom:10px;">ઉપલબ્ધ લાઈવ ક્લાસ:</div>';
+
+                    Object.keys(classes).forEach(key => {
+                        const cls = classes[key];
+                        const clsBranch = (cls.branch || '').trim().toLowerCase();
+                        const clsSemester = cls.semester || 0;
+
+                        if (clsBranch === userBranch && clsSemester === userSemester) {
+                            found = true;
+                            html += `
+                                <div class="class-item" data-key="${key}">
+                                    <span class="name">${cls.className} (${cls.subject})</span>
+                                    <button class="btn btn-success btn-sm joinClassBtn" data-name="${cls.className}">જોડાઓ</button>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    if (!found) {
+                        html += `<div class="text-muted">તમારી બ્રાન્ચ અને સેમેસ્ટર માટે કોઈ લાઈવ ક્લાસ નથી.</div>`;
+                    }
+                    classListDiv.innerHTML = html;
+
+                    document.querySelectorAll('.joinClassBtn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const name = btn.dataset.name;
+                            joinStudentClass(name);
+                        });
+                    });
+                } else {
+                    classListDiv.innerHTML = '<div class="text-muted">હમણાં કોઈ લાઈવ ક્લાસ નથી.</div>';
+                }
+            });
+
+            let studentPeer = null;
+            let studentCall = null;
+            let studentStream = null;
+
+            async function joinStudentClass(className) {
+                if (studentCall) {
+                    studentCall.close();
+                    studentCall = null;
+                    if (studentStream) {
+                        studentStream.getTracks().forEach(t => t.stop());
+                        studentStream = null;
+                    }
+                    if (studentPeer) {
+                        studentPeer.destroy();
+                        studentPeer = null;
+                    }
+                    liveContainer.innerHTML = '';
+                    return;
+                }
+
+                try {
+                    studentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    studentStream.getAudioTracks().forEach(t => t.enabled = false);
+
+                    const randomId = 'student-' + Date.now();
+                    studentPeer = new Peer(randomId, { debug: 2 });
+
+                    await new Promise((resolve, reject) => {
+                        const timeout = setTimeout(() => reject(new Error('Peer connection timeout')), 10000);
+                        studentPeer.on('open', () => {
+                            clearTimeout(timeout);
+                            resolve();
+                        });
+                        studentPeer.on('error', reject);
+                    });
+
+                    const call = studentPeer.call(className, studentStream);
+                    studentCall = call;
+
+                    call.on('stream', (remoteStream) => {
+                        liveContainer.innerHTML = `
+                            <div class="card" style="margin-top:10px;">
+                                <h3 style="font-size:16px;margin-bottom:6px;">🟢 જોડાયા: ${className}</h3>
+                                <div class="video-wrapper" style="min-height:280px;position:relative;">
+                                    <div id="studentVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:8px;padding:8px;overflow-y:auto;position:relative;">
+                                        <div class="remote-player" style="flex:2 1 60%;min-width:180px;height:60%;min-height:140px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.05);"></div>
+                                        <div class="local-player" style="flex:0 0 25%;min-width:100px;height:30%;min-height:70px;border-radius:10px;overflow:hidden;border:2px solid rgba(167,139,250,0.4);"></div>
+                                    </div>
+                                    <div class="video-overlay-badge">
+                                        <i class="fas fa-circle" style="color:#34d399;"></i>
+                                        <span>કનેક્ટેડ</span>
+                                    </div>
+                                </div>
+                                <div class="chat-box" style="margin-top:8px;height:120px;">
+                                    <div class="chat-messages" id="student-chat-messages"></div>
+                                    <div class="chat-input">
+                                        <input type="text" id="student-chat-input" placeholder="પ્રશ્ન પૂછો..." />
+                                        <button id="student-chat-send"><i class="fas fa-paper-plane"></i></button>
+                                    </div>
+                                </div>
+                                <button id="leaveClassBtn" class="btn btn-danger" style="margin-top:8px;">ક્લાસ છોડો</button>
+                            </div>
+                        `;
+
+                        const videoContainer = document.getElementById('studentVideoContainer');
+                        const remoteDiv = videoContainer.querySelector('.remote-player');
+                        const localDiv = videoContainer.querySelector('.local-player');
+
+                        // Remote (teacher) video
+                        const remoteVideo = document.createElement('video');
+                        remoteVideo.srcObject = remoteStream;
+                        remoteVideo.autoplay = true;
+                        remoteVideo.style.width = '100%';
+                        remoteVideo.style.height = '100%';
+                        remoteVideo.style.objectFit = 'cover';
+                        remoteDiv.appendChild(remoteVideo);
+
+                        // Local (student) video
+                        const localVideo = document.createElement('video');
+                        localVideo.srcObject = studentStream;
+                        localVideo.autoplay = true;
+                        localVideo.muted = true;
+                        localVideo.style.width = '100%';
+                        localVideo.style.height = '100%';
+                        localVideo.style.objectFit = 'cover';
+                        localDiv.appendChild(localVideo);
+
+                        // Chat
+                        const chatRef = db.ref('chat/' + className);
+                        chatRef.on('child_added', (snap) => {
+                            const data = snap.val();
+                            const msgDiv = document.createElement('div');
+                            msgDiv.className = 'msg ' + (data.role === 'teacher' ? 'teacher' :
+                            'student');
+                            msgDiv.innerHTML =
+                                `<span class="sender">${data.sender}</span> ${data.text}`;
+                            const container = document.getElementById('student-chat-messages');
+                            container.appendChild(msgDiv);
+                            container.scrollTop = container.scrollHeight;
+                        });
+
+                        document.getElementById('student-chat-send').addEventListener('click', () => {
+                            const input = document.getElementById('student-chat-input');
+                            const text = input.value.trim();
+                            if (!text) return;
+                            chatRef.push({
+                                sender: currentUser.email,
+                                role: 'student',
+                                text: text,
+                                timestamp: Date.now()
+                            });
+                            input.value = '';
+                        });
+
+                        document.getElementById('leaveClassBtn').addEventListener('click', () => {
+                            joinStudentClass(className);
+                        });
+
+                        db.ref('attendance/' + className + '/' + currentUser.uid).set({
+                            joined: Date.now()
+                        });
+
+                        // Listen for teacher's unmute command
+                        const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/unmute`);
+                        controlRef.on('value', (snap) => {
+                            const unmute = snap.val() === true;
+                            if (studentStream) {
+                                studentStream.getAudioTracks().forEach(t => t.enabled = unmute);
+                            }
+                        });
+                    });
+
+                    call.on('close', () => {
+                        liveContainer.innerHTML = '';
+                        if (studentPeer) studentPeer.destroy();
+                        studentPeer = null;
+                        studentCall = null;
+                        const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/unmute`);
+                        controlRef.off();
+                    });
+
+                    call.on('error', (err) => {
+                        alert('❌ કનેક્શન ભૂલ: ' + err.message);
+                        if (studentPeer) studentPeer.destroy();
+                        studentPeer = null;
+                        if (studentStream) {
+                            studentStream.getTracks().forEach(t => t.stop());
+                            studentStream = null;
+                        }
+                        liveContainer.innerHTML = '';
+                    });
+
+                } catch (err) {
+                    alert('❌ જોડાવામાં ભૂલ: ' + err.message);
+                    if (studentPeer) {
+                        studentPeer.destroy();
+                        studentPeer = null;
+                    }
+                    if (studentStream) {
+                        studentStream.getTracks().forEach(t => t.stop());
+                        studentStream = null;
+                    }
+                    liveContainer.innerHTML = '';
+                }
+            }
+        }
+
+        // ================================================================
+        //  9. OTHER PAGES (simplified)
+        // ================================================================
         function renderTeacherStudents() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
@@ -1803,385 +2025,6 @@
             });
         }
 
-        // ================================================================
-        //  8. STUDENT PAGES
-        // ================================================================
-
-        // --- Student Live Class (with fixed join) ---
-        function renderStudentLive() {
-            dynamicContent.innerHTML = `
-                <div class="page-content">
-                    <h2>લાઈવ ક્લાસ</h2>
-                    <div id="studentClassList"></div>
-                    <div id="studentLiveContainer"></div>
-                </div>
-            `;
-            const classListDiv = document.getElementById('studentClassList');
-            const liveContainer = document.getElementById('studentLiveContainer');
-
-            const userBranch = (currentBranch || '').trim().toLowerCase();
-            const userSemester = currentSemester || 0;
-
-            console.log('વિદ્યાર્થી બ્રાન્ચ (નાના અક્ષર):', userBranch, 'સેમેસ્ટર:', userSemester);
-
-            db.ref('classes').orderByChild('active').equalTo(true).on('value', (snap) => {
-                classListDiv.innerHTML = '';
-                if (snap.exists()) {
-                    const classes = snap.val();
-                    let found = false;
-                    let html = '<div style="margin-bottom:10px;">ઉપલબ્ધ લાઈવ ક્લાસ:</div>';
-                    let allClassesHtml = '';
-
-                    Object.keys(classes).forEach(key => {
-                        const cls = classes[key];
-                        const clsBranch = (cls.branch || '').trim().toLowerCase();
-                        const clsSemester = cls.semester || 0;
-
-                        console.log(`ક્લાસ: ${cls.className}, બ્રાન્ચ: ${clsBranch}, સેમેસ્ટર: ${clsSemester}`);
-
-                        if (clsBranch === userBranch && clsSemester === userSemester) {
-                            found = true;
-                            html += `
-                                <div class="class-item" data-key="${key}">
-                                    <span class="name">${cls.className} (${cls.subject})</span>
-                                    <button class="btn btn-success btn-sm joinClassBtn" data-name="${cls.className}">જોડાઓ</button>
-                                </div>
-                            `;
-                        }
-                        allClassesHtml += `<div class="class-item">${cls.className} (બ્રાન્ચ: ${cls.branch}, સેમે: ${cls.semester})</div>`;
-                    });
-
-                    if (!found) {
-                        html += `<div class="text-muted">તમારી બ્રાન્ચ અને સેમેસ્ટર માટે કોઈ લાઈવ ક્લાસ નથી.</div>`;
-                        html += `<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.05);padding-top:8px;">
-                                    <div style="font-size:12px;color:rgba(255,255,255,0.3);">ડીબગ: બધા એક્ટિવ ક્લાસ:</div>
-                                    ${allClassesHtml}
-                                </div>`;
-                    }
-                    classListDiv.innerHTML = html;
-
-                    document.querySelectorAll('.joinClassBtn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const name = btn.dataset.name;
-                            joinStudentClass(name);
-                        });
-                    });
-                } else {
-                    classListDiv.innerHTML = '<div class="text-muted">હમણાં કોઈ લાઈવ ક્લાસ નથી.</div>';
-                }
-            });
-
-            // --- Face tracking and join logic with simple retry ---
-            let studentPeer = null;
-            let studentCall = null;
-            let studentStream = null;
-            let faceDetector = null;
-            let faceCheckInterval = null;
-            let noFaceCount = 0;
-            const warningOverlay = document.getElementById('warningOverlay');
-            let sirenAudio = null;
-            let audioCtx = null;
-            let sirenTriggered = false;
-
-            function resumeAudioContext() {
-                if (!audioCtx) {
-                    try {
-                        audioCtx = new(window.AudioContext || window.webkitAudioContext)();
-                    } catch (e) {}
-                }
-                if (audioCtx && audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-            }
-
-            function stopSiren() {
-                if (sirenAudio) {
-                    try {
-                        sirenAudio.oscillator.stop();
-                        sirenAudio.oscillator.disconnect();
-                        sirenAudio.gainNode.disconnect();
-                        if (audioCtx && audioCtx.state !== 'closed') {
-                            audioCtx.close();
-                        }
-                    } catch (e) {}
-                    sirenAudio = null;
-                    audioCtx = null;
-                }
-                sirenTriggered = false;
-            }
-
-            function playSiren() {
-                if (sirenAudio || sirenTriggered) return;
-                resumeAudioContext();
-                if (!audioCtx) return;
-                try {
-                    const oscillator = audioCtx.createOscillator();
-                    const gainNode = audioCtx.createGain();
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
-                    oscillator.type = 'sawtooth';
-                    let freq = 200;
-                    const startTime = audioCtx.currentTime;
-                    oscillator.frequency.setValueAtTime(freq, startTime);
-                    oscillator.frequency.linearRampToValueAtTime(600, startTime + 0.3);
-                    oscillator.frequency.linearRampToValueAtTime(200, startTime + 0.6);
-                    oscillator.frequency.linearRampToValueAtTime(600, startTime + 0.9);
-                    oscillator.frequency.linearRampToValueAtTime(200, startTime + 1.2);
-                    gainNode.gain.setValueAtTime(0.3, startTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 1.5);
-                    oscillator.start(startTime);
-                    oscillator.stop(startTime + 1.5);
-                    sirenAudio = { oscillator, gainNode };
-                    sirenTriggered = true;
-                    setTimeout(() => {
-                        if (sirenAudio) {
-                            sirenAudio = null;
-                            sirenTriggered = false;
-                        }
-                    }, 1600);
-                } catch (e) {
-                    console.warn('સાયરન સપોર્ટેડ નથી:', e);
-                }
-            }
-
-            async function initFaceDetection(videoElement) {
-                if (!window.FaceDetector) {
-                    console.warn('FaceDetector સપોર્ટેડ નથી. ચહેરો ટ્રેકિંગ બંધ.');
-                    return;
-                }
-                try {
-                    faceDetector = new FaceDetector({
-                        maxDetectedFaces: 1,
-                        fastMode: true
-                    });
-                    faceCheckInterval = setInterval(async () => {
-                        if (!videoElement || videoElement.readyState < 2) return;
-                        try {
-                            const faces = await faceDetector.detect(videoElement);
-                            if (faces.length > 0) {
-                                noFaceCount = 0;
-                                warningOverlay.classList.remove('active');
-                                if (sirenAudio) stopSiren();
-                                sirenTriggered = false;
-                            } else {
-                                noFaceCount++;
-                                if (noFaceCount > 5 && !sirenTriggered) {
-                                    warningOverlay.classList.add('active');
-                                    playSiren();
-                                }
-                            }
-                        } catch (err) {
-                            console.warn('ચહેરો શોધમાં ભૂલ:', err);
-                        }
-                    }, 1000);
-                } catch (err) {
-                    console.warn('FaceDetector ભૂલ:', err);
-                }
-            }
-
-            function stopFaceDetection() {
-                if (faceCheckInterval) {
-                    clearInterval(faceCheckInterval);
-                    faceCheckInterval = null;
-                }
-                if (faceDetector) {
-                    faceDetector = null;
-                }
-                warningOverlay.classList.remove('active');
-                stopSiren();
-                noFaceCount = 0;
-                sirenTriggered = false;
-            }
-
-            // Simple join with timeout and one retry
-            async function joinStudentClass(className, retry = false) {
-                if (studentCall) {
-                    studentCall.close();
-                    studentCall = null;
-                    if (studentStream) {
-                        studentStream.getTracks().forEach(t => t.stop());
-                        studentStream = null;
-                    }
-                    if (studentPeer) {
-                        studentPeer.destroy();
-                        studentPeer = null;
-                    }
-                    liveContainer.innerHTML = '';
-                    stopFaceDetection();
-                    return;
-                }
-
-                try {
-                    resumeAudioContext();
-
-                    studentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                    studentStream.getAudioTracks().forEach(t => t.enabled = false);
-
-                    // Use a random ID to avoid conflicts
-                    const randomId = 'student-' + Date.now();
-                    studentPeer = new Peer(randomId, { debug: 2 });
-
-                    // Wait for open with timeout
-                    await new Promise((resolve, reject) => {
-                        const timeout = setTimeout(() => reject(new Error('Peer connection timeout')), 8000);
-                        studentPeer.on('open', () => {
-                            clearTimeout(timeout);
-                            resolve();
-                        });
-                        studentPeer.on('error', reject);
-                    });
-
-                    console.log('📞 કૉલ કરી રહ્યા છે:', className);
-                    const call = studentPeer.call(className, studentStream);
-                    studentCall = call;
-
-                    call.on('stream', (remoteStream) => {
-                        // Build UI
-                        liveContainer.innerHTML = `
-                            <div class="card" style="margin-top:10px;">
-                                <h3 style="font-size:16px;margin-bottom:6px;">🟢 જોડાયા: ${className}</h3>
-                                <div class="video-wrapper" style="min-height:280px;position:relative;">
-                                    <div id="studentVideoContainer" style="width:100%;height:100%;background:#0a0f1a;display:flex;flex-wrap:wrap;gap:8px;padding:8px;overflow-y:auto;position:relative;">
-                                        <div class="remote-player" style="flex:2 1 60%;min-width:180px;height:60%;min-height:140px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.05);"></div>
-                                        <div class="local-player" style="flex:0 0 25%;min-width:100px;height:30%;min-height:70px;border-radius:10px;overflow:hidden;border:2px solid rgba(167,139,250,0.4);"></div>
-                                    </div>
-                                    <div class="video-overlay-badge">
-                                        <i class="fas fa-circle" style="color:#34d399;"></i>
-                                        <span>કનેક્ટેડ</span>
-                                    </div>
-                                </div>
-                                <div class="chat-box" style="margin-top:8px;height:120px;">
-                                    <div class="chat-messages" id="student-chat-messages"></div>
-                                    <div class="chat-input">
-                                        <input type="text" id="student-chat-input" placeholder="પ્રશ્ન પૂછો..." />
-                                        <button id="student-chat-send"><i class="fas fa-paper-plane"></i></button>
-                                    </div>
-                                </div>
-                                <button id="leaveClassBtn" class="btn btn-danger" style="margin-top:8px;">ક્લાસ છોડો</button>
-                            </div>
-                        `;
-
-                        const videoContainer = document.getElementById('studentVideoContainer');
-                        const remoteDiv = videoContainer.querySelector('.remote-player');
-                        const localDiv = videoContainer.querySelector('.local-player');
-
-                        const remoteVideo = document.createElement('video');
-                        remoteVideo.srcObject = remoteStream;
-                        remoteVideo.autoplay = true;
-                        remoteVideo.style.width = '100%';
-                        remoteVideo.style.height = '100%';
-                        remoteVideo.style.objectFit = 'cover';
-                        remoteDiv.appendChild(remoteVideo);
-
-                        const localVideo = document.createElement('video');
-                        localVideo.srcObject = studentStream;
-                        localVideo.autoplay = true;
-                        localVideo.muted = true;
-                        localVideo.style.width = '100%';
-                        localVideo.style.height = '100%';
-                        localVideo.style.objectFit = 'cover';
-                        localDiv.appendChild(localVideo);
-
-                        // Chat
-                        const chatRef = db.ref('chat/' + className);
-                        chatRef.on('child_added', (snap) => {
-                            const data = snap.val();
-                            const msgDiv = document.createElement('div');
-                            msgDiv.className = 'msg ' + (data.role === 'teacher' ? 'teacher' : 'student');
-                            msgDiv.innerHTML = `<span class="sender">${data.sender}</span> ${data.text}`;
-                            const container = document.getElementById('student-chat-messages');
-                            container.appendChild(msgDiv);
-                            container.scrollTop = container.scrollHeight;
-                        });
-
-                        document.getElementById('student-chat-send').addEventListener('click', () => {
-                            const input = document.getElementById('student-chat-input');
-                            const text = input.value.trim();
-                            if (!text) return;
-                            chatRef.push({
-                                sender: currentUser.email,
-                                role: 'student',
-                                text: text,
-                                timestamp: Date.now()
-                            });
-                            input.value = '';
-                        });
-
-                        document.getElementById('leaveClassBtn').addEventListener('click', () => {
-                            joinStudentClass(className);
-                        });
-
-                        db.ref('attendance/' + className + '/' + currentUser.uid).set({
-                            joined: Date.now()
-                        });
-
-                        initFaceDetection(localVideo);
-
-                        const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/unmute`);
-                        controlRef.on('value', (snap) => {
-                            const unmute = snap.val() === true;
-                            if (studentStream) {
-                                studentStream.getAudioTracks().forEach(t => t.enabled = unmute);
-                            }
-                        });
-                    });
-
-                    call.on('close', () => {
-                        liveContainer.innerHTML = '';
-                        stopFaceDetection();
-                        if (studentPeer) studentPeer.destroy();
-                        studentPeer = null;
-                        studentCall = null;
-                        const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/unmute`);
-                        controlRef.off();
-                    });
-
-                    call.on('error', (err) => {
-                        console.error('કૉલ ભૂલ:', err);
-                        if (!retry) {
-                            setTimeout(() => {
-                                console.log('🔄 ફરી પ્રયાસ...');
-                                joinStudentClass(className, true);
-                            }, 2000);
-                        } else {
-                            alert('❌ કનેક્શન ફેલ: ' + err.message + '\nકૃપા કરીને ફરી પ્રયાસ કરો.');
-                            if (studentPeer) studentPeer.destroy();
-                            studentPeer = null;
-                            if (studentStream) {
-                                studentStream.getTracks().forEach(t => t.stop());
-                                studentStream = null;
-                            }
-                            liveContainer.innerHTML = '';
-                        }
-                    });
-
-                } catch (err) {
-                    console.error('જોડાવામાં ભૂલ:', err);
-                    if (!retry) {
-                        setTimeout(() => {
-                            console.log('🔄 ફરી પ્રયાસ...');
-                            joinStudentClass(className, true);
-                        }, 2000);
-                    } else {
-                        alert('❌ જોડાવામાં ભૂલ: ' + err.message + '\nકૃપા કરીને ફરી પ્રયાસ કરો.');
-                        if (studentPeer) {
-                            studentPeer.destroy();
-                            studentPeer = null;
-                        }
-                        if (studentStream) {
-                            studentStream.getTracks().forEach(t => t.stop());
-                            studentStream = null;
-                        }
-                        liveContainer.innerHTML = '';
-                    }
-                }
-            }
-
-            window.addEventListener('beforeunload', () => {
-                stopFaceDetection();
-            });
-        }
-
         // --- Student other pages ---
         function renderStudentAttendance() {
             dynamicContent.innerHTML = `
@@ -2404,10 +2247,10 @@
         // ================================================================
         //  INIT
         // ================================================================
-        console.log('✅ સ્માર્ટ ક્લાસરૂમ સંપૂર્ણપણે કાર્યરત છે.');
-        console.log('📌 પ્રોફાઇલ માટે અવતાર પર ક્લિક કરો.');
-        console.log('💡 બ્રાન્ચ/સેમેસ્ટર સરખામણી હવે કેસ-ઇનસેન્સિટિવ છે.');
-        console.log('🔄 જોડાવા દરમિયાન 1 વખત રિટ્રાય થશે.');
+        console.log('✅ PeerJS Smart Classroom with all fixes ready.');
+        console.log('📌 Click avatar for profile.');
+        console.log('🔄 Teacher can switch camera using the button.');
+        console.log('🎤 Teacher can unmute student from the mic button on student thumbnail.');
     </script>
 </body>
 </html>
