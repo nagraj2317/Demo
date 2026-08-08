@@ -24,7 +24,8 @@
     </script>
 
     <style>
-        /* ===== GLOBAL ===== */
+        /* ===== SAME STYLES AS BEFORE (full code below) ===== */
+        /* (I have included the complete CSS from previous version) */
         * {
             margin: 0;
             padding: 0;
@@ -757,8 +758,8 @@
         <div class="login-box">
             <h2>Smart Classroom</h2>
             <div id="loginForm">
-                <input type="email" id="loginEmail" placeholder="Email address" value="sachuumali2317@gmail.com" />
-                <input type="password" id="loginPassword" placeholder="Password" value="11223344" />
+                <input type="email" id="loginEmail" placeholder="Email address" />
+                <input type="password" id="loginPassword" placeholder="Password" />
                 <button class="btn-primary" id="loginBtn">Sign In</button>
                 <div class="toggle-link">New user? <span id="showSignup">Create account</span></div>
                 <div class="msg" id="loginMsg"></div>
@@ -830,7 +831,7 @@
         const db = firebase.database();
 
         // ================================================================
-        //  2. DOM REFS & AUTH
+        //  2. DOM REFS & AUTH (UPDATED with better error handling)
         // ================================================================
         const loginOverlay = document.getElementById('loginOverlay');
         const loginForm = document.getElementById('loginForm');
@@ -875,20 +876,37 @@
             signupMsg.textContent = '';
         });
 
+        // --- LOGIN (with detailed error) ---
         loginBtn.addEventListener('click', async () => {
             const email = loginEmail.value.trim();
             const pass = loginPassword.value.trim();
-            if (!email || !pass) { loginMsg.textContent = 'Please enter email and password.'; return; }
+            if (!email || !pass) {
+                loginMsg.textContent = 'Please enter email and password.';
+                return;
+            }
             loginMsg.textContent = '⏳ Signing in...';
             loginMsg.style.color = 'rgba(255,255,255,0.5)';
             try {
                 await auth.signInWithEmailAndPassword(email, pass);
+                // Success – auth state listener will handle
             } catch (err) {
-                loginMsg.textContent = '❌ ' + err.message;
+                console.error('Login error:', err);
+                // Show user-friendly message
+                let msg = '❌ ' + err.message;
+                if (err.code === 'auth/user-not-found') {
+                    msg = '❌ No account found with this email. Please sign up.';
+                } else if (err.code === 'auth/wrong-password') {
+                    msg = '❌ Incorrect password. Please try again.';
+                } else if (err.code === 'auth/too-many-requests') {
+                    msg = '❌ Too many failed attempts. Please try later.';
+                }
+                loginMsg.textContent = msg;
                 loginMsg.style.color = '#f87171';
+                alert(msg); // Also show alert for clarity
             }
         });
 
+        // --- SIGNUP ---
         signupBtn.addEventListener('click', async () => {
             const email = signupEmail.value.trim();
             const pass = signupPassword.value.trim();
@@ -899,31 +917,37 @@
                 signupMsg.textContent = 'Please fill all fields correctly.';
                 return;
             }
-            if (pass.length < 6) { signupMsg.textContent = 'Password must be at least 6 characters.'; return; }
+            if (pass.length < 6) {
+                signupMsg.textContent = 'Password must be at least 6 characters.';
+                return;
+            }
             signupMsg.textContent = '⏳ Creating account...';
             signupMsg.style.color = 'rgba(255,255,255,0.5)';
             try {
                 const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                // Save user data
                 await db.ref('users/' + cred.user.uid).set({
                     email,
                     role,
                     branch,
                     semester: role === 'student' ? semester : 0
                 });
-                signupMsg.textContent = '✅ Account created! Please sign in.';
+                signupMsg.textContent = '✅ Account created! You are now signed in.';
                 signupMsg.style.color = '#34d399';
-                loginForm.style.display = 'block';
-                signupForm.style.display = 'none';
-                loginEmail.value = email;
-                loginPassword.value = pass;
-                loginMsg.textContent = 'Account created, please sign in.';
-                loginMsg.style.color = '#34d399';
+                // Auto redirect via auth state listener
             } catch (err) {
-                signupMsg.textContent = '❌ ' + err.message;
+                console.error('Signup error:', err);
+                let msg = '❌ ' + err.message;
+                if (err.code === 'auth/email-already-in-use') {
+                    msg = '❌ This email is already registered. Please login.';
+                }
+                signupMsg.textContent = msg;
                 signupMsg.style.color = '#f87171';
+                alert(msg);
             }
         });
 
+        // --- AUTH STATE LISTENER ---
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 try {
@@ -940,15 +964,17 @@
                         avatarLetter.textContent = user.email.charAt(0).toUpperCase();
                         buildDashboard();
                     } else {
+                        // User exists in Auth but not in DB – sign out
                         await auth.signOut();
-                        alert('User role not found. Please sign up again.');
+                        alert('User data not found. Please sign up again.');
                     }
                 } catch (err) {
-                    console.error(err);
-                    alert('Error loading user data.');
+                    console.error('Error loading user data:', err);
+                    alert('Error loading user data: ' + err.message);
                     await auth.signOut();
                 }
             } else {
+                // Show login
                 loginOverlay.style.display = 'flex';
                 appContainer.style.display = 'none';
                 loginMsg.textContent = '';
@@ -956,7 +982,7 @@
         });
 
         // ================================================================
-        //  3. DASHBOARD BUILDER
+        //  3. DASHBOARD BUILDER (same as before)
         // ================================================================
         function buildDashboard() {
             sidebar.innerHTML = '';
@@ -1097,7 +1123,7 @@
         }
 
         // ================================================================
-        //  5. TEACHER PAGES
+        //  5. TEACHER PAGES (same as earlier, with latest improvements)
         // ================================================================
 
         // --- Teacher Live Class ---
@@ -1132,7 +1158,7 @@
             let localStream = null;
             let currentClassKey = null;
             let isTeacherLive = false;
-            let studentCalls = {}; // key: studentId (email), value: { call, stream }
+            let studentCalls = {};
 
             const classesRef = db.ref('classes');
 
@@ -1214,7 +1240,6 @@
                 newSubject.value = '';
             });
 
-            // ----- Start Class -----
             async function startClass(classKey, className) {
                 if (isTeacherLive) {
                     await endClass(currentClassKey);
@@ -1231,7 +1256,6 @@
                         classesRef.child(classKey).update({ active: true });
                         loadClasses();
 
-                        // Build UI
                         liveContainer.innerHTML = `
                             <div class="card" style="margin-top:12px;">
                                 <h3 style="font-size:17px;margin-bottom:8px;">🟢 Live: ${className}</h3>
@@ -1250,7 +1274,6 @@
                             </div>
                         `;
 
-                        // Teacher's own video
                         const mainVideo = document.createElement('video');
                         mainVideo.srcObject = localStream;
                         mainVideo.autoplay = true;
@@ -1260,11 +1283,9 @@
                         mainVideo.style.objectFit = 'cover';
                         document.getElementById('teacher-main-video').appendChild(mainVideo);
 
-                        // Clear thumbnails
                         const thumbContainer = document.getElementById('student-thumbnails');
                         thumbContainer.innerHTML = '<div style="padding:6px;color:rgba(255,255,255,0.3);font-size:13px;">Waiting for students...</div>';
 
-                        // Chat listener
                         const chatRef = db.ref('chat/' + className);
                         chatRef.on('child_added', (snap) => {
                             const data = snap.val();
@@ -1277,7 +1298,6 @@
                             container.scrollTop = container.scrollHeight;
                         });
 
-                        // Send chat (teacher)
                         document.getElementById('teacher-chat-send').addEventListener('click', () => {
                             const input = document.getElementById('teacher-chat-input');
                             const text = input.value.trim();
@@ -1291,19 +1311,15 @@
                             input.value = '';
                         });
 
-                        // Listen for student calls
                         peer.on('call', (call) => {
-                            const studentId = call.peer; // this is email now
+                            const studentId = call.peer;
                             if (studentCalls[studentId]) {
                                 call.close();
                                 return;
                             }
-                            // Answer with teacher's stream
                             call.answer(localStream);
-                            // Store call
                             studentCalls[studentId] = { call, stream: null };
 
-                            // Add thumbnail for this student
                             const thumbDiv = document.createElement('div');
                             thumbDiv.className = 'video-thumb';
                             thumbDiv.id = 'thumb-' + studentId;
@@ -1312,11 +1328,9 @@
                                 <button class="mic-btn muted" data-student="${studentId}" title="Unmute student"><i class="fas fa-microphone-slash"></i></button>
                             `;
                             thumbContainer.appendChild(thumbDiv);
-                            // Remove placeholder if any
                             const placeholder = thumbContainer.querySelector('div[style]');
                             if (placeholder) placeholder.remove();
 
-                            // Handle remote stream
                             call.on('stream', (remoteStream) => {
                                 const video = document.createElement('video');
                                 video.srcObject = remoteStream;
@@ -1325,11 +1339,8 @@
                                 video.style.height = '100%';
                                 video.style.objectFit = 'cover';
                                 thumbDiv.appendChild(video);
-                                // Store stream for later mute/unmute
                                 studentCalls[studentId].stream = remoteStream;
-                                // Initially mute audio
                                 remoteStream.getAudioTracks().forEach(t => t.enabled = false);
-                                // Listen to Firebase for unmute command
                                 const controlRef = db.ref(`classControl/${className}/students/${studentId}/unmute`);
                                 controlRef.on('value', (snap) => {
                                     const unmute = snap.val() === true;
@@ -1347,12 +1358,10 @@
                                 });
                             });
 
-                            // Mute/unmute button on thumbnail
                             const micBtn = thumbDiv.querySelector('.mic-btn');
                             micBtn.addEventListener('click', (e) => {
                                 e.stopPropagation();
                                 const student = micBtn.dataset.student;
-                                // Toggle unmute state in Firebase
                                 const controlRef = db.ref(`classControl/${className}/students/${student}/unmute`);
                                 controlRef.once('value').then(snap => {
                                     const current = snap.val() === true;
@@ -1360,7 +1369,6 @@
                                 });
                             });
 
-                            // Remove on close
                             call.on('close', () => {
                                 delete studentCalls[studentId];
                                 const el = document.getElementById('thumb-' + studentId);
@@ -1372,7 +1380,6 @@
                             });
                         });
 
-                        // Stop button
                         document.getElementById('stopLiveBtn').addEventListener('click', () => {
                             endClass(classKey);
                         });
@@ -1391,7 +1398,6 @@
             }
 
             async function endClass(classKey) {
-                // Close all calls
                 Object.values(studentCalls).forEach(({ call }) => call.close());
                 studentCalls = {};
                 if (localStream) {
@@ -1407,7 +1413,6 @@
                 await classesRef.child(classKey).update({ active: false });
                 loadClasses();
                 currentClassKey = null;
-                // Cleanup Firebase control node
                 await db.ref(`classControl/${currentClassKey}`).remove();
             }
         }
@@ -1497,7 +1502,7 @@
         }
 
         // ================================================================
-        //  6. TEACHER HOMEWORK (unchanged, full version included)
+        //  6. TEACHER HOMEWORK (full version)
         // ================================================================
         function renderTeacherHomework() {
             dynamicContent.innerHTML = `
@@ -1613,7 +1618,6 @@
             loadSubmissions();
         }
 
-        // --- Teacher Ratings ---
         function renderTeacherRatings() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
@@ -1669,7 +1673,7 @@
         //  7. STUDENT PAGES
         // ================================================================
 
-        // --- Student Live Class ---
+        // --- Student Live Class (with fixed join) ---
         function renderStudentLive() {
             dynamicContent.innerHTML = `
                 <div class="page-content">
@@ -1726,8 +1730,8 @@
             const warningOverlay = document.getElementById('warningOverlay');
             let sirenAudio = null;
             let audioCtx = null;
+            let sirenTriggered = false;
 
-            // Function to resume audio context on user gesture
             function resumeAudioContext() {
                 if (!audioCtx) {
                     try {
@@ -1739,9 +1743,26 @@
                 }
             }
 
+            function stopSiren() {
+                if (sirenAudio) {
+                    try {
+                        sirenAudio.oscillator.stop();
+                        sirenAudio.oscillator.disconnect();
+                        sirenAudio.gainNode.disconnect();
+                        if (audioCtx && audioCtx.state !== 'closed') {
+                            audioCtx.close();
+                        }
+                    } catch (e) {}
+                    sirenAudio = null;
+                    audioCtx = null;
+                }
+                sirenTriggered = false;
+            }
+
             function playSiren() {
+                if (sirenAudio || sirenTriggered) return;
                 resumeAudioContext();
-                if (sirenAudio || !audioCtx) return;
+                if (!audioCtx) return;
                 try {
                     const oscillator = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
@@ -1760,9 +1781,11 @@
                     oscillator.start(startTime);
                     oscillator.stop(startTime + 1.5);
                     sirenAudio = { oscillator, gainNode };
+                    sirenTriggered = true;
                     setTimeout(() => {
                         if (sirenAudio) {
                             sirenAudio = null;
+                            sirenTriggered = false;
                         }
                     }, 1600);
                 } catch (e) {
@@ -1787,9 +1810,13 @@
                             if (faces.length > 0) {
                                 noFaceCount = 0;
                                 warningOverlay.classList.remove('active');
+                                if (sirenAudio) {
+                                    stopSiren();
+                                }
+                                sirenTriggered = false;
                             } else {
                                 noFaceCount++;
-                                if (noFaceCount > 5) { // ~5 seconds
+                                if (noFaceCount > 5 && !sirenTriggered) {
                                     warningOverlay.classList.add('active');
                                     playSiren();
                                 }
@@ -1812,19 +1839,14 @@
                     faceDetector = null;
                 }
                 warningOverlay.classList.remove('active');
-                if (sirenAudio) {
-                    try {
-                        sirenAudio.oscillator.stop();
-                        if (audioCtx) audioCtx.close();
-                    } catch (e) {}
-                    sirenAudio = null;
-                    audioCtx = null;
-                }
+                stopSiren();
                 noFaceCount = 0;
+                sirenTriggered = false;
             }
 
             async function joinStudentClass(className) {
                 if (studentCall) {
+                    // Leave
                     studentCall.close();
                     studentCall = null;
                     if (studentStream) {
@@ -1841,124 +1863,136 @@
                 }
 
                 try {
-                    // Resume audio context on user click
                     resumeAudioContext();
 
                     studentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                     studentStream.getAudioTracks().forEach(t => t.enabled = false);
 
-                    // Use email as Peer ID so teacher can identify
-                    studentPeer = new Peer(currentUser.email);
+                    // Create peer with email as ID
+                    studentPeer = new Peer(currentUser.email, { debug: 2 });
 
-                    studentPeer.on('open', () => {
-                        const call = studentPeer.call(className, studentStream);
-                        studentCall = call;
+                    // Wait for peer to open
+                    await new Promise((resolve, reject) => {
+                        studentPeer.on('open', resolve);
+                        studentPeer.on('error', reject);
+                        setTimeout(() => reject(new Error('Peer connection timeout')), 10000);
+                    });
 
-                        call.on('stream', (remoteStream) => {
-                            liveContainer.innerHTML = `
-                                <div class="card" style="margin-top:12px;">
-                                    <h3 style="font-size:17px;margin-bottom:8px;">🟢 Joined: ${className}</h3>
-                                    <div class="live-container">
-                                        <div class="video-main" id="student-main-video"></div>
-                                        <div class="video-thumbnails" style="max-width:200px;">
-                                            <div class="video-thumb active" id="student-self-thumb"></div>
-                                        </div>
-                                        <div class="chat-box">
-                                            <div class="chat-messages" id="student-chat-messages"></div>
-                                            <div class="chat-input">
-                                                <input type="text" id="student-chat-input" placeholder="Ask question..." />
-                                                <button id="student-chat-send"><i class="fas fa-paper-plane"></i></button>
-                                            </div>
-                                        </div>
-                                        <button id="leaveClassBtn" class="btn btn-danger" style="margin-top:10px;">Leave Class</button>
+                    const call = studentPeer.call(className, studentStream);
+                    studentCall = call;
+
+                    call.on('stream', (remoteStream) => {
+                        liveContainer.innerHTML = `
+                            <div class="card" style="margin-top:12px;">
+                                <h3 style="font-size:17px;margin-bottom:8px;">🟢 Joined: ${className}</h3>
+                                <div class="live-container">
+                                    <div class="video-main" id="student-main-video"></div>
+                                    <div class="video-thumbnails" style="max-width:200px;">
+                                        <div class="video-thumb active" id="student-self-thumb"></div>
                                     </div>
+                                    <div class="chat-box">
+                                        <div class="chat-messages" id="student-chat-messages"></div>
+                                        <div class="chat-input">
+                                            <input type="text" id="student-chat-input" placeholder="Ask question..." />
+                                            <button id="student-chat-send"><i class="fas fa-paper-plane"></i></button>
+                                        </div>
+                                    </div>
+                                    <button id="leaveClassBtn" class="btn btn-danger" style="margin-top:10px;">Leave Class</button>
                                 </div>
-                            `;
+                            </div>
+                        `;
 
-                            const mainVideo = document.createElement('video');
-                            mainVideo.srcObject = remoteStream;
-                            mainVideo.autoplay = true;
-                            mainVideo.style.width = '100%';
-                            mainVideo.style.height = '100%';
-                            mainVideo.style.objectFit = 'cover';
-                            document.getElementById('student-main-video').appendChild(mainVideo);
+                        const mainVideo = document.createElement('video');
+                        mainVideo.srcObject = remoteStream;
+                        mainVideo.autoplay = true;
+                        mainVideo.style.width = '100%';
+                        mainVideo.style.height = '100%';
+                        mainVideo.style.objectFit = 'cover';
+                        document.getElementById('student-main-video').appendChild(mainVideo);
 
-                            const selfThumb = document.getElementById('student-self-thumb');
-                            const selfVideo = document.createElement('video');
-                            selfVideo.srcObject = studentStream;
-                            selfVideo.autoplay = true;
-                            selfVideo.muted = true;
-                            selfVideo.style.width = '100%';
-                            selfVideo.style.height = '100%';
-                            selfVideo.style.objectFit = 'cover';
-                            selfThumb.appendChild(selfVideo);
+                        const selfThumb = document.getElementById('student-self-thumb');
+                        const selfVideo = document.createElement('video');
+                        selfVideo.srcObject = studentStream;
+                        selfVideo.autoplay = true;
+                        selfVideo.muted = true;
+                        selfVideo.style.width = '100%';
+                        selfVideo.style.height = '100%';
+                        selfVideo.style.objectFit = 'cover';
+                        selfThumb.appendChild(selfVideo);
 
-                            const chatRef = db.ref('chat/' + className);
-                            chatRef.on('child_added', (snap) => {
-                                const data = snap.val();
-                                const msgDiv = document.createElement('div');
-                                msgDiv.className = 'msg ' + (data.role === 'teacher' ? 'teacher' :
-                                    'student');
-                                msgDiv.innerHTML =
-                                    `<span class="sender">${data.sender}</span> ${data.text}`;
-                                const container = document.getElementById('student-chat-messages');
-                                container.appendChild(msgDiv);
-                                container.scrollTop = container.scrollHeight;
-                            });
-
-                            document.getElementById('student-chat-send').addEventListener('click', () => {
-                                const input = document.getElementById('student-chat-input');
-                                const text = input.value.trim();
-                                if (!text) return;
-                                chatRef.push({
-                                    sender: currentUser.email,
-                                    role: 'student',
-                                    text: text,
-                                    timestamp: Date.now()
-                                });
-                                input.value = '';
-                            });
-
-                            document.getElementById('leaveClassBtn').addEventListener('click', () => {
-                                joinStudentClass(className);
-                            });
-
-                            db.ref('attendance/' + className + '/' + currentUser.uid).set({
-                                joined: Date.now()
-                            });
-
-                            initFaceDetection(selfVideo);
-
-                            // Listen for teacher's unmute command
-                            const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/unmute`);
-                            controlRef.on('value', (snap) => {
-                                const unmute = snap.val() === true;
-                                if (studentStream) {
-                                    studentStream.getAudioTracks().forEach(t => t.enabled = unmute);
-                                }
-                            });
+                        const chatRef = db.ref('chat/' + className);
+                        chatRef.on('child_added', (snap) => {
+                            const data = snap.val();
+                            const msgDiv = document.createElement('div');
+                            msgDiv.className = 'msg ' + (data.role === 'teacher' ? 'teacher' :
+                                'student');
+                            msgDiv.innerHTML =
+                                `<span class="sender">${data.sender}</span> ${data.text}`;
+                            const container = document.getElementById('student-chat-messages');
+                            container.appendChild(msgDiv);
+                            container.scrollTop = container.scrollHeight;
                         });
 
-                        call.on('close', () => {
-                            liveContainer.innerHTML = '';
-                            stopFaceDetection();
-                            if (studentPeer) studentPeer.destroy();
-                            studentPeer = null;
-                            studentCall = null;
-                            const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/unmute`);
-                            controlRef.off();
+                        document.getElementById('student-chat-send').addEventListener('click', () => {
+                            const input = document.getElementById('student-chat-input');
+                            const text = input.value.trim();
+                            if (!text) return;
+                            chatRef.push({
+                                sender: currentUser.email,
+                                role: 'student',
+                                text: text,
+                                timestamp: Date.now()
+                            });
+                            input.value = '';
+                        });
+
+                        document.getElementById('leaveClassBtn').addEventListener('click', () => {
+                            joinStudentClass(className);
+                        });
+
+                        db.ref('attendance/' + className + '/' + currentUser.uid).set({
+                            joined: Date.now()
+                        });
+
+                        initFaceDetection(selfVideo);
+
+                        const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/unmute`);
+                        controlRef.on('value', (snap) => {
+                            const unmute = snap.val() === true;
+                            if (studentStream) {
+                                studentStream.getAudioTracks().forEach(t => t.enabled = unmute);
+                            }
                         });
                     });
 
-                    studentPeer.on('error', (err) => {
-                        alert('Error: ' + err.message);
+                    call.on('close', () => {
+                        liveContainer.innerHTML = '';
                         stopFaceDetection();
                         if (studentPeer) studentPeer.destroy();
                         studentPeer = null;
+                        studentCall = null;
+                        const controlRef = db.ref(`classControl/${className}/students/${currentUser.email}/unmute`);
+                        controlRef.off();
+                    });
+
+                    call.on('error', (err) => {
+                        console.error('Call error:', err);
+                        alert('Connection error: ' + err.message);
+                        joinStudentClass(className);
                     });
 
                 } catch (err) {
-                    alert('Error joining class: ' + err.message);
+                    console.error('Join error:', err);
+                    alert('❌ Failed to join: ' + err.message);
+                    if (studentPeer) {
+                        studentPeer.destroy();
+                        studentPeer = null;
+                    }
+                    if (studentStream) {
+                        studentStream.getTracks().forEach(t => t.stop());
+                        studentStream = null;
+                    }
+                    liveContainer.innerHTML = '';
                 }
             }
 
@@ -1996,7 +2030,7 @@
         }
 
         // ================================================================
-        //  8. STUDENT HOMEWORK
+        //  8. STUDENT HOMEWORK (full version)
         // ================================================================
         function renderStudentHomework() {
             dynamicContent.innerHTML = `
@@ -2102,21 +2136,17 @@
                             reader.onload = (e) => resolve(e.target.result);
                             reader.readAsDataURL(file);
                         });
-                        // Compute hash
                         const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(
                             studentBase64));
                         const hashArray = Array.from(new Uint8Array(hashBuffer));
                         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-                        // Check duplicate hash for this assignment (student side)
                         const existing = await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).once('value');
                         if (existing.exists()) {
                             status.textContent = 'You already submitted this assignment.';
                             return;
                         }
-                        // Also check if same hash used for any other submission? Not needed.
 
-                        // Compare with teacher's image
                         const teacherBase64 = hw.imageBase64;
                         const similarity = await compareImagesBase64(teacherBase64, studentBase64);
                         let grade;
@@ -2128,7 +2158,6 @@
 
                         const finalGrade = Math.min(5, Math.max(1, grade));
 
-                        // Save submission in student's own node
                         await db.ref(`homework/${currentUser.uid}/submissions/${hwId}`).set({
                             imageBase64: studentBase64,
                             hash: hashHex,
@@ -2137,7 +2166,6 @@
                             timestamp: Date.now()
                         });
 
-                        // Also store in teacher's submission node
                         await db.ref(`homework/${hw.teacher}/${hwId}/submissions/${currentUser.email}`).set({
                             imageBase64: studentBase64,
                             hash: hashHex,
@@ -2199,10 +2227,9 @@
         // ================================================================
         //  INIT
         // ================================================================
-        console.log('✅ Smart Classroom with fixed mic control and siren ready.');
-        console.log('📌 Accounts: Teacher: nagrajmall2317@gmail.com, Student: sachuumali2317@gmail.com');
-        console.log('💡 Teacher can now unmute student mic, and siren plays after 5 seconds of face missing.');
+        console.log('✅ Smart Classroom with fixed login, join, and siren ready.');
+        console.log('📌 Use any email to sign up first, then login.');
+        console.log('💡 If login fails, check console for detailed error.');
     </script>
-
 </body>
 </html>
