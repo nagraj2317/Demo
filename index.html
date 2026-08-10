@@ -1116,7 +1116,7 @@
                 profileName.value = currentUser.name || '';
                 profileMobile.value = currentUser.mobile || '';
                 profileBranch.value = currentBranch || '';
-                profileSemester.value = currentSemester || '';
+                profileSemester.value = currentSemester || 0;
                 profilePassword.value = '';
                 profileMsg.textContent = '';
                 profileModal.classList.add('active');
@@ -1316,7 +1316,7 @@
         }
 
         // ================================================================
-        //  7. TEACHER LIVE CLASS
+        //  7. TEACHER LIVE CLASS  (FIXED: ghost connections + camera switch)
         // ================================================================
         function renderTeacherLive() {
             dynamicContent.innerHTML = `
@@ -1351,6 +1351,8 @@
             let studentCalls = {};
             let cameraFacing = 'user';
             let notifRef = null;
+            // store timeouts for ghost connections
+            let ghostTimeouts = {};
 
             const classesRef = db.ref('classes');
 
@@ -1433,35 +1435,68 @@
                 newSubject.value = '';
             });
 
+            // ----- FIXED camera switch -----
             async function switchCamera() {
-                if (!localStream) return;
+                if (!localStream) {
+                    showToast('No camera stream available', 'error');
+                    return;
+                }
                 const newFacing = cameraFacing === 'user' ? 'environment' : 'user';
                 try {
+                    // Get new stream with exact facing mode
                     const newStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: newFacing },
+                        video: {
+                            facingMode: newFacing,
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        },
                         audio: true
                     });
+
                     const newVideoTrack = newStream.getVideoTracks()[0];
+                    if (!newVideoTrack) {
+                        showToast('No video track in new stream', 'error');
+                        return;
+                    }
+
                     const oldVideoTrack = localStream.getVideoTracks()[0];
-                    
+
+                    // Replace track in local stream
                     localStream.removeTrack(oldVideoTrack);
                     localStream.addTrack(newVideoTrack);
                     oldVideoTrack.stop();
-                    cameraFacing = newFacing;
-                    
-                    const localVideo = document.querySelector('#teacherVideoContainer .local-player video');
-                    if (localVideo) localVideo.srcObject = localStream;
 
-                    Object.values(studentCalls).forEach(({ call }) => {
-                        if (call && call.peerConnection) {
-                            const sender = call.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-                            if (sender) {
-                                sender.replaceTrack(newVideoTrack);
+                    // Update facing mode
+                    cameraFacing = newFacing;
+
+                    // Update local video element
+                    const localVideo = document.querySelector('#teacherVideoContainer .local-player video');
+                    if (localVideo && localVideo.srcObject) {
+                        localVideo.srcObject = localStream;
+                    }
+
+                    // Replace track for all peer connections
+                    for (const uid in studentCalls) {
+                        const entry = studentCalls[uid];
+                        if (entry && entry.call && entry.call.peerConnection) {
+                            const pc = entry.call.peerConnection;
+                            try {
+                                const senders = pc.getSenders();
+                                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                                if (videoSender) {
+                                    await videoSender.replaceTrack(newVideoTrack);
+                                }
+                            } catch (e) {
+                                console.warn('Replace track failed for', uid, e);
                             }
                         }
-                    });
+                    }
+
+                    showToast('Camera switched to ' + (newFacing === 'user' ? 'Front' : 'Back'), 'success');
+
                 } catch (err) {
-                    alert('Camera switch error: ' + err.message);
+                    console.error('Camera switch error:', err);
+                    showToast('Camera switch failed: ' + err.message, 'error');
                 }
             }
 
@@ -1470,8 +1505,18 @@
                     await endClass(currentClassKey);
                 }
                 try {
-                    if (peer) { peer.destroy(); peer = null; }
-                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    if (peer) { peer.destroy();
+                        peer = null; }
+                    // Get local stream
+                    localStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: cameraFacing,
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        },
+                        audio: true
+                    });
+
                     peer = new Peer(className, { debug: 2 });
 
                     peer.on('open', () => {
@@ -1580,22 +1625,52 @@
                             }
                         });
 
-                        // Handle student calls
+                        // ----- FIXED: Handle student calls with ghost detection -----
                         peer.on('call', (call) => {
                             const studentUid = call.peer;
+
+                            // If already connected, ignore
                             if (studentCalls[studentUid]) {
                                 call.close();
                                 return;
                             }
-                            call.answer(localStream);
-                            studentCalls[studentUid] = { call, stream: null, element: null };
 
+                            // Answer immediately
+                            call.answer(localStream);
+
+                            // Create a temporary entry with a timeout
+                            let streamReceived = false;
+                            let timeoutId = setTimeout(() => {
+                                if (!streamReceived) {
+                                    // Ghost connection: close and remove
+                                    call.close();
+                                    const el = document.getElementById('student-' + studentUid);
+                                    if (el) el.remove();
+                                    delete studentCalls[studentUid];
+                                    delete ghostTimeouts[studentUid];
+                                    updateStudentCount();
+                                    showToast('🧹 Ghost connection removed: ' + studentUid.slice(0, 8), 'error');
+                                }
+                            }, 1200);
+
+                            // Store the call and timeout
+                            studentCalls[studentUid] = {
+                                call,
+                                stream: null,
+                                element: null,
+                                timeoutId: timeoutId,
+                                streamReceived: false
+                            };
+                            ghostTimeouts[studentUid] = timeoutId;
+
+                            // Fetch student name
                             db.ref('users/' + studentUid).once('value').then(snap => {
                                 let displayName = "Student";
                                 if (snap.exists()) {
-                                    displayName = snap.val().name || snap.val().email;
+                                    displayName = snap.val().name || snap.val().email || "Student";
                                 }
-                                
+
+                                // Create UI entry
                                 const studentList = document.getElementById('studentListContainer');
                                 const placeholder = studentList.querySelector('div[style]');
                                 if (placeholder) placeholder.remove();
@@ -1606,7 +1681,7 @@
                                 studentDiv.style.cssText =
                                     'display:flex;justify-content:space-between;align-items:center;padding:4px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.05);margin-bottom:4px;flex-wrap:wrap;gap:4px;';
                                 studentDiv.innerHTML = `
-                                    <span style="font-size:13px;color:rgba(255,255,255,0.7);">${displayName}</span>
+                                    <span class="name" style="font-size:13px;color:rgba(255,255,255,0.7);">${displayName}</span>
                                     <div style="display:flex;gap:8px;">
                                         <button class="micToggleBtn" data-uid="${studentUid}" data-class="${className}" style="background:rgba(255,255,255,0.05);border:none;color:#f87171;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">
                                             <i class="fas fa-microphone-slash"></i>
@@ -1617,9 +1692,14 @@
                                     </div>
                                 `;
                                 studentList.appendChild(studentDiv);
-                                studentCalls[studentUid].element = studentDiv;
+
+                                // Store element reference
+                                if (studentCalls[studentUid]) {
+                                    studentCalls[studentUid].element = studentDiv;
+                                }
                                 updateStudentCount();
 
+                                // Control buttons
                                 const micBtn = studentDiv.querySelector('.micToggleBtn');
                                 const vidBtn = studentDiv.querySelector('.videoToggleBtn');
 
@@ -1643,18 +1723,26 @@
                                     });
                                 });
 
-                                // Stream handling (Teacher Receives)
+                                // Stream handling
                                 call.on('stream', (remoteStream) => {
-                                    studentCalls[studentUid].stream = remoteStream;
-                                    
+                                    streamReceived = true;
+                                    if (studentCalls[studentUid]) {
+                                        studentCalls[studentUid].stream = remoteStream;
+                                        studentCalls[studentUid].streamReceived = true;
+                                        // Clear ghost timeout
+                                        if (ghostTimeouts[studentUid]) {
+                                            clearTimeout(ghostTimeouts[studentUid]);
+                                            delete ghostTimeouts[studentUid];
+                                        }
+                                    }
+
                                     const controlRef = db.ref(`classControl/${className}/students/${studentUid}`);
                                     controlRef.on('value', (snap) => {
                                         if (!snap.exists()) return;
                                         const data = snap.val();
-                                        
                                         const audioOn = data.audio === true;
                                         const videoOn = data.video === true;
-                                        
+
                                         const micBtn = studentDiv.querySelector('.micToggleBtn');
                                         if (audioOn) {
                                             micBtn.style.color = '#34d399';
@@ -1663,7 +1751,7 @@
                                             micBtn.style.color = '#f87171';
                                             micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
                                         }
-                                        
+
                                         const vidBtn = studentDiv.querySelector('.videoToggleBtn');
                                         if (videoOn) {
                                             vidBtn.style.color = '#34d399';
@@ -1672,8 +1760,7 @@
                                             vidBtn.style.color = '#f87171';
                                             vidBtn.innerHTML = '<i class="fas fa-video-slash"></i>';
                                         }
-                                        
-                                        // 💡 Show Video / Play Audio
+
                                         let vidContainer = document.getElementById('vid-' + studentUid);
                                         if (videoOn || audioOn) {
                                             if (!vidContainer) {
@@ -1696,18 +1783,14 @@
                                             if (vidEl.srcObject !== remoteStream) {
                                                 vidEl.srcObject = remoteStream;
                                             }
-                                            
-                                            // 💡 ટીચર સ્ટુડન્ટને સાંભળી શકશે જો audioOn = true હોય
-                                            vidEl.muted = !audioOn; 
-                                            // 💡 ટીચર સ્ટુડન્ટને જોઈ શકશે જો videoOn = true હોય
-                                            vidEl.style.display = videoOn ? 'block' : 'none'; 
-                                            
+                                            vidEl.muted = !audioOn;
+                                            vidEl.style.display = videoOn ? 'block' : 'none';
                                             vidContainer.style.display = 'flex';
                                         } else {
                                             if (vidContainer) {
                                                 vidContainer.style.display = 'none';
                                                 let vidEl = vidContainer.querySelector('video');
-                                                if(vidEl) vidEl.muted = true;
+                                                if (vidEl) vidEl.muted = true;
                                             }
                                         }
                                     });
@@ -1717,6 +1800,10 @@
                                     const el = document.getElementById('student-' + studentUid);
                                     if (el) el.remove();
                                     delete studentCalls[studentUid];
+                                    if (ghostTimeouts[studentUid]) {
+                                        clearTimeout(ghostTimeouts[studentUid]);
+                                        delete ghostTimeouts[studentUid];
+                                    }
                                     updateStudentCount();
                                     const vidCont = document.getElementById('vid-' + studentUid);
                                     if (vidCont) vidCont.remove();
@@ -1761,10 +1848,19 @@
             }
 
             async function endClass(classKey) {
-                Object.values(studentCalls).forEach(({ call }) => {
-                    if (call) call.close();
-                });
+                // Close all student connections
+                for (const uid in studentCalls) {
+                    const entry = studentCalls[uid];
+                    if (entry && entry.call) {
+                        try { entry.call.close(); } catch (e) {}
+                    }
+                    if (ghostTimeouts[uid]) {
+                        clearTimeout(ghostTimeouts[uid]);
+                        delete ghostTimeouts[uid];
+                    }
+                }
                 studentCalls = {};
+
                 if (localStream) {
                     localStream.getTracks().forEach(t => t.stop());
                     localStream = null;
@@ -1785,6 +1881,14 @@
                 if (currentClassKey) {
                     await db.ref(`classControl/${currentClassKey}`).remove();
                 }
+            }
+
+            function showToast(message, type) {
+                toast.textContent = message;
+                toast.className = 'toast' + (type === 'success' ? ' success' : '');
+                toast.style.display = 'block';
+                clearTimeout(toast._hideTimer);
+                toast._hideTimer = setTimeout(() => { toast.style.display = 'none'; }, 4000);
             }
         }
 
@@ -1869,7 +1973,7 @@
                             const studentEmail = user.email;
                             const studentName = user.name || studentEmail;
                             const safeEmail = sanitizeEmail(studentEmail);
-                            
+
                             const attRef = db.ref(`attendance/${today}/${safeEmail}`);
                             attRef.once('value').then(snap2 => {
                                 const status = snap2.exists() ? snap2.val().status : 'Absent';
@@ -2059,7 +2163,7 @@
             `;
             const display = document.getElementById('studentRatingDisplay');
             const safeEmail = sanitizeEmail(currentUser.email);
-            
+
             db.ref('studentRatings/' + safeEmail).on('value', (snap) => {
                 if (snap.exists()) {
                     display.innerHTML = `<div style="font-size:40px;font-weight:700;color:#a78bfa;">${snap.val().rating} / 5</div>`;
@@ -2221,7 +2325,7 @@
                         }
                     }
                     html += '</div>';
-                    if(!found) html = '<div class="text-muted">No assignments posted.</div>';
+                    if (!found) html = '<div class="text-muted">No assignments posted.</div>';
                     listDiv.innerHTML = html;
 
                     document.querySelectorAll('.selectHwBtn').forEach(btn => {
@@ -2270,7 +2374,7 @@
                 submitBtn.addEventListener('click', async () => {
                     const file = fileInput.files[0];
                     if (!file) { status.textContent = 'Select an image first.'; return; }
-                    
+
                     status.textContent = '⏳ Processing...';
                     try {
                         const reader = new FileReader();
@@ -2278,7 +2382,8 @@
                             reader.onload = (e) => resolve(e.target.result);
                             reader.readAsDataURL(file);
                         });
-                        const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(studentBase64));
+                        const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(
+                        studentBase64));
                         const hashArray = Array.from(new Uint8Array(hashBuffer));
                         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
@@ -2394,7 +2499,8 @@
                                 noFaceCount = 0;
                                 notificationSent = false;
                                 toast.style.display = 'none';
-                                if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
+                                if (toastTimeout) { clearTimeout(toastTimeout);
+                                    toastTimeout = null; }
                             } else {
                                 noFaceCount++;
                                 if (noFaceCount > 5 && !notificationSent) {
@@ -2406,7 +2512,8 @@
                                         timestamp: Date.now(),
                                         seen: false
                                     });
-                                    toast.textContent = '⚠️ Your face is not visible. Please sit in front of the camera.';
+                                    toast.textContent =
+                                        '⚠️ Your face is not visible. Please sit in front of the camera.';
                                     toast.style.display = 'block';
                                     if (toastTimeout) clearTimeout(toastTimeout);
                                     toastTimeout = setTimeout(() => { toast.style.display = 'none'; }, 5000);
@@ -2418,37 +2525,47 @@
             }
 
             function stopFaceDetection() {
-                if (faceCheckInterval) { clearInterval(faceCheckInterval); faceCheckInterval = null; }
+                if (faceCheckInterval) { clearInterval(faceCheckInterval);
+                    faceCheckInterval = null; }
                 if (faceDetector) { faceDetector = null; }
                 noFaceCount = 0;
                 notificationSent = false;
                 toast.style.display = 'none';
-                if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
+                if (toastTimeout) { clearTimeout(toastTimeout);
+                    toastTimeout = null; }
             }
 
             async function joinStudentClass(className) {
                 if (studentCall) {
                     studentCall.close();
                     studentCall = null;
-                    if (studentStream) { studentStream.getTracks().forEach(t => t.stop()); studentStream = null; }
-                    if (studentPeer) { studentPeer.destroy(); studentPeer = null; }
+                    if (studentStream) { studentStream.getTracks().forEach(t => t.stop());
+                        studentStream = null; }
+                    if (studentPeer) { studentPeer.destroy();
+                        studentPeer = null; }
                     liveContainer.innerHTML = '';
                     stopFaceDetection();
                     return;
                 }
 
                 try {
-                    // 💡 અસલી કનેક્શન સ્ટ્રીમ
-                    studentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                    
-                    // શરૂઆતમાં Mute
+                    studentStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'user',
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        },
+                        audio: true
+                    });
+
                     studentStream.getAudioTracks().forEach(t => t.enabled = false);
                     studentStream.getVideoTracks().forEach(t => t.enabled = false);
 
                     studentPeer = new Peer(currentUser.uid, { debug: 2 });
                     await new Promise((resolve, reject) => {
                         const timeout = setTimeout(() => reject(new Error('Peer connection timeout')), 10000);
-                        studentPeer.on('open', () => { clearTimeout(timeout); resolve(); });
+                        studentPeer.on('open', () => { clearTimeout(timeout);
+                            resolve(); });
                         studentPeer.on('error', reject);
                     });
 
@@ -2486,8 +2603,13 @@
                         remoteVideo.style.objectFit = 'cover';
                         videoContainer.querySelector('.remote-player').appendChild(remoteVideo);
 
-                        // ફેસ ડિટેક્શન માટે લોકલ કેમેરો સ્ત્રોત
-                        navigator.mediaDevices.getUserMedia({ video: true }).then(faceStream => {
+                        navigator.mediaDevices.getUserMedia({
+                            video: {
+                                facingMode: 'user',
+                                width: { ideal: 640 },
+                                height: { ideal: 480 }
+                            }
+                        }).then(faceStream => {
                             const localVideo = document.createElement('video');
                             localVideo.srcObject = faceStream;
                             localVideo.autoplay = true;
@@ -2514,7 +2636,8 @@
                             const input = document.getElementById('student-chat-input');
                             const text = input.value.trim();
                             if (!text) return;
-                            chatRef.push({ sender: currentUser.email, role: 'student', text: text, timestamp: Date.now() });
+                            chatRef.push({ sender: currentUser.email, role: 'student', text: text,
+                                timestamp: Date.now() });
                             input.value = '';
                         });
 
@@ -2522,18 +2645,19 @@
                             joinStudentClass(className);
                         });
 
-                        // 💡 ઓટોમેટિક એટેન્ડન્સ પ્રેઝન્ટ એન્ટ્રી
                         const today = new Date().toISOString().split('T')[0];
                         const safeEmail = sanitizeEmail(currentUser.email);
-                        db.ref(`attendance/${today}/${safeEmail}`).update({ status: 'Present', timestamp: Date.now() });
+                        db.ref(`attendance/${today}/${safeEmail}`).update({ status: 'Present',
+                            timestamp: Date.now() });
 
-                        // 💡 ફાયરબેઝ લિસનર દ્વારા ટીચરનો કંટ્રોલ પ્રોસેસ થશે
                         const controlRef = db.ref(`classControl/${className}/students/${currentUser.uid}`);
                         controlRef.on('value', (snap) => {
                             if (snap.exists() && studentStream) {
                                 const data = snap.val();
-                                studentStream.getAudioTracks().forEach(t => t.enabled = (data.audio === true));
-                                studentStream.getVideoTracks().forEach(t => t.enabled = (data.video === true));
+                                studentStream.getAudioTracks().forEach(t => t.enabled = (data.audio ===
+                                true));
+                                studentStream.getVideoTracks().forEach(t => t.enabled = (data.video ===
+                                true));
                             }
                         });
                     });
@@ -2550,16 +2674,20 @@
                     call.on('error', (err) => {
                         alert('❌ Connection error: ' + err.message);
                         stopFaceDetection();
-                        if (studentPeer) studentPeer.destroy(); studentPeer = null;
-                        if (studentStream) { studentStream.getTracks().forEach(t => t.stop()); studentStream = null; }
+                        if (studentPeer) studentPeer.destroy();
+                        studentPeer = null;
+                        if (studentStream) { studentStream.getTracks().forEach(t => t.stop());
+                            studentStream = null; }
                         liveContainer.innerHTML = '';
                     });
 
                 } catch (err) {
                     alert('❌ Join error: ' + err.message);
                     stopFaceDetection();
-                    if (studentPeer) { studentPeer.destroy(); studentPeer = null; }
-                    if (studentStream) { studentStream.getTracks().forEach(t => t.stop()); studentStream = null; }
+                    if (studentPeer) { studentPeer.destroy();
+                        studentPeer = null; }
+                    if (studentStream) { studentStream.getTracks().forEach(t => t.stop());
+                        studentStream = null; }
                     liveContainer.innerHTML = '';
                 }
             }
