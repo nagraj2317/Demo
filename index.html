@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>EduManage · School/College Management</title>
+    <title>EduManage · Complete System</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -62,7 +62,7 @@
         #loginOverlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.88);
+            background: rgba(0, 0, 0, 0.92);
             backdrop-filter: blur(14px);
             z-index: 9999;
             display: flex;
@@ -182,6 +182,20 @@
         }
         .msg.success {
             color: #34d399;
+        }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         #appContainer {
@@ -493,7 +507,11 @@
             font-size: 13px;
             flex-wrap: wrap;
             gap: 4px;
-            cursor: default;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .list-item:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
         .list-item .name {
             font-weight: 500;
@@ -623,6 +641,8 @@
             padding: 5px 14px;
             border-radius: 40px;
             border: 1px solid var(--border);
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .video-controls button {
             background: none;
@@ -804,7 +824,7 @@
             background: var(--card);
             border-radius: 28px;
             padding: 24px;
-            max-width: 480px;
+            max-width: 520px;
             width: 94%;
             max-height: 90vh;
             overflow-y: auto;
@@ -852,6 +872,20 @@
         .modal-box .field .value {
             font-size: 15px;
             padding: 6px 0;
+            word-break: break-all;
+        }
+        .modal-box .field .value-input {
+            padding: 8px 14px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+        }
+        .modal-box .field .value-input:focus {
+            border-color: rgba(167, 139, 250, 0.3);
         }
         .modal-box .divider {
             border: none;
@@ -921,6 +955,57 @@
         }
         .stars .empty {
             color: rgba(255, 255, 255, 0.15);
+        }
+        .profile-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 16px;
+        }
+        .profile-detail-grid .detail-item {
+            padding: 4px 0;
+        }
+        .profile-detail-grid .detail-item .label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .profile-detail-grid .detail-item .val {
+            font-size: 14px;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .invite-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .invite-links button {
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+        .invite-links button:hover {
+            transform: scale(1.05);
+        }
+        .invite-links .copy-btn {
+            background: #64748b;
+        }
+        .invite-links .whatsapp-btn {
+            background: #25D366;
+        }
+        .invite-links .email-btn {
+            background: #3b82f6;
         }
 
         @media (max-width: 1024px) {
@@ -994,6 +1079,9 @@
             .login-box {
                 padding: 20px 16px;
             }
+            .profile-detail-grid {
+                grid-template-columns: 1fr;
+            }
         }
         @media (max-width: 480px) {
             body {
@@ -1042,20 +1130,19 @@
             <div id="loginForm">
                 <input type="email" id="loginEmail" placeholder="Email Address" />
                 <input type="password" id="loginPassword" placeholder="Password" />
-                <button class="btn-primary" id="loginBtn">Sign In</button>
+                <button class="btn-primary" id="loginBtn"><span id="loginBtnText">Sign In</span></button>
                 <div class="toggle-link">No account? <span id="showSignup">Request Invite</span></div>
                 <div id="loginMsg" class="msg"></div>
             </div>
             <div id="signupForm" style="display:none;">
                 <div class="text-muted" style="text-align:center;margin-bottom:12px;font-size:13px;">
                     <i class="fas fa-info-circle"></i> You can only join via invitation link.
-                    <br />Contact your admin or principal for access.
                 </div>
                 <input type="text" id="signupName" placeholder="Full Name" />
                 <input type="email" id="signupEmail" placeholder="Email Address" />
                 <input type="password" id="signupPassword" placeholder="Password" />
-                <input type="text" id="signupInviteCode" placeholder="Invitation Code (optional)" />
-                <button class="btn-success" id="signupBtn">Request Access</button>
+                <input type="text" id="signupInviteCode" placeholder="Invitation Code" />
+                <button class="btn-success" id="signupBtn"><span id="signupBtnText">Request Access</span></button>
                 <div class="toggle-link">Already have an account? <span id="showLogin">Sign in</span></div>
                 <div id="signupMsg" class="msg"></div>
             </div>
@@ -1073,6 +1160,7 @@
                 <a href="#" data-tab="classroom" title="Classroom"><i class="fas fa-video"></i></a>
                 <a href="#" data-tab="students" title="Students"><i class="fas fa-users"></i></a>
                 <a href="#" data-tab="teachers" title="Teachers"><i class="fas fa-chalkboard-teacher"></i></a>
+                <a href="#" data-tab="principals" title="Principals"><i class="fas fa-user-tie"></i></a>
                 <a href="#" data-tab="notifications" title="Notifications"><i class="fas fa-bell"></i><span class="badge" id="notifBadge" style="display:none;">0</span></a>
                 <a href="#" data-tab="classes" title="Classes"><i class="fas fa-book"></i></a>
                 <a href="#" data-tab="settings" title="Settings"><i class="fas fa-cog"></i></a>
@@ -1126,6 +1214,7 @@
                             <button class="btn-sm btn-primary" id="dashCreateClass"><i class="fas fa-plus"></i> Create Class</button>
                             <button class="btn-sm btn-success" id="dashJoinClass"><i class="fas fa-sign-in-alt"></i> Join Class</button>
                             <button class="btn-sm btn-warning" id="dashNotify"><i class="fas fa-bell"></i> Send Notification</button>
+                            <button class="btn-sm btn-primary" id="dashAddPrincipal"><i class="fas fa-user-tie"></i> Add Principal</button>
                         </div>
                     </div>
                 </div>
@@ -1143,6 +1232,7 @@
                             <button id="toggleMic" class="active" title="Microphone"><i class="fas fa-microphone"></i></button>
                             <button id="toggleCam" class="active" title="Camera"><i class="fas fa-video"></i></button>
                             <button id="toggleScreen" title="Share Screen"><i class="fas fa-desktop"></i></button>
+                            <button id="toggleCameraAngle" title="Switch Camera"><i class="fas fa-sync-alt"></i></button>
                             <button id="leaveCall" class="danger" title="Leave"><i class="fas fa-phone-slash"></i></button>
                         </div>
                     </div>
@@ -1162,7 +1252,10 @@
                     <div class="card">
                         <div class="flex-between">
                             <div class="card-title" style="margin-bottom:0;"><i class="fas fa-user-graduate"></i> Students</div>
-                            <button class="btn-sm btn-primary" id="addStudentBtn"><i class="fas fa-plus"></i> Add</button>
+                            <div class="flex-row">
+                                <button class="btn-sm btn-primary" id="addStudentBtn"><i class="fas fa-plus"></i> Add</button>
+                                <button class="btn-sm btn-success" id="inviteStudentBtn"><i class="fas fa-envelope"></i> Invite</button>
+                            </div>
                         </div>
                     </div>
                     <div id="studentListContainer"><div class="text-muted">No students found.</div></div>
@@ -1173,10 +1266,24 @@
                     <div class="card">
                         <div class="flex-between">
                             <div class="card-title" style="margin-bottom:0;"><i class="fas fa-chalkboard-teacher"></i> Teachers</div>
-                            <button class="btn-sm btn-primary" id="addTeacherBtn"><i class="fas fa-plus"></i> Add</button>
+                            <div class="flex-row">
+                                <button class="btn-sm btn-primary" id="addTeacherBtn"><i class="fas fa-plus"></i> Add</button>
+                                <button class="btn-sm btn-success" id="inviteTeacherBtn"><i class="fas fa-envelope"></i> Invite</button>
+                            </div>
                         </div>
                     </div>
                     <div id="teacherListContainer"><div class="text-muted">No teachers found.</div></div>
+                </div>
+
+                <!-- PRINCIPALS -->
+                <div id="tab-principals" class="tab-content hidden">
+                    <div class="card">
+                        <div class="flex-between">
+                            <div class="card-title" style="margin-bottom:0;"><i class="fas fa-user-tie"></i> Principals</div>
+                            <button class="btn-sm btn-primary" id="addPrincipalBtn"><i class="fas fa-plus"></i> Add</button>
+                        </div>
+                    </div>
+                    <div id="principalListContainer"><div class="text-muted">No principals found.</div></div>
                 </div>
 
                 <!-- NOTIFICATIONS -->
@@ -1249,19 +1356,100 @@
 
     <!-- ====== MODALS ====== -->
 
-    <!-- PROFILE -->
+    <!-- PROFILE MODAL (with edit) -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal-box">
             <button class="modal-close" id="profileClose"><i class="fas fa-times"></i></button>
-            <h2><i class="fas fa-user-circle"></i> Profile</h2>
-            <div class="field"><label>Name</label><div class="value" id="profName">—</div></div>
-            <div class="field"><label>Email</label><div class="value" id="profEmail">—</div></div>
-            <div class="field"><label>Role</label><div class="value" id="profRole">—</div></div>
-            <div class="field"><label>School / College</label><div class="value" id="profSchool">—</div></div>
-            <div class="field"><label>Mobile</label><div class="value" id="profMobile">—</div></div>
+            <h2><i class="fas fa-user-circle"></i> My Profile</h2>
+            <div class="field">
+                <label>Name</label>
+                <input type="text" id="profEditName" class="value-input" />
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <div class="value" id="profEmail" style="color:var(--text-muted);">—</div>
+            </div>
+            <div class="field">
+                <label>Role</label>
+                <div class="value" id="profRole">—</div>
+            </div>
+            <div class="field">
+                <label>Mobile</label>
+                <input type="text" id="profEditMobile" class="value-input" placeholder="Mobile number" />
+            </div>
+            <div class="field">
+                <label>School / College</label>
+                <input type="text" id="profEditSchool" class="value-input" placeholder="School name" />
+            </div>
             <hr class="divider" />
-            <div class="field"><label>My Rating</label><div class="value" id="profRating">—</div></div>
-            <button class="btn btn-danger" id="profLogout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <div class="field">
+                <label>My Rating</label>
+                <div class="value" id="profRating">—</div>
+            </div>
+            <button class="btn btn-primary" id="profSaveBtn"><i class="fas fa-save"></i> Save Profile</button>
+            <button class="btn btn-danger mt-10" id="profLogout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </div>
+
+    <!-- USER DETAIL MODAL (view bio-data) -->
+    <div class="modal-overlay" id="userDetailModal">
+        <div class="modal-box">
+            <button class="modal-close" id="userDetailClose"><i class="fas fa-times"></i></button>
+            <h2><i class="fas fa-id-card"></i> <span id="userDetailTitle">User Details</span></h2>
+            <div class="profile-detail-grid" id="userDetailGrid">
+                <div class="detail-item"><div class="label">Full Name</div><div class="val" id="udName">—</div></div>
+                <div class="detail-item"><div class="label">Email</div><div class="val" id="udEmail">—</div></div>
+                <div class="detail-item"><div class="label">Mobile</div><div class="val" id="udMobile">—</div></div>
+                <div class="detail-item"><div class="label">Role</div><div class="val" id="udRole">—</div></div>
+                <div class="detail-item"><div class="label">UID / Roll</div><div class="val" id="udUid">—</div></div>
+                <div class="detail-item"><div class="label">Standard / Class</div><div class="val" id="udStandard">—</div></div>
+                <div class="detail-item"><div class="label">School</div><div class="val" id="udSchool">—</div></div>
+                <div class="detail-item"><div class="label">Rating</div><div class="val" id="udRating">—</div></div>
+            </div>
+            <hr class="divider" />
+            <div class="field">
+                <label>Invitation Link</label>
+                <div class="value" id="udInviteLink" style="font-size:12px;word-break:break-all;color:var(--text-muted);">—</div>
+                <div class="invite-links">
+                    <button class="copy-btn" onclick="copyInviteLink()"><i class="fas fa-copy"></i> Copy</button>
+                    <button class="whatsapp-btn" onclick="shareWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    <button class="email-btn" onclick="shareEmail()"><i class="fas fa-envelope"></i> Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD PRINCIPAL MODAL -->
+    <div class="modal-overlay" id="addPrincipalModal">
+        <div class="modal-box">
+            <button class="modal-close" id="addPrincipalClose"><i class="fas fa-times"></i></button>
+            <h2><i class="fas fa-user-tie"></i> Add Principal</h2>
+            <div class="field"><label>Full Name *</label><input type="text" id="addPrincipalName" class="input-field" placeholder="Principal name" /></div>
+            <div class="field"><label>Email *</label><input type="email" id="addPrincipalEmail" class="input-field" placeholder="principal@school.com" /></div>
+            <div class="field"><label>Mobile *</label><input type="text" id="addPrincipalMobile" class="input-field" placeholder="9876543210" /></div>
+            <div class="field"><label>School Name *</label><input type="text" id="addPrincipalSchool" class="input-field" placeholder="School / College name" /></div>
+            <button class="btn btn-primary" id="addPrincipalConfirm"><i class="fas fa-check"></i> Add & Send Invite</button>
+            <div id="addPrincipalMsg" class="msg"></div>
+        </div>
+    </div>
+
+    <!-- INVITE MODAL (generic) -->
+    <div class="modal-overlay" id="inviteModal">
+        <div class="modal-box">
+            <button class="modal-close" id="inviteClose"><i class="fas fa-times"></i></button>
+            <h2><i class="fas fa-envelope"></i> <span id="inviteTitle">Send Invitation</span></h2>
+            <div class="field"><label>Email *</label><input type="email" id="inviteEmail" class="input-field" placeholder="user@example.com" /></div>
+            <div class="field"><label>Name *</label><input type="text" id="inviteName" class="input-field" placeholder="Full name" /></div>
+            <div class="field"><label>Mobile</label><input type="text" id="inviteMobile" class="input-field" placeholder="Mobile number" /></div>
+            <div class="field"><label>Role</label>
+                <select id="inviteRole" class="input-field">
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="principal">Principal</option>
+                </select>
+            </div>
+            <button class="btn btn-success" id="inviteConfirm"><i class="fas fa-paper-plane"></i> Send Invitation</button>
+            <div id="inviteMsg" class="msg"></div>
         </div>
     </div>
 
@@ -1298,13 +1486,13 @@
             <div class="field"><label>Email *</label><input type="email" id="addStudentEmail" class="input-field" placeholder="student@example.com" /></div>
             <div class="field"><label>Mobile *</label><input type="text" id="addStudentMobile" class="input-field" placeholder="9876543210" /></div>
             <div class="field"><label>Roll Number</label><input type="text" id="addStudentRoll" class="input-field" placeholder="Roll number" /></div>
+            <div class="field"><label>Standard</label><input type="text" id="addStudentStandard" class="input-field" placeholder="e.g. 10th" /></div>
             <div class="field"><label>Role</label>
                 <select id="addStudentRole" class="input-field">
                     <option value="student">Student</option>
                     <option value="monitor">Monitor</option>
                 </select>
             </div>
-            <div class="field"><label>Class / Standard</label><input type="text" id="addStudentClass" class="input-field" placeholder="e.g. 10-A" /></div>
             <button class="btn btn-success" id="addStudentConfirm"><i class="fas fa-check"></i> Add Student</button>
             <div id="addStudentMsg" class="msg"></div>
         </div>
@@ -1337,6 +1525,7 @@
                     <option value="students">Students Only</option>
                     <option value="teachers">Teachers Only</option>
                     <option value="principal">Principal Only</option>
+                    <option value="admin">Admin Only</option>
                 </select>
             </div>
             <button class="btn btn-warning" id="sendNotifConfirm"><i class="fas fa-paper-plane"></i> Send</button>
@@ -1385,7 +1574,18 @@
         // ================================================================
         //  INIT FIREBASE
         // ================================================================
-        firebase.initializeApp(firebaseConfig);
+        let firebaseInitialized = false;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            firebaseInitialized = true;
+            console.log('✅ Firebase initialized successfully');
+        } catch (e) {
+            console.warn('⚠️ Firebase already initialized or error:', e);
+            if (!firebase.apps.length) {
+                console.error('❌ Firebase failed to initialize');
+            }
+        }
+
         const auth = firebase.auth();
         const db = firebase.database();
 
@@ -1393,6 +1593,7 @@
         //  CONSTANTS
         // ================================================================
         const ADMIN_EMAIL = 'sachumali2317@gmail.com';
+        const INVITE_CODE_LENGTH = 8;
 
         // ================================================================
         //  STATE
@@ -1408,6 +1609,8 @@
         let isCamOff = false;
         let inCall = false;
         let currentClassCode = null;
+        let currentCameraFacing = 'environment';
+        let currentInviteLink = '';
 
         const PEER_PREFIX = 'em-';
         let ratingTarget = null;
@@ -1426,7 +1629,9 @@
         const loginMsg = $('loginMsg');
         const signupMsg = $('signupMsg');
         const loginBtn = $('loginBtn');
+        const loginBtnText = $('loginBtnText');
         const signupBtn = $('signupBtn');
+        const signupBtnText = $('signupBtnText');
         const showSignup = $('showSignup');
         const showLogin = $('showLogin');
         const avatarDisplay = $('avatarDisplay');
@@ -1444,12 +1649,14 @@
         const dashCreateClass = $('dashCreateClass');
         const dashJoinClass = $('dashJoinClass');
         const dashNotify = $('dashNotify');
+        const dashAddPrincipal = $('dashAddPrincipal');
 
         const localVideo = $('localVideo');
         const videoContainer = $('videoContainer');
         const toggleMic = $('toggleMic');
         const toggleCam = $('toggleCam');
         const toggleScreen = $('toggleScreen');
+        const toggleCameraAngle = $('toggleCameraAngle');
         const leaveCall = $('leaveCall');
 
         const chatMessages = $('chatMessages');
@@ -1463,6 +1670,7 @@
 
         const studentListContainer = $('studentListContainer');
         const teacherListContainer = $('teacherListContainer');
+        const principalListContainer = $('principalListContainer');
         const notificationListContainer = $('notificationListContainer');
         const classesListContainer = $('classesListContainer');
 
@@ -1474,13 +1682,46 @@
 
         const profileModal = $('profileModal');
         const profileClose = $('profileClose');
-        const profName = $('profName');
+        const profEditName = $('profEditName');
         const profEmail = $('profEmail');
         const profRole = $('profRole');
-        const profSchool = $('profSchool');
-        const profMobile = $('profMobile');
+        const profEditMobile = $('profEditMobile');
+        const profEditSchool = $('profEditSchool');
         const profRating = $('profRating');
+        const profSaveBtn = $('profSaveBtn');
         const profLogout = $('profLogout');
+
+        const userDetailModal = $('userDetailModal');
+        const userDetailClose = $('userDetailClose');
+        const userDetailTitle = $('userDetailTitle');
+        const udName = $('udName');
+        const udEmail = $('udEmail');
+        const udMobile = $('udMobile');
+        const udRole = $('udRole');
+        const udUid = $('udUid');
+        const udStandard = $('udStandard');
+        const udSchool = $('udSchool');
+        const udRating = $('udRating');
+        const udInviteLink = $('udInviteLink');
+
+        const addPrincipalModal = $('addPrincipalModal');
+        const addPrincipalClose = $('addPrincipalClose');
+        const addPrincipalName = $('addPrincipalName');
+        const addPrincipalEmail = $('addPrincipalEmail');
+        const addPrincipalMobile = $('addPrincipalMobile');
+        const addPrincipalSchool = $('addPrincipalSchool');
+        const addPrincipalConfirm = $('addPrincipalConfirm');
+        const addPrincipalMsg = $('addPrincipalMsg');
+
+        const inviteModal = $('inviteModal');
+        const inviteClose = $('inviteClose');
+        const inviteTitle = $('inviteTitle');
+        const inviteEmail = $('inviteEmail');
+        const inviteName = $('inviteName');
+        const inviteMobile = $('inviteMobile');
+        const inviteRole = $('inviteRole');
+        const inviteConfirm = $('inviteConfirm');
+        const inviteMsg = $('inviteMsg');
 
         const createClassModal = $('createClassModal');
         const createClassClose = $('createClassClose');
@@ -1502,8 +1743,8 @@
         const addStudentEmail = $('addStudentEmail');
         const addStudentMobile = $('addStudentMobile');
         const addStudentRoll = $('addStudentRoll');
+        const addStudentStandard = $('addStudentStandard');
         const addStudentRole = $('addStudentRole');
-        const addStudentClass = $('addStudentClass');
         const addStudentConfirm = $('addStudentConfirm');
         const addStudentMsg = $('addStudentMsg');
 
@@ -1536,7 +1777,10 @@
         const profileBtn = $('profileBtn');
         const logoutBtn = $('logoutBtn');
         const addStudentBtn = $('addStudentBtn');
+        const inviteStudentBtn = $('inviteStudentBtn');
         const addTeacherBtn = $('addTeacherBtn');
+        const inviteTeacherBtn = $('inviteTeacherBtn');
+        const addPrincipalBtn = $('addPrincipalBtn');
         const sendNotifBtn = $('sendNotifBtn');
         const classesCreateBtn = $('classesCreateBtn');
         const notifBadge = $('notifBadge');
@@ -1555,17 +1799,87 @@
         }
 
         // ================================================================
-        //  AUTH — FORCE ADMIN ROLE FOR ADMIN EMAIL
+        //  GENERATE INVITE LINK
         // ================================================================
-        function switchToLogin() { loginForm.style.display = 'block';
+        function generateInviteLink(uid, email, role, name) {
+            const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+            const baseUrl = window.location.origin + window.location.pathname;
+            const link = baseUrl + '?invite=' + code + '&uid=' + uid + '&email=' + encodeURIComponent(email) + '&role=' +
+                role + '&name=' + encodeURIComponent(name);
+            currentInviteLink = link;
+
+            // Store invite in DB
+            const inviteRef = db.ref('invites/' + code);
+            inviteRef.set({
+                uid: uid,
+                email: email,
+                role: role,
+                name: name,
+                createdBy: currentUser ? currentUser.uid : 'system',
+                createdAt: Date.now(),
+                used: false
+            });
+
+            // Save to user's invites
+            db.ref('users/' + uid + '/invites/' + code).set({
+                link: link,
+                role: role,
+                sentAt: Date.now()
+            });
+
+            return link;
+        }
+
+        function copyInviteLink() {
+            if (!currentInviteLink) {
+                showToast('No invite link to copy', 'error');
+                return;
+            }
+            navigator.clipboard.writeText(currentInviteLink).then(() => {
+                showToast('Link copied to clipboard!', 'success');
+            }).catch(() => {
+                // fallback
+                const ta = document.createElement('textarea');
+                ta.value = currentInviteLink;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+                showToast('Link copied!', 'success');
+            });
+        }
+
+        function shareWhatsApp() {
+            if (!currentInviteLink) { showToast('No invite link', 'error'); return; }
+            const msg = encodeURIComponent('📚 EduManage Invitation\n\nYou have been invited to join EduManage.\n\n🔗 Click here to join: ' +
+                currentInviteLink);
+            window.open('https://wa.me/?text=' + msg, '_blank');
+        }
+
+        function shareEmail() {
+            if (!currentInviteLink) { showToast('No invite link', 'error'); return; }
+            const subject = encodeURIComponent('EduManage Invitation');
+            const body = encodeURIComponent('You have been invited to join EduManage.\n\nClick the link below to access:\n\n' +
+                currentInviteLink + '\n\nThis is an automated invitation.');
+            window.open('mailto:?subject=' + subject + '&body=' + body, '_blank');
+        }
+
+        // ================================================================
+        //  AUTH — WITH LOADING STATES
+        // ================================================================
+        function switchToLogin() {
+            loginForm.style.display = 'block';
             signupForm.style.display = 'none';
             loginMsg.textContent = '';
-            signupMsg.textContent = ''; }
+            signupMsg.textContent = '';
+        }
 
-        function switchToSignup() { loginForm.style.display = 'none';
+        function switchToSignup() {
+            loginForm.style.display = 'none';
             signupForm.style.display = 'block';
             loginMsg.textContent = '';
-            signupMsg.textContent = ''; }
+            signupMsg.textContent = '';
+        }
 
         showSignup.addEventListener('click', switchToSignup);
         showLogin.addEventListener('click', switchToLogin);
@@ -1574,13 +1888,13 @@
             const email = $('loginEmail').value.trim();
             const pass = $('loginPassword').value.trim();
             if (!email || !pass) { loginMsg.textContent = 'Please fill in all fields.'; return; }
-            loginMsg.textContent = 'Signing in...';
+            loginMsg.textContent = '';
+            loginBtnText.innerHTML = '<span class="spinner"></span> Signing...';
             loginBtn.disabled = true;
             try {
                 const cred = await auth.signInWithEmailAndPassword(email, pass);
                 const uid = cred.user.uid;
                 const snap = await db.ref('users/' + uid).once('value');
-
                 const isAdmin = (email === ADMIN_EMAIL);
                 const role = isAdmin ? 'admin' : (snap.exists() ? snap.val().role : 'student');
 
@@ -1603,24 +1917,47 @@
             } catch (err) {
                 loginMsg.textContent = err.message;
                 showToast(err.message, 'error');
+                loginBtnText.textContent = 'Sign In';
+                loginBtn.disabled = false;
             }
-            loginBtn.disabled = false;
         });
 
         signupBtn.addEventListener('click', async () => {
             const name = $('signupName').value.trim();
             const email = $('signupEmail').value.trim();
             const pass = $('signupPassword').value.trim();
-            const invite = $('signupInviteCode').value.trim();
+            const inviteCode = $('signupInviteCode').value.trim().toUpperCase();
             if (!name || !email || !pass) { signupMsg.textContent = 'Please fill in all fields.'; return; }
-            signupMsg.textContent = 'Requesting access...';
+            signupMsg.textContent = '';
+            signupBtnText.innerHTML = '<span class="spinner"></span> Requesting...';
             signupBtn.disabled = true;
             try {
                 let role = 'student';
                 let schoolId = null;
-                if (invite) {
-                    const snap = await db.ref('classes').orderByChild('code').equalTo(invite.toUpperCase()).once('value');
-                    if (snap.exists()) { role = 'student'; }
+                // Check if invite code exists
+                if (inviteCode) {
+                    const inviteSnap = await db.ref('invites/' + inviteCode).once('value');
+                    if (inviteSnap.exists()) {
+                        const inviteData = inviteSnap.val();
+                        if (!inviteData.used) {
+                            role = inviteData.role || 'student';
+                            schoolId = inviteData.schoolId || null;
+                            await db.ref('invites/' + inviteCode + '/used').set(true);
+                            await db.ref('invites/' + inviteCode + '/usedBy').set(email);
+                        } else {
+                            signupMsg.textContent = 'This invitation code has already been used.';
+                            showToast('Invite code already used.', 'error');
+                            signupBtnText.textContent = 'Request Access';
+                            signupBtn.disabled = false;
+                            return;
+                        }
+                    } else {
+                        signupMsg.textContent = 'Invalid invitation code.';
+                        showToast('Invalid invite code.', 'error');
+                        signupBtnText.textContent = 'Request Access';
+                        signupBtn.disabled = false;
+                        return;
+                    }
                 }
                 if (email === ADMIN_EMAIL) role = 'admin';
 
@@ -1631,67 +1968,82 @@
                     email: email,
                     role: role,
                     schoolId: schoolId,
-                    createdAt: Date.now()
+                    createdAt: Date.now(),
+                    mobile: $('signupMobile') ? $('signupMobile').value.trim() : ''
                 });
                 showToast('Account created! You can now sign in.', 'success');
                 switchToLogin();
                 $('loginEmail').value = email;
+                signupMsg.textContent = '✅ Account created! Please sign in.';
+                signupMsg.className = 'msg success';
             } catch (err) {
                 signupMsg.textContent = err.message;
                 showToast(err.message, 'error');
             }
+            signupBtnText.textContent = 'Request Access';
             signupBtn.disabled = false;
         });
 
         // ================================================================
-        //  AUTH STATE — FORCE ADMIN ROLE
+        //  AUTH STATE
         // ================================================================
         auth.onAuthStateChanged(async user => {
             if (user) {
-                const snap = await db.ref('users/' + user.uid).once('value');
-                let userData = snap.exists() ? snap.val() : null;
+                try {
+                    const snap = await db.ref('users/' + user.uid).once('value');
+                    let userData = snap.exists() ? snap.val() : null;
 
-                const isAdmin = (user.email === ADMIN_EMAIL);
-                if (isAdmin) {
-                    if (!userData || userData.role !== 'admin') {
-                        await db.ref('users/' + user.uid + '/role').set('admin');
-                        userData = (await db.ref('users/' + user.uid).once('value')).val();
+                    const isAdmin = (user.email === ADMIN_EMAIL);
+                    if (isAdmin) {
+                        if (!userData || userData.role !== 'admin') {
+                            await db.ref('users/' + user.uid + '/role').set('admin');
+                            userData = (await db.ref('users/' + user.uid).once('value')).val();
+                        }
                     }
-                }
 
-                if (userData) {
-                    currentUser = { uid: user.uid, ...userData };
-                } else {
-                    currentUser = { uid: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email,
-                        role: isAdmin ? 'admin' : 'student' };
-                    await db.ref('users/' + user.uid).set(currentUser);
-                }
+                    if (userData) {
+                        currentUser = { uid: user.uid, ...userData };
+                    } else {
+                        currentUser = { uid: user.uid, name: user.displayName || user.email.split('@')[0],
+                            email: user.email, role: isAdmin ? 'admin' : 'student' };
+                        await db.ref('users/' + user.uid).set(currentUser);
+                    }
 
-                loginOverlay.style.display = 'none';
-                appContainer.classList.add('active');
+                    loginOverlay.style.display = 'none';
+                    appContainer.classList.add('active');
 
-                const isAdminUser = (currentUser.role === 'admin' || currentUser.email === ADMIN_EMAIL);
-                avatarDisplay.textContent = currentUser.name.charAt(0).toUpperCase();
-                if (isAdminUser) {
-                    adminBadge.style.display = 'flex';
-                    adminBadge.textContent = '👑';
-                } else {
-                    adminBadge.style.display = 'none';
-                }
+                    const isAdminUser = (currentUser.role === 'admin' || currentUser.email === ADMIN_EMAIL);
+                    avatarDisplay.textContent = currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U';
+                    if (isAdminUser) {
+                        adminBadge.style.display = 'flex';
+                        adminBadge.textContent = '👑';
+                    } else {
+                        adminBadge.style.display = 'none';
+                    }
 
-                pageSubtitle.textContent = 'Welcome, ' + currentUser.name + (isAdminUser ? ' (Admin)' : '');
-                statusText.textContent = 'Online';
+                    pageSubtitle.textContent = 'Welcome, ' + (currentUser.name || 'User') + (isAdminUser ? ' (Admin)' :
+                    '');
+                    statusText.textContent = 'Online';
 
-                initPeer();
-                loadDashboard();
-                loadStudents();
-                loadTeachers();
-                loadNotifications();
-                loadClassesList();
-                updateSettings();
-                listenNotifications();
-                if (['teacher', 'admin', 'principal'].includes(currentUser.role)) {
-                    listenForStudentCalls();
+                    // Reset login button if it was stuck
+                    loginBtnText.textContent = 'Sign In';
+                    loginBtn.disabled = false;
+
+                    initPeer();
+                    loadDashboard();
+                    loadStudents();
+                    loadTeachers();
+                    loadPrincipals();
+                    loadNotifications();
+                    loadClassesList();
+                    updateSettings();
+                    listenNotifications();
+                    if (['teacher', 'admin', 'principal'].includes(currentUser.role)) {
+                        listenForStudentCalls();
+                    }
+                } catch (err) {
+                    console.error('Auth state error:', err);
+                    showToast('Error loading user data: ' + err.message, 'error');
                 }
             } else {
                 currentUser = null;
@@ -1711,6 +2063,11 @@
                 participantList.innerHTML = '<div class="placeholder">No participants</div>';
                 participantCount.textContent = '0';
                 adminBadge.style.display = 'none';
+                // Reset login button
+                loginBtnText.textContent = 'Sign In';
+                loginBtn.disabled = false;
+                signupBtnText.textContent = 'Request Access';
+                signupBtn.disabled = false;
             }
         });
 
@@ -1720,6 +2077,7 @@
         function initPeer() {
             if (peer) { peer.destroy();
                 peer = null; }
+            if (!currentUser) return;
             const id = PEER_PREFIX + currentUser.uid;
             peer = new Peer(id, {
                 debug: 0,
@@ -1734,10 +2092,14 @@
                     listenForStudentCalls();
                 }
             });
-            peer.on('error', err => { console.error('Peer error:', err);
-                setTimeout(initPeer, 3000); });
-            peer.on('disconnected', () => { console.log('Peer reconnecting...');
-                peer.reconnect(); });
+            peer.on('error', err => {
+                console.error('Peer error:', err);
+                setTimeout(initPeer, 3000);
+            });
+            peer.on('disconnected', () => {
+                console.log('Peer reconnecting...');
+                peer.reconnect();
+            });
             peer.on('call', call => {
                 if (currentClassCode || ['teacher', 'admin', 'principal'].includes(currentUser.role)) {
                     acceptCall(call);
@@ -1780,9 +2142,11 @@
         // ================================================================
         //  LOCAL STREAM
         // ================================================================
+        let currentStreamConstraints = { video: { facingMode: 'environment' }, audio: true };
+
         function startLocalStream(callback) {
             if (localStream) { if (callback) callback(); return; }
-            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            navigator.mediaDevices.getUserMedia(currentStreamConstraints)
                 .then(stream => {
                     localStream = stream;
                     localVideo.srcObject = stream;
@@ -1799,7 +2163,10 @@
                     }
                     if (callback) callback();
                 })
-                .catch(err => { showToast('Camera/mic access denied: ' + err.message, 'error'); if (callback) callback(); });
+                .catch(err => {
+                    showToast('Camera/mic access denied: ' + err.message, 'error');
+                    if (callback) callback();
+                });
         }
 
         function stopLocalStream() {
@@ -1817,6 +2184,56 @@
             removeAllRemoteVideos();
             updateParticipantList();
         }
+
+        // ================================================================
+        //  CAMERA ANGLE TOGGLE
+        // ================================================================
+        toggleCameraAngle.addEventListener('click', async () => {
+            if (!localStream) { showToast('No camera active', 'info'); return; }
+            const currentFacing = currentCameraFacing === 'environment' ? 'user' : 'environment';
+            currentCameraFacing = currentFacing;
+
+            // Stop current video track
+            const videoTrack = localStream.getVideoTracks()[0];
+            if (videoTrack) {
+                videoTrack.stop();
+                localStream.removeTrack(videoTrack);
+            }
+
+            try {
+                const newStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: currentFacing },
+                    audio: true
+                });
+                const newVideoTrack = newStream.getVideoTracks()[0];
+                localStream.addTrack(newVideoTrack);
+                localVideo.srcObject = localStream;
+
+                // Update all peer connections
+                Object.keys(calls).forEach(key => {
+                    const call = calls[key];
+                    if (call && call.peerConnection) {
+                        const senders = call.peerConnection.getSenders();
+                        const vidSender = senders.find(s => s.track && s.track.kind === 'video');
+                        if (vidSender) vidSender.replaceTrack(newVideoTrack);
+                    }
+                });
+
+                showToast('Switched camera', 'info');
+            } catch (err) {
+                showToast('Failed to switch camera: ' + err.message, 'error');
+                // Restore old track
+                try {
+                    const oldStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: currentCameraFacing === 'environment' ? 'user' : 'environment' },
+                        audio: true
+                    });
+                    const oldTrack = oldStream.getVideoTracks()[0];
+                    localStream.addTrack(oldTrack);
+                    localVideo.srcObject = localStream;
+                } catch (e) {}
+            }
+        });
 
         // ================================================================
         //  REMOTE VIDEO
@@ -1879,6 +2296,23 @@
         }
 
         // ================================================================
+        //  STUDENT MIC CONTROL (Teacher/Admin)
+        // ================================================================
+        function toggleStudentMic(uid) {
+            if (!currentClassCode) return;
+            const ref = db.ref('classes/' + currentClassCode + '/students/' + uid + '/muted');
+            ref.transaction(current => !current);
+            showToast('Toggled student mic', 'info');
+        }
+
+        function toggleStudentCam(uid) {
+            if (!currentClassCode) return;
+            const ref = db.ref('classes/' + currentClassCode + '/students/' + uid + '/camOn');
+            ref.transaction(current => current !== false ? false : true);
+            showToast('Toggled student camera', 'info');
+        }
+
+        // ================================================================
         //  NAVIGATION
         // ================================================================
         document.querySelectorAll('#mainNav a[data-tab]').forEach(link => {
@@ -1901,6 +2335,7 @@
                 classroom: 'Classroom',
                 students: 'Students',
                 teachers: 'Teachers',
+                principals: 'Principals',
                 notifications: 'Notifications',
                 classes: 'Classes',
                 settings: 'Settings'
@@ -1916,6 +2351,7 @@
             }
             if (tab === 'students') loadStudents();
             if (tab === 'teachers') loadTeachers();
+            if (tab === 'principals') loadPrincipals();
             if (tab === 'notifications') loadNotifications();
             if (tab === 'classes') loadClassesList();
             if (tab === 'dashboard') loadDashboard();
@@ -1930,6 +2366,7 @@
         dashCreateClass.addEventListener('click', () => openCreateClass());
         dashJoinClass.addEventListener('click', () => openJoinClass());
         dashNotify.addEventListener('click', () => openSendNotif());
+        dashAddPrincipal.addEventListener('click', () => openAddPrincipal());
         classesCreateBtn.addEventListener('click', () => openCreateClass());
 
         // ================================================================
@@ -1966,7 +2403,7 @@
                 snap.forEach(child => { items.push({ id: child.key, ...child.val() }); });
                 if (!items.length) { dashNotifications.innerHTML = '<div class="text-muted">No notifications</div>'; return; }
                 dashNotifications.innerHTML = items.reverse().map(n =>
-                    `<div class="list-item" style="border-color:transparent;background:transparent;padding:4px 0;">
+                    `<div class="list-item" style="border-color:transparent;background:transparent;padding:4px 0;cursor:default;">
                         <span class="name" style="font-size:12px;">${n.text || '—'}</span>
                         <span class="sub">${n.from || 'System'}</span>
                     </div>`
@@ -2002,12 +2439,16 @@
                     return;
                 }
                 studentListContainer.innerHTML = entries.map(s => {
-                    const roleTag = s.role === 'monitor' ? '⭐ Monitor' : '';
+                    const isMonitor = s.role === 'monitor';
                     return `
-                    <div class="list-item">
-                        <span class="name">${s.name} ${s.role === 'monitor' ? '⭐' : ''}</span>
+                    <div class="list-item" onclick="showUserDetail('${s.uid}')">
+                        <span class="name">${s.name} ${isMonitor ? '⭐' : ''}</span>
                         <span class="sub">${s.role || 'student'} ${s.roll ? '· Roll: '+s.roll : ''}</span>
-                        <div class="actions">
+                        <div class="actions" onclick="event.stopPropagation();">
+                            ${currentClassCode && ['teacher','admin','principal'].includes(currentUser?.role) ? `
+                                <button class="${s.muted ? 'danger' : 'success'}" onclick="toggleStudentMic('${s.uid}')" title="Mic"><i class="fas fa-${s.muted ? 'microphone-slash' : 'microphone'}"></i></button>
+                                <button class="${s.camOn !== false ? 'success' : 'danger'}" onclick="toggleStudentCam('${s.uid}')" title="Camera"><i class="fas fa-${s.camOn !== false ? 'video' : 'video-slash'}"></i></button>
+                            ` : ''}
                             ${canManageUsers() ? `<button class="warning" onclick="rateUser('${s.uid}','${s.name}')" title="Rate"><i class="fas fa-star"></i></button>` : ''}
                             ${canManageUsers() ? `<button class="danger" onclick="removeUser('${s.uid}')" title="Remove"><i class="fas fa-times"></i></button>` : ''}
                         </div>
@@ -2015,30 +2456,6 @@
                 `}).join('');
             });
         }
-
-        function canManageUsers() {
-            return ['admin', 'principal', 'teacher'].includes(currentUser?.role);
-        }
-
-        window.rateUser = function(uid, name) {
-            ratingTarget = uid;
-            ratingTargetType = 'user';
-            ratingTargetName.textContent = name || 'User';
-            ratingValue.value = '0';
-            ratingStars.querySelectorAll('span').forEach(el => el.textContent = '☆');
-            ratingDisplay.textContent = 'Select a star';
-            ratingMsg.textContent = '';
-            ratingModal.classList.add('active');
-        };
-
-        window.removeUser = function(uid) {
-            if (!confirm('Remove this user?')) return;
-            db.ref('users/' + uid).remove().then(() => {
-                showToast('User removed.', 'success');
-                loadStudents();
-                loadTeachers();
-            }).catch(err => showToast(err.message, 'error'));
-        };
 
         // ================================================================
         //  TEACHERS
@@ -2064,10 +2481,10 @@
                     return;
                 }
                 teacherListContainer.innerHTML = entries.map(t => `
-                    <div class="list-item">
+                    <div class="list-item" onclick="showUserDetail('${t.uid}')">
                         <span class="name">${t.name || 'Unknown'}</span>
-                        <span class="sub">${t.email || ''}</span>
-                        <div class="actions">
+                        <span class="sub">${t.email || ''} ${t.standard ? '· '+t.standard : ''}</span>
+                        <div class="actions" onclick="event.stopPropagation();">
                             ${canManageUsers() ? `<button class="warning" onclick="rateUser('${t.uid}','${t.name}')" title="Rate"><i class="fas fa-star"></i></button>` : ''}
                             ${canManageUsers() ? `<button class="danger" onclick="removeUser('${t.uid}')" title="Remove"><i class="fas fa-times"></i></button>` : ''}
                         </div>
@@ -2075,6 +2492,269 @@
                 `).join('');
             });
         }
+
+        // ================================================================
+        //  PRINCIPALS
+        // ================================================================
+        function loadPrincipals() {
+            if (!currentUser) return;
+            const isAdmin = currentUser.role === 'admin';
+            if (!isAdmin) {
+                principalListContainer.innerHTML = '<div class="text-muted">Only admins can view principals.</div>';
+                return;
+            }
+            db.ref('users').orderByChild('role').equalTo('principal').once('value', snap => {
+                const data = snap.val() || {};
+                const entries = Object.keys(data).map(key => ({ uid: key, ...data[key] }));
+                if (!entries.length) {
+                    principalListContainer.innerHTML = '<div class="text-muted">No principals found.</div>';
+                    return;
+                }
+                principalListContainer.innerHTML = entries.map(p => `
+                    <div class="list-item" onclick="showUserDetail('${p.uid}')">
+                        <span class="name">${p.name || 'Unknown'}</span>
+                        <span class="sub">${p.email || ''} ${p.schoolId ? '· School: '+p.schoolId : ''}</span>
+                        <div class="actions" onclick="event.stopPropagation();">
+                            ${canManageUsers() ? `<button class="warning" onclick="rateUser('${p.uid}','${p.name}')" title="Rate"><i class="fas fa-star"></i></button>` : ''}
+                            ${canManageUsers() ? `<button class="danger" onclick="removeUser('${p.uid}')" title="Remove"><i class="fas fa-times"></i></button>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            });
+        }
+
+        // ================================================================
+        //  USER DETAIL VIEW
+        // ================================================================
+        window.showUserDetail = function(uid) {
+            if (!uid) return;
+            db.ref('users/' + uid).once('value', snap => {
+                if (!snap.exists()) { showToast('User not found', 'error'); return; }
+                const data = snap.val();
+                userDetailTitle.textContent = data.name || 'User Details';
+                udName.textContent = data.name || '—';
+                udEmail.textContent = data.email || '—';
+                udMobile.textContent = data.mobile || '—';
+                udRole.textContent = data.role || '—';
+                udUid.textContent = data.uid || uid || '—';
+                udStandard.textContent = data.standard || data.class || '—';
+                udSchool.textContent = data.schoolId || data.school || '—';
+
+                // Get rating
+                db.ref('ratings').orderByChild('targetId').equalTo(uid).once('value', rSnap => {
+                    const ratings = [];
+                    rSnap.forEach(child => ratings.push(child.val()));
+                    if (ratings.length) {
+                        const avg = ratings.reduce((s, r) => s + r.rating, 0) / ratings.length;
+                        const stars = '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg));
+                        udRating.textContent = avg.toFixed(1) + ' ' + stars + ' (' + ratings.length +
+                            ' reviews)';
+                    } else {
+                        udRating.textContent = 'No ratings yet';
+                    }
+                });
+
+                // Generate invite link
+                const inviteLink = generateInviteLink(uid, data.email || '', data.role || '', data.name || '');
+                udInviteLink.textContent = inviteLink;
+                currentInviteLink = inviteLink;
+
+                userDetailModal.classList.add('active');
+            });
+        };
+
+        userDetailClose.addEventListener('click', () => userDetailModal.classList.remove('active'));
+        userDetailModal.addEventListener('click', e => { if (e.target === userDetailModal) userDetailModal.classList.remove(
+                'active'); });
+
+        // Expose invite functions globally
+        window.copyInviteLink = copyInviteLink;
+        window.shareWhatsApp = shareWhatsApp;
+        window.shareEmail = shareEmail;
+
+        // ================================================================
+        //  ADD PRINCIPAL
+        // ================================================================
+        function openAddPrincipal() {
+            addPrincipalModal.classList.add('active');
+            addPrincipalName.value = '';
+            addPrincipalEmail.value = '';
+            addPrincipalMobile.value = '';
+            addPrincipalSchool.value = '';
+            addPrincipalMsg.textContent = '';
+        }
+
+        addPrincipalClose.addEventListener('click', () => addPrincipalModal.classList.remove('active'));
+        addPrincipalBtn.addEventListener('click', openAddPrincipal);
+
+        addPrincipalConfirm.addEventListener('click', async () => {
+            const name = addPrincipalName.value.trim();
+            const email = addPrincipalEmail.value.trim();
+            const mobile = addPrincipalMobile.value.trim();
+            const school = addPrincipalSchool.value.trim();
+            if (!name || !email || !mobile || !school) {
+                addPrincipalMsg.textContent = 'Please fill in all required fields.';
+                return;
+            }
+            addPrincipalMsg.textContent = 'Adding principal...';
+            addPrincipalConfirm.disabled = true;
+            try {
+                // Check if user exists
+                const snap = await db.ref('users').orderByChild('email').equalTo(email).once('value');
+                let uid;
+                let existing = false;
+                if (snap.exists()) {
+                    snap.forEach(child => { uid = child.key;
+                        existing = true; });
+                }
+
+                if (existing) {
+                    await db.ref('users/' + uid).update({
+                        name: name,
+                        mobile: mobile,
+                        role: 'principal',
+                        schoolId: school,
+                        school: school
+                    });
+                    showToast('Principal updated.', 'success');
+                } else {
+                    const tempPass = 'Welcome@123';
+                    const cred = await auth.createUserWithEmailAndPassword(email, tempPass);
+                    uid = cred.user.uid;
+                    await db.ref('users/' + uid).set({
+                        name: name,
+                        email: email,
+                        mobile: mobile,
+                        role: 'principal',
+                        schoolId: school,
+                        school: school,
+                        createdAt: Date.now()
+                    });
+                    showToast('Principal added! Temporary password: ' + tempPass, 'success');
+                }
+
+                // Generate invite link
+                const link = generateInviteLink(uid, email, 'principal', name);
+                addPrincipalMsg.textContent = '✅ Principal added! Invite link created.';
+                addPrincipalMsg.className = 'msg success';
+
+                // Show invite options
+                currentInviteLink = link;
+                const inviteSection = document.createElement('div');
+                inviteSection.className = 'invite-links';
+                inviteSection.innerHTML = `
+                    <button class="copy-btn" onclick="copyInviteLink()"><i class="fas fa-copy"></i> Copy Link</button>
+                    <button class="whatsapp-btn" onclick="shareWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    <button class="email-btn" onclick="shareEmail()"><i class="fas fa-envelope"></i> Email</button>
+                `;
+                const msgContainer = addPrincipalMsg.parentNode;
+                const existingInvite = msgContainer.querySelector('.invite-links');
+                if (existingInvite) existingInvite.remove();
+                msgContainer.appendChild(inviteSection);
+
+                loadPrincipals();
+                loadDashboard();
+
+                setTimeout(() => {
+                    addPrincipalModal.classList.remove('active');
+                }, 3000);
+
+            } catch (err) {
+                addPrincipalMsg.textContent = err.message;
+                showToast(err.message, 'error');
+            }
+            addPrincipalConfirm.disabled = false;
+        });
+
+        // ================================================================
+        //  INVITE MODAL (generic)
+        // ================================================================
+        function openInvite(role, title) {
+            inviteModal.classList.add('active');
+            inviteTitle.textContent = title || 'Send Invitation';
+            inviteRole.value = role || 'student';
+            inviteEmail.value = '';
+            inviteName.value = '';
+            inviteMobile.value = '';
+            inviteMsg.textContent = '';
+        }
+
+        inviteClose.addEventListener('click', () => inviteModal.classList.remove('active'));
+        inviteStudentBtn.addEventListener('click', () => openInvite('student', 'Invite Student'));
+        inviteTeacherBtn.addEventListener('click', () => openInvite('teacher', 'Invite Teacher'));
+
+        inviteConfirm.addEventListener('click', async () => {
+            const name = inviteName.value.trim();
+            const email = inviteEmail.value.trim();
+            const mobile = inviteMobile.value.trim();
+            const role = inviteRole.value;
+            if (!name || !email) { inviteMsg.textContent = 'Name and email are required.'; return; }
+            inviteMsg.textContent = 'Sending invitation...';
+            inviteConfirm.disabled = true;
+            try {
+                // Check if user exists
+                const snap = await db.ref('users').orderByChild('email').equalTo(email).once('value');
+                let uid;
+                let existing = false;
+                if (snap.exists()) {
+                    snap.forEach(child => { uid = child.key;
+                        existing = true; });
+                }
+
+                if (existing) {
+                    await db.ref('users/' + uid).update({
+                        name: name,
+                        mobile: mobile || '',
+                        role: role
+                    });
+                    showToast('User updated.', 'success');
+                } else {
+                    const tempPass = 'Welcome@123';
+                    const cred = await auth.createUserWithEmailAndPassword(email, tempPass);
+                    uid = cred.user.uid;
+                    await db.ref('users/' + uid).set({
+                        name: name,
+                        email: email,
+                        mobile: mobile || '',
+                        role: role,
+                        schoolId: currentUser.schoolId || null,
+                        createdAt: Date.now()
+                    });
+                    showToast('User added! Temporary password: ' + tempPass, 'success');
+                }
+
+                const link = generateInviteLink(uid, email, role, name);
+                inviteMsg.textContent = '✅ Invitation sent! Link created.';
+                inviteMsg.className = 'msg success';
+                currentInviteLink = link;
+
+                // Show invite options
+                const existingInvite = inviteMsg.parentNode.querySelector('.invite-links');
+                if (existingInvite) existingInvite.remove();
+                const inviteSection = document.createElement('div');
+                inviteSection.className = 'invite-links';
+                inviteSection.innerHTML = `
+                    <button class="copy-btn" onclick="copyInviteLink()"><i class="fas fa-copy"></i> Copy Link</button>
+                    <button class="whatsapp-btn" onclick="shareWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    <button class="email-btn" onclick="shareEmail()"><i class="fas fa-envelope"></i> Email</button>
+                `;
+                inviteMsg.parentNode.appendChild(inviteSection);
+
+                loadStudents();
+                loadTeachers();
+                loadPrincipals();
+                loadDashboard();
+
+                setTimeout(() => {
+                    inviteModal.classList.remove('active');
+                }, 3000);
+
+            } catch (err) {
+                inviteMsg.textContent = err.message;
+                showToast(err.message, 'error');
+            }
+            inviteConfirm.disabled = false;
+        });
 
         // ================================================================
         //  NOTIFICATIONS
@@ -2088,7 +2768,7 @@
                     return;
                 }
                 notificationListContainer.innerHTML = items.reverse().map(n => `
-                    <div class="list-item">
+                    <div class="list-item" style="cursor:default;">
                         <span class="name">${n.text || '—'}</span>
                         <span class="sub">${n.from || 'System'} · ${new Date(n.timestamp||Date.now()).toLocaleString()}</span>
                     </div>
@@ -2127,10 +2807,10 @@
                     return;
                 }
                 classesListContainer.innerHTML = items.map(cls => `
-                    <div class="list-item">
+                    <div class="list-item" onclick="enterClassroom('${cls.code}')">
                         <span class="name">${cls.name || 'Unnamed'}</span>
                         <span class="sub">${cls.code} · ${cls.subject || ''} ${cls.standard ? '· '+cls.standard : ''}</span>
-                        <div class="actions">
+                        <div class="actions" onclick="event.stopPropagation();">
                             <button class="success" onclick="enterClassroom('${cls.code}')" title="Enter"><i class="fas fa-door-open"></i></button>
                             ${canManageUsers() ? `<button class="danger" onclick="deleteClass('${cls.code}')" title="Delete"><i class="fas fa-trash"></i></button>` : ''}
                         </div>
@@ -2251,11 +2931,13 @@
                     const hasVideo = s.peerId && (calls[s.peerId] || s.peerId === peer?.id);
                     const roleTag = s.role === 'teacher' ? '👨‍🏫' : s.role === 'admin' ? '👑' : s.role ===
                         'principal' ? '🎓' : s.role === 'monitor' ? '⭐' : '';
+                    const isMuted = s.muted || false;
                     return `
-                        <div class="list-item" style="${isMe ? 'border-color:rgba(167,139,250,0.3);' : ''}padding:4px 10px;">
+                        <div class="list-item" style="${isMe ? 'border-color:rgba(167,139,250,0.3);' : ''}padding:4px 10px;cursor:default;">
                             <span class="name" style="font-size:12px;">${s.name || 'Anonymous'} ${isMe ? ' (you)' : ''} ${roleTag}</span>
                             <span style="font-size:10px;color:${hasVideo ? '#34d399' : 'rgba(255,255,255,0.2)'};">
                                 <i class="fas fa-${hasVideo ? 'video' : 'video-slash'}"></i>
+                                ${isMuted ? '🔇' : '🎤'}
                             </span>
                         </div>
                     `;
@@ -2539,8 +3221,8 @@
             addStudentEmail.value = '';
             addStudentMobile.value = '';
             addStudentRoll.value = '';
+            addStudentStandard.value = '';
             addStudentRole.value = 'student';
-            addStudentClass.value = '';
             addStudentMsg.textContent = '';
         });
         addStudentClose.addEventListener('click', () => addStudentModal.classList.remove('active'));
@@ -2564,12 +3246,14 @@
                             name: name,
                             mobile: mobile,
                             role: addStudentRole.value,
-                            schoolId: currentUser.schoolId || null
+                            schoolId: currentUser.schoolId || null,
+                            roll: addStudentRoll.value.trim() || '',
+                            standard: addStudentStandard.value.trim() || ''
                         });
                         showToast('Student updated.', 'success');
                     }
                 } else {
-                    const tempPass = 'temp123';
+                    const tempPass = 'Welcome@123';
                     const cred = await auth.createUserWithEmailAndPassword(email, tempPass);
                     uid = cred.user.uid;
                     await db.ref('users/' + uid).set({
@@ -2579,7 +3263,7 @@
                         role: addStudentRole.value,
                         schoolId: currentUser.schoolId || null,
                         roll: addStudentRoll.value.trim() || '',
-                        class: addStudentClass.value.trim() || '',
+                        standard: addStudentStandard.value.trim() || '',
                         createdAt: Date.now()
                     });
                     showToast('Student added. Temporary password: ' + tempPass, 'success');
@@ -2596,6 +3280,9 @@
                         camOn: true
                     });
                 }
+                // Generate invite
+                const link = generateInviteLink(uid, email, addStudentRole.value, name);
+                showToast('Invite link generated!', 'success');
             } catch (err) { addStudentMsg.textContent = err.message;
                 showToast(err.message, 'error'); }
             addStudentConfirm.disabled = false;
@@ -2638,7 +3325,7 @@
                         showToast('Teacher updated.', 'success');
                     }
                 } else {
-                    const tempPass = 'temp123';
+                    const tempPass = 'Welcome@123';
                     const cred = await auth.createUserWithEmailAndPassword(email, tempPass);
                     uid = cred.user.uid;
                     await db.ref('users/' + uid).set({
@@ -2655,6 +3342,8 @@
                 }
                 addTeacherModal.classList.remove('active');
                 loadTeachers();
+                const link = generateInviteLink(uid, email, 'teacher', name);
+                showToast('Invite link generated!', 'success');
             } catch (err) { addTeacherMsg.textContent = err.message;
                 showToast(err.message, 'error'); }
             addTeacherConfirm.disabled = false;
@@ -2750,7 +3439,7 @@
             if (!currentUser) return;
             settingsRole.textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1) +
                 (currentUser.role === 'admin' ? ' 👑' : '');
-            settingsSchool.textContent = currentUser.schoolId || '—';
+            settingsSchool.textContent = currentUser.schoolId || currentUser.school || '—';
             settingsClassCode.textContent = currentClassCode || '—';
             db.ref('ratings').orderByChild('targetId').equalTo(currentUser.uid).once('value', snap => {
                 const items = [];
@@ -2769,18 +3458,19 @@
         }
 
         // ================================================================
-        //  PROFILE
+        //  PROFILE (with edit)
         // ================================================================
         profileBtn.addEventListener('click', openProfile);
         profileClose.addEventListener('click', () => profileModal.classList.remove('active'));
 
         function openProfile() {
             if (!currentUser) return;
-            profName.textContent = currentUser.name || '—';
+            profEditName.value = currentUser.name || '';
             profEmail.textContent = currentUser.email || '—';
             profRole.textContent = currentUser.role || '—' + (currentUser.role === 'admin' ? ' 👑' : '');
-            profSchool.textContent = currentUser.schoolId || '—';
-            profMobile.textContent = currentUser.mobile || '—';
+            profEditMobile.value = currentUser.mobile || '';
+            profEditSchool.value = currentUser.schoolId || currentUser.school || '';
+
             db.ref('ratings').orderByChild('targetId').equalTo(currentUser.uid).once('value', snap => {
                 const items = [];
                 snap.forEach(child => items.push(child.val()));
@@ -2792,6 +3482,31 @@
             profileModal.classList.add('active');
         }
 
+        profSaveBtn.addEventListener('click', async () => {
+            if (!currentUser) return;
+            const name = profEditName.value.trim();
+            const mobile = profEditMobile.value.trim();
+            const school = profEditSchool.value.trim();
+            if (!name) { showToast('Name cannot be empty', 'error'); return; }
+            try {
+                await db.ref('users/' + currentUser.uid).update({
+                    name: name,
+                    mobile: mobile || '',
+                    schoolId: school || currentUser.schoolId || null,
+                    school: school || currentUser.school || ''
+                });
+                currentUser.name = name;
+                currentUser.mobile = mobile;
+                currentUser.schoolId = school || currentUser.schoolId || null;
+                currentUser.school = school || currentUser.school || '';
+                avatarDisplay.textContent = name.charAt(0).toUpperCase();
+                pageSubtitle.textContent = 'Welcome, ' + name + (currentUser.role === 'admin' ? ' (Admin)' : '');
+                showToast('Profile updated!', 'success');
+                loadDashboard();
+                updateSettings();
+            } catch (err) { showToast('Error: ' + err.message, 'error'); }
+        });
+
         profLogout.addEventListener('click', () => { profileModal.classList.remove('active');
             auth.signOut();
             showToast('Logged out', 'info'); });
@@ -2801,6 +3516,38 @@
         document.querySelectorAll('.modal-overlay').forEach(modal => {
             modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
         });
+
+        // ================================================================
+        //  CAN MANAGE USERS
+        // ================================================================
+        function canManageUsers() {
+            return ['admin', 'principal', 'teacher'].includes(currentUser?.role);
+        }
+
+        window.rateUser = function(uid, name) {
+            ratingTarget = uid;
+            ratingTargetType = 'user';
+            ratingTargetName.textContent = name || 'User';
+            ratingValue.value = '0';
+            ratingStars.querySelectorAll('span').forEach(el => el.textContent = '☆');
+            ratingDisplay.textContent = 'Select a star';
+            ratingMsg.textContent = '';
+            ratingModal.classList.add('active');
+        };
+
+        window.removeUser = function(uid) {
+            if (!confirm('Remove this user?')) return;
+            db.ref('users/' + uid).remove().then(() => {
+                showToast('User removed.', 'success');
+                loadStudents();
+                loadTeachers();
+                loadPrincipals();
+                loadDashboard();
+            }).catch(err => showToast(err.message, 'error'));
+        };
+
+        window.toggleStudentMic = toggleStudentMic;
+        window.toggleStudentCam = toggleStudentCam;
 
         // ================================================================
         //  KEYBOARD SHORTCUTS
@@ -2814,23 +3561,37 @@
             if (e.key === 'v' && !e.ctrlKey && !e.metaKey) {
                 if (document.activeElement?.tagName !== 'INPUT') toggleCam.click();
             }
+            if (e.key === 'c' && !e.ctrlKey && !e.metaKey) {
+                if (document.activeElement?.tagName !== 'INPUT') toggleCameraAngle.click();
+            }
         });
 
         // ================================================================
         //  INIT
         // ================================================================
         switchTab('dashboard');
-        console.log('EduManage loaded. 🔥');
-        console.log('User:', currentUser);
-        console.log('Peer ID:', peer?.id);
+        console.log('✅ EduManage Complete System loaded.');
+        console.log('👤 User:', currentUser);
+        console.log('🔗 Peer ID:', peer?.id);
 
         // Auto-fill admin credentials for demo
         setTimeout(() => {
             if (!currentUser) {
-                $('loginEmail').value = 'sachumali2317@gmail.com';
-                $('loginPassword').value = 'SACHIN';
+                const loginEmail = $('loginEmail');
+                const loginPassword = $('loginPassword');
+                if (loginEmail) loginEmail.value = 'sachumali2317@gmail.com';
+                if (loginPassword) loginPassword.value = 'SACHIN';
             }
         }, 500);
+
+        console.log('📋 All features loaded successfully!');
+        console.log('🎯 Features: Admin, Principal, Teacher, Student, Monitor');
+        console.log('📹 Video: Camera switch, mic/cam toggle, screen share');
+        console.log('📩 Invite: Copy, WhatsApp, Email');
+        console.log('👤 Profile: View & Edit');
+        console.log('⭐ Ratings: Rate users 1-5 stars');
+        console.log('🔔 Notifications: Target-specific');
+        console.log('📚 Classes: Create, Join, Delete');
     </script>
 
 </body>
