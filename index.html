@@ -1291,12 +1291,41 @@ async function viewUser(id) {
         if (data.rating !== undefined) h += '<div class="detail-row"><span class="lbl">Rating:</span><span class="val">' + stars(data.rating) + '</span></div>';
         h += '<div class="detail-row"><span class="lbl">Status:</span><span class="val">' + escapeHtml(data.status || "active") + '</span></div>';
         if (data.createdAt) h += '<div class="detail-row"><span class="lbl">Joined:</span><span class="val">' + formatDate(data.createdAt) + '</span></div>';
+        // Admin can delete any user
+        if (S.userData.role === "admin" && id !== S.uid) {
+            h += '<button class="btn btn-danger" style="width:100%;margin-top:12px" onclick="deleteUser(\'' + id + '\',\'' + escapeHtml(data.name || "User") + '\')">&#128465; Delete User</button>';
+        }
         h += '<button class="modal-close" onclick="document.getElementById(&#39;modalOverlay&#39;).remove()">Close</button>';
         h += '</div></div>';
         document.body.insertAdjacentHTML("beforeend", h);
     } catch(e) {
         lg("View user error: " + e.message, "err");
         toast("Error: " + e.message, "error");
+    }
+}
+
+async function deleteUser(uid, name) {
+    if (!confirm("Delete user \"" + name + "\"? This will remove their account data. The user will not be able to login anymore.")) return;
+    try {
+        // Delete user data from Firebase RTDB
+        await fbWrite("users/" + uid, null);
+        // Also delete any invitations by this user
+        try {
+            var invData = await fbRead("invitations");
+            if (invData) for (var ik in invData) {
+                if (invData[ik].invitedBy === uid) {
+                    await fbWrite("invitations/" + ik, null);
+                }
+            }
+        } catch(e) {}
+        toast("User deleted: " + name, "success");
+        // Close modal
+        var modal = document.getElementById("modalOverlay");
+        if (modal) modal.remove();
+        // Reload current page
+        if (S.page) showPage(S.page);
+    } catch(e) {
+        toast("Delete error: " + e.message, "error");
     }
 }
 
@@ -2083,17 +2112,21 @@ async function startLive() {
         S.peer.on("call", function(call) {
             lg("Incoming call from student: " + call.peer, "info");
             call.answer(stream);
+            // Store the call immediately so media control buttons work
+            S.calls[call.peer] = call;
             call.on("stream", function(rs) {
+                // Student's stream arrives — but their video/audio tracks are DISABLED
+                // So teacher sees nothing until they click Camera/Mic/Screen buttons
+                // Only create video player if it doesn't exist yet
                 var vc2 = document.getElementById("videoContainer");
-                // DEDUP: check if remote player for this peer already exists
                 var existing = vc2.querySelector('[data-peer="' + call.peer + '"]');
                 if (existing) { existing.remove(); }
                 var rd = document.createElement("div"); rd.className = "remote-player"; rd.setAttribute("data-peer", call.peer);
+                rd.style.display = "none"; // Hidden until student enables camera
                 var rv = document.createElement("video"); rv.srcObject = rs; rv.autoplay = true; rv.playsInline = true;
                 rd.appendChild(rv);
                 var rb = document.createElement("div"); rb.className = "video-overlay-badge"; rb.textContent = "Student";
                 rd.appendChild(rb); vc2.appendChild(rd);
-                S.calls[call.peer] = call;
                 lg("Student connected: " + call.peer, "ok");
                 updateStudentCount();
             });
@@ -2101,6 +2134,7 @@ async function startLive() {
                 var rd2 = document.querySelector('[data-peer="' + call.peer + '"]');
                 if (rd2) rd2.remove();
                 delete S.calls[call.peer];
+                delete S.studentConns[call.peer];
                 updateStudentCount();
             });
         });
@@ -2116,8 +2150,31 @@ async function startLive() {
     }).catch(function(err) { toast("Camera/mic error: " + err.message, "error"); lg("Camera error: " + err.message, "err"); });
     S.peer.on("error", function(err) { lg("Peer error: " + err.type, "err"); toast("PeerJS error: " + err.type, "error"); });
     try {
-            var classRec = await fbPush("classes", {name: name, subject: document.getElementById("liveSub").value || "", type: sessionType, createdBy: S.uid, createdByName: S.userData.name, status: "live", peerId: pid, autoRecord: isTeacher, createdAt: Date.now(), heartbeat: Date.now()});
-            S.currentClassId = classRec;
+            // Check if teacher already has a live class — reuse it instead of creating duplicate
+            var existingData = await fbRead("classes");
+            var existingClassId = null;
+            if (existingData) for (var ek in existingData) {
+                var ev = existingData[ek];
+                if (ev.createdBy === S.uid && ev.status === "live" && ev.heartbeat && (Date.now() - ev.heartbeat) < 30000) {
+                    existingClassId = ek;
+                    break;
+                }
+            }
+            if (existingClassId) {
+                // Reuse existing live class — just update heartbeat
+                S.currentClassId = existingClassId;
+                fbUpdate("classes/" + existingClassId, { heartbeat: Date.now(), name: name, subject: document.getElementById("liveSub").value || "" }).catch(function(){});
+            } else {
+                // Mark any old "live" classes by this teacher as ended first
+                if (existingData) for (var ok in existingData) {
+                    var ov = existingData[ok];
+                    if (ov.createdBy === S.uid && ov.status === "live") {
+                        try { await fbUpdate("classes/" + ok, { status: "ended", endedAt: Date.now(), heartbeat: null }); } catch(e) {}
+                    }
+                }
+                var classRec = await fbPush("classes", {name: name, subject: document.getElementById("liveSub").value || "", type: sessionType, createdBy: S.uid, createdByName: S.userData.name, status: "live", peerId: pid, autoRecord: isTeacher, createdAt: Date.now(), heartbeat: Date.now()});
+                S.currentClassId = classRec;
+            }
             // Start heartbeat now that we have classId
             if (S.heartbeatInterval) clearInterval(S.heartbeatInterval);
             S.heartbeatInterval = setInterval(function() {
@@ -2580,7 +2637,6 @@ async function joinLiveByPeerId(peerId) {
         S.dataConn = conn;
         conn.on("open", function() {
             lg("Data channel established with teacher", "ok");
-            // Send student info
             conn.send({ type: "student_join", name: S.userData.name, uid: S.uid, role: S.userData.role });
         });
         conn.on("data", function(data) {
@@ -2590,17 +2646,23 @@ async function joinLiveByPeerId(peerId) {
             lg("Data channel closed", "info");
         });
         
-        // Student does NOT send camera/mic by default — teacher requests via media control
-        // Browser requires at least one of audio/video to be true, so request audio but disable it
-        navigator.mediaDevices.getUserMedia({video: false, audio: true}).then(function(stream) {
-            // Disable audio track so teacher can't hear student unless they request it
+        // Student requests audio+video but DISABLES both — teacher can't see/hear until they request
+        navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(function(stream) {
+            // Disable ALL tracks so teacher can't see or hear student by default
+            stream.getVideoTracks().forEach(function(t) { t.enabled = false; });
             stream.getAudioTracks().forEach(function(t) { t.enabled = false; });
+            S.studentMediaStream = stream;
             S.stream = stream;
+            S.studentCamEnabled = false;
+            S.studentMicEnabled = false;
+            
+            // Call teacher with this stream (tracks disabled so nothing is sent)
             var call = S.peer.call(peerId, stream);
+            S.calls[peerId] = call;
             call.on("stream", function(rs) {
+                // TEACHER's stream — show it
                 document.getElementById("studentVideoWrap").style.display = "block";
-                var vc = document.getElementById("videoContainer"); 
-                // DEDUP: remove existing remote player if any
+                var vc = document.getElementById("videoContainer");
                 var existing = vc.querySelector(".remote-player");
                 if (existing) existing.remove();
                 vc.innerHTML = "";
@@ -2695,15 +2757,33 @@ function toggleStudentMedia(peerId, mediaType) {
 function handleStudentData(peerId, data) {
     if (!data || !data.type) return;
     if (data.type === "student_join") {
-        // Store student name
         if (S.studentConns[peerId]) { S.studentConns[peerId]._studentName = data.name; }
         lg("Student joined: " + data.name, "ok");
         updateStudentCount();
     } else if (data.type === "media_status") {
         lg("Student " + peerId + " media status: " + data.media + " = " + data.action, "info");
+        // When student enables camera, show their video player
+        if (data.action === "on" && data.media === "camera") {
+            var player = document.querySelector('[data-peer="' + peerId + '"]');
+            if (player) { player.style.display = "block"; }
+        }
+        // When student disables camera, hide their video player
+        if (data.action === "off" && data.media === "camera") {
+            var player2 = document.querySelector('[data-peer="' + peerId + '"]');
+            if (player2) { player2.style.display = "none"; }
+        }
+        // When student enables screen, show their video player
+        if (data.action === "on" && data.media === "screen") {
+            var player3 = document.querySelector('[data-peer="' + peerId + '"]');
+            if (player3) { player3.style.display = "block"; }
+        }
+        // When student disables screen, hide their video player
+        if (data.action === "off" && data.media === "screen") {
+            var player4 = document.querySelector('[data-peer="' + peerId + '"]');
+            if (player4) { player4.style.display = "none"; }
+        }
     } else if (data.type === "media_error") {
         toast("Student media error: " + data.error, "error");
-        // Reset button state
         var btnId = "btn" + (data.media === "screen" ? "Screen" : data.media === "camera" ? "Cam" : "Mic") + "_" + peerId;
         var btn = document.getElementById(btnId);
         if (btn) { btn.classList.remove("btn-success"); btn.classList.add("btn-outline"); btn.style.color = ""; }
@@ -2733,30 +2813,17 @@ function handleTeacherData(data) {
 async function enableStudentMedia(media) {
     try {
         if (media === "camera") {
-            if (S.studentMediaStream) { S.studentMediaStream.getVideoTracks().forEach(function(t) { t.enabled = true; }); }
-            else {
-                S.studentMediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                // Add video track to existing call
-                var videoTrack = S.studentMediaStream.getVideoTracks()[0];
-                for (var pid in S.calls) {
-                    var sender = S.calls[pid].peerConnection ?
-                        S.calls[pid].peerConnection.getSenders().find(function(s) { return s.track && s.track.kind === "video"; }) : null;
-                    if (sender) { try { sender.replaceTrack(videoTrack); } catch(e) {} }
-                }
+            // Just enable the existing video track (was disabled on join)
+            if (S.studentMediaStream) {
+                S.studentMediaStream.getVideoTracks().forEach(function(t) { t.enabled = true; });
             }
             S.studentCamEnabled = true;
             toast("Teacher enabled your camera", "info");
             if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_status", media: "camera", action: "on" });
         } else if (media === "mic") {
-            if (S.studentMediaStream) { S.studentMediaStream.getAudioTracks().forEach(function(t) { t.enabled = true; }); }
-            else {
-                S.studentMediaStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
-                var audioTrack = S.studentMediaStream.getAudioTracks()[0];
-                for (var pid2 in S.calls) {
-                    var sender2 = S.calls[pid2].peerConnection ?
-                        S.calls[pid2].peerConnection.getSenders().find(function(s) { return s.track && s.track.kind === "audio"; }) : null;
-                    if (sender2) { try { sender2.replaceTrack(audioTrack); } catch(e) {} }
-                }
+            // Just enable the existing audio track (was disabled on join)
+            if (S.studentMediaStream) {
+                S.studentMediaStream.getAudioTracks().forEach(function(t) { t.enabled = true; });
             }
             S.studentMicEnabled = true;
             toast("Teacher enabled your microphone", "info");
@@ -2769,6 +2836,7 @@ async function enableStudentMedia(media) {
             }
             S.studentScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
             S.studentScreenEnabled = true;
+            // Replace camera video track with screen track in the call
             var screenTrack = S.studentScreenStream.getVideoTracks()[0];
             for (var pid3 in S.calls) {
                 var sender3 = S.calls[pid3].peerConnection ?
@@ -2799,7 +2867,21 @@ function disableStudentMedia(media) {
             S.studentMicEnabled = false;
             toast("Teacher disabled your microphone", "info");
         } else if (media === "screen") {
-            if (S.studentScreenStream) { S.studentScreenStream.getTracks().forEach(function(t) { t.stop(); }); S.studentScreenStream = null; }
+            if (S.studentScreenStream) {
+                S.studentScreenStream.getTracks().forEach(function(t) { t.stop(); });
+                S.studentScreenStream = null;
+                // Restore camera video track in the call
+                if (S.studentMediaStream) {
+                    var camTrack = S.studentMediaStream.getVideoTracks()[0];
+                    if (camTrack) {
+                        for (var pid in S.calls) {
+                            var sender = S.calls[pid].peerConnection ?
+                                S.calls[pid].peerConnection.getSenders().find(function(s) { return s.track && s.track.kind === "video"; }) : null;
+                            if (sender) { try { sender.replaceTrack(camTrack); } catch(e) {} }
+                        }
+                    }
+                }
+            }
             S.studentScreenEnabled = false;
             toast("Screen share stopped", "info");
         }
