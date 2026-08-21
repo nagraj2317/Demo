@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>EduManage · School/College Management</title>
+<title>sachin'3 project · School/College Management</title>
 <style>
 /* ============================================================
-   EduManage v8 — Complete School/College Management System
+   sachin'3 project — Complete School/College Management System
    Dark glassmorphism theme · Firebase REST API · No external deps
    ============================================================ */
 *{margin:0;padding:0;box-sizing:border-box}
@@ -334,7 +334,7 @@ select.input-field{appearance:none;cursor:pointer}
 <div id="loginOverlay">
     <!-- Default Login Box -->
     <div class="login-box" id="loginBox">
-        <h2>EduManage</h2>
+        <h2>sachin'3 project</h2>
         <p class="sub">School / College Management Platform</p>
         <div id="loginMsg" class="msg"></div>
         <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email">
@@ -346,7 +346,7 @@ select.input-field{appearance:none;cursor:pointer}
     <!-- Invite Acceptance Box -->
     <div class="invite-box" id="inviteBox" style="display:none">
         <h2>Accept Invitation</h2>
-        <p class="sub">Create your account to join EduManage</p>
+        <p class="sub">Create your account to join sachin'3 project</p>
         <div id="inviteMsg" class="msg"></div>
         <div class="invite-detail" id="inviteDetail">
             <div class="row"><span class="label">Name:</span><span class="value" id="ivName">-</span></div>
@@ -376,7 +376,7 @@ select.input-field{appearance:none;cursor:pointer}
 <div id="app">
     <!-- SIDEBAR -->
     <div class="sidebar">
-        <div class="brand">EDU</div>
+        <div class="brand">S3</div>
         <nav id="sidebarNav"></nav>
         <div class="bottom">
             <a title="Profile" data-page="profile" onclick="showPage('profile')">&#9681;<span class="nav-text">Profile</span></a>
@@ -449,7 +449,16 @@ var S = {
     isRecording: false,
     facingMode: "user",
     isScreenShare: false,
-    screenStream: null
+    screenStream: null,
+    studentConns: {},
+    dataConn: null,
+    heartbeatInterval: null,
+    teacherPeerId: null,
+    studentMediaStream: null,
+    studentCamEnabled: false,
+    studentMicEnabled: false,
+    studentScreenEnabled: false,
+    studentScreenStream: null
 };
 
 // ============================================================
@@ -508,7 +517,7 @@ var TC = {admin:"tag-admin", principal:"tag-principal", teacher:"tag-teacher", s
 // DEBUG LOG
 // ============================================================
 function lg(msg, type) {
-    console.log("[EDU]", msg);
+    console.log("[S3]", msg);
 }
 
 
@@ -773,7 +782,7 @@ async function acceptInvitation() {
             lg("Re-login failed: " + loginErr.message + " — using signup token", "warn");
         }
 
-        toast("Welcome to EduManage, " + S.inviteData.name + "!", "success");
+        toast("Welcome to sachin'3 project, " + S.inviteData.name + "!", "success");
         S.userData = profile;
 
         // STEP 6: Show app with error handling
@@ -884,9 +893,12 @@ async function doLogin() {
 // ============================================================
 function doLogout() {
     if (S.notifPollInterval) { clearInterval(S.notifPollInterval); S.notifPollInterval = null; }
+    if (S.heartbeatInterval) { clearInterval(S.heartbeatInterval); S.heartbeatInterval = null; }
     if (S.peer) { try { S.peer.destroy(); } catch(e) {} S.peer = null; }
     if (S.stream) { S.stream.getTracks().forEach(function(t) { t.stop(); }); S.stream = null; }
-    S = {token: null, uid: null, email: null, userData: null, page: "", peer: null, stream: null, calls: {}, inviteData: null, notifPollInterval: null};
+    if (S.studentMediaStream) { S.studentMediaStream.getTracks().forEach(function(t) { t.stop(); }); S.studentMediaStream = null; }
+    if (S.studentScreenStream) { S.studentScreenStream.getTracks().forEach(function(t) { t.stop(); }); S.studentScreenStream = null; }
+    S = {token: null, uid: null, email: null, userData: null, page: "", peer: null, stream: null, calls: {}, inviteData: null, notifPollInterval: null, studentConns: {}, dataConn: null, heartbeatInterval: null, teacherPeerId: null, studentMediaStream: null, studentCamEnabled: false, studentMicEnabled: false, studentScreenEnabled: false, studentScreenStream: null};
     document.getElementById("loginOverlay").style.display = "flex";
     document.getElementById("app").classList.remove("active");
     showLoginBox();
@@ -1572,7 +1584,7 @@ function showInvitationResult(elId, link, name, mobile, role) {
     var inviteCode = link.split("?invite=")[1] || "";
     var waNum = mobile.replace(/[^0-9]/g, "");
     // WhatsApp message with invite CODE (not link, since file:// links don't work for others)
-    var waText = "Hello " + name + "! You are invited to EduManage as " + rl + ".\n\nTo accept:\n1. Open EduManage app\n2. Click 'Have an invite code?'\n3. Enter this code: " + inviteCode + "\n4. Set your password and login!";
+    var waText = "Hello " + name + "! You are invited to sachin'3 project as " + rl + ".\n\nTo accept:\n1. Open EduManage app\n2. Click 'Have an invite code?'\n3. Enter this code: " + inviteCode + "\n4. Set your password and login!";
     var waLink = "https://wa.me/" + waNum + "?text=" + encodeURIComponent(waText);
 
     var h = '<div class="card" style="background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.2)">';
@@ -1594,7 +1606,7 @@ function showInvitationResult(elId, link, name, mobile, role) {
     
     h += '<div class="text-muted mt-10" style="font-size:11px;line-height:1.6">';
     h += '<strong>How invitee accepts:</strong><br>';
-    h += '1. They open the same EduManage HTML file<br>';
+    h += '1. They open the same sachin\'3 project HTML file<br>';
     h += '2. Click "Have an invite code?"<br>';
     h += '3. Enter the code: <strong>' + inviteCode + '</strong><br>';
     h += '4. Set their password and click "Create Account"';
@@ -1644,10 +1656,13 @@ async function loadClassLive() {
     document.getElementById("classLive").innerHTML = card("Live Classes", '<div id="liveCls">Loading...</div>') + card("Sessions", '<div id="liveSess">Loading...</div>');
     try {
         var data = await fbRead("classes");
+        var now = Date.now();
         var clsHTML = "", sessHTML = "";
         if (data) for (var k in data) {
             var v = data[k];
             if (v.status !== "live") continue;
+            // HEARTBEAT CHECK: skip stale classes
+            if (v.heartbeat && (now - v.heartbeat) > 30000) continue;
             var item = '<div class="list-item"><div><div class="name">' + escapeHtml(v.name || v.topic || "Untitled") + '</div><div class="sub">' + escapeHtml(v.createdByName || "-") + '</div></div><span class="tag-live"><span class="live-dot"></span> LIVE</span></div>';
             if (v.type === "session") sessHTML += item; else clsHTML += item;
         }
@@ -1937,22 +1952,29 @@ function pgLive() {
     // CHECK: Is live class already running? If so, show running state
     if (S.stream && S.peer) {
         var isTeacher = (S.userData.role === "teacher");
+        var isStudent = (S.userData.role === "student" || S.userData.role === "monitor");
         var recBtnHtml = isTeacher ? '<button id="btnRec" onclick="toggleRecording()" style="color:#fbbf24;font-size:18px" title="Start Recording">&#9679;</button>' : '';
         var peerIdText = S.peerId || "Loading...";
         var recIndDisplay = S.isRecording ? "block" : "none";
+        var studentCountBadge = isTeacher ? '<span class="tag tag-teacher" id="studentCountBadge" style="margin-left:auto;font-size:12px">0 students</span>' : '';
+        var studentListCard = isTeacher ? card("Connected Students", '<div id="studentListContainer"><div class="text-muted" style="padding:10px;text-align:center">No students connected yet.</div></div>') : '';
         document.getElementById("pageContent").innerHTML =
-            '<div style="background:rgba(34,197,94,0.1);padding:10px 14px;border-radius:10px;display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="width:10px;height:10px;background:#22c55e;border-radius:50%;animation:blink 1s infinite"></span><span style="color:#22c55e;font-weight:600;font-size:14px">LIVE</span><span class="text-muted" style="margin-left:auto;font-size:12px">Class is active</span></div>' +
-            card("Your Peer ID (share with students)", '<div style="background:rgba(255,255,255,0.04);padding:14px;border-radius:14px;text-align:center"><div style="font-family:monospace;font-size:16px;font-weight:700;color:#a78bfa">' + escapeHtml(peerIdText) + '</div><button class="btn btn-sm btn-outline" style="margin-top:8px" onclick="copyText(&#39;' + peerIdText + '&#39;)">Copy Peer ID</button></div>') +
-            '<div class="video-wrapper" style="min-height:300px"><div id="videoContainer"></div><div class="video-controls" id="vidControls" style="display:flex"><button id="btnMute" onclick="toggleMute()">Mic On</button><button id="btnCam" onclick="toggleCam()">Cam On</button><button id="btnFlip" onclick="flipCamera()" style="font-size:16px" title="Flip Camera">&#x21BB;</button><button id="btnScreen" onclick="toggleScreenShare()" style="font-size:16px" title="Share Screen">&#128187;</button>' + recBtnHtml + '<div id="recIndicator" style="display:' + recIndDisplay + ';background:#dc2626;color:#fff;padding:2px 10px;border-radius:6px;font-size:11px;font-weight:700;animation:blink 1s infinite">REC 00:00</div><button class="danger" onclick="endLive()">End</button></div></div>';
+            '<div style="background:rgba(34,197,94,0.1);padding:10px 14px;border-radius:10px;display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="width:10px;height:10px;background:#22c55e;border-radius:50%;animation:blink 1s infinite"></span><span style="color:#22c55e;font-weight:600;font-size:14px">LIVE</span>' + studentCountBadge + '</div>' +
+            (isTeacher ? card("Your Class is Live", '<div class="text-muted text-sm">Students from your class can see and join this live class automatically.</div>') : '') +
+            '<div class="video-wrapper" style="min-height:300px"><div id="videoContainer"></div><div class="video-controls" id="vidControls" style="display:flex"><button id="btnMute" onclick="toggleMute()">Mic On</button><button id="btnCam" onclick="toggleCam()">Cam On</button>' + (isTeacher ? '<button id="btnFlip" onclick="flipCamera()" style="font-size:16px" title="Flip Camera">&#x21BB;</button><button id="btnScreen" onclick="toggleScreenShare()" style="font-size:16px" title="Share Screen">&#128187;</button>' : '') + recBtnHtml + '<div id="recIndicator" style="display:' + recIndDisplay + ';background:#dc2626;color:#fff;padding:2px 10px;border-radius:6px;font-size:11px;font-weight:700;animation:blink 1s infinite">REC 00:00</div><button class="danger" onclick="' + (isStudent ? 'leaveLive()' : 'endLive()') + '">' + (isStudent ? 'Leave' : 'End') + '</button></div></div>' +
+            studentListCard;
         
         // Re-attach existing stream to new video container
         var vc = document.getElementById("videoContainer");
         if (vc && S.stream) {
-            var ld = document.createElement("div"); ld.className = "local-player";
-            var lv = document.createElement("video"); lv.srcObject = S.stream; lv.muted = true; lv.autoplay = true; lv.playsInline = true;
-            ld.appendChild(lv);
-            var b = document.createElement("div"); b.className = "video-overlay-badge"; b.textContent = "You (Host)";
-            ld.appendChild(b); vc.appendChild(ld);
+            // Only add local player if not already present
+            if (!vc.querySelector(".local-player")) {
+                var ld = document.createElement("div"); ld.className = "local-player";
+                var lv = document.createElement("video"); lv.srcObject = S.stream; lv.muted = true; lv.autoplay = true; lv.playsInline = true;
+                ld.appendChild(lv);
+                var b = document.createElement("div"); b.className = "video-overlay-badge"; b.textContent = isStudent ? "You" : "You (Host)";
+                ld.appendChild(b); vc.appendChild(ld);
+            }
         }
         // Update mic/cam button states
         try {
@@ -1971,17 +1993,14 @@ function pgLive() {
                 '<input type="text" class="input-field mb-10" id="liveSub" placeholder="Subject (e.g. Mathematics)" value="' + escapeHtml(S.userData.subject || "") + '">' +
                 '<button class="btn btn-success" onclick="startLive()">Start Live Class</button>'
             ) +
-            card("Your Peer ID", '<div id="peerDisplay" style="text-align:center;padding:16px"><div class="text-muted">Peer ID will appear here after starting.</div></div>') +
             '<div class="video-wrapper" style="min-height:300px"><div id="videoContainer"></div><div class="video-controls" id="vidControls" style="display:none"><button id="btnMute" onclick="toggleMute()">Mic On</button><button id="btnCam" onclick="toggleCam()">Cam On</button><button id="btnFlip" onclick="flipCamera()" style="font-size:16px" title="Flip Camera">&#x21BB;</button><button id="btnScreen" onclick="toggleScreenShare()" style="font-size:16px" title="Share Screen">&#128187;</button><button id="btnRec" onclick="toggleRecording()" style="color:#fbbf24;font-size:18px" title="Start Recording">&#9679;</button><div id="recIndicator" style="display:none;background:#dc2626;color:#fff;padding:2px 10px;border-radius:6px;font-size:11px;font-weight:700;animation:blink 1s infinite">REC 00:00</div><button class="danger" onclick="endLive()">End</button></div></div>' +
+            card("Connected Students", '<div id="studentListContainer"><div class="text-muted" style="padding:10px;text-align:center">Start a class to see connected students.</div></div>') +
             (S.userData.role === "teacher" ? card("My Classes (Saved)", '<div id="myClassesList" style="margin-top:8px">Loading...</div>') : '');
         if (S.userData.role === "teacher") { setTimeout(function() { loadMyClasses(); }, 100); }
     } else {
+        // STUDENT: No Peer ID input. Auto-show teacher's live class.
         document.getElementById("pageContent").innerHTML =
-            card("Join Live Class",
-                '<input type="text" class="input-field mb-10" id="joinPeerId" placeholder="Paste teacher Peer ID here">' +
-                '<button class="btn" onclick="joinLive()">Join Class</button>'
-            ) +
-            card("Available Live Classes", '<div id="liveList">Loading...</div>') +
+            card("Live Class", '<div id="liveList" style="margin-top:4px">Loading live classes...</div>') +
             '<div class="video-wrapper" style="min-height:300px;display:none" id="studentVideoWrap"><div id="videoContainer"></div><div class="video-controls"><button class="danger" onclick="leaveLive()">Leave</button></div></div>';
         loadLiveList();
     }
@@ -1999,12 +2018,11 @@ async function startLive() {
     var pid = "edu-" + S.uid.substring(0, 12);
     if (S.peer) { try { S.peer.destroy(); } catch(e) {} }
     S.peer = new Peer(pid);
+    S.studentConns = {};
     S.peer.on("open", function(id) {
         lg("Peer opened: " + id, "ok");
         S.peerId = id;
-        document.getElementById("peerDisplay").innerHTML = '<div style="background:rgba(255,255,255,0.04);padding:14px;border-radius:14px;text-align:center"><div class="text-muted" style="font-size:10px;margin-bottom:4px">Your Peer ID (share with students):</div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#a78bfa">' + id + '</div><button class="btn btn-sm btn-outline" style="margin-top:8px" onclick="copyText(&#39;' + id + '&#39;)">Copy</button></div>';
         document.getElementById("vidControls").style.display = "flex";
-        // Show/hide record button based on role
         var btnRec = document.getElementById("btnRec");
         var indRec = document.getElementById("recIndicator");
         if (isTeacher) {
@@ -2013,27 +2031,66 @@ async function startLive() {
             if (btnRec) btnRec.style.display = "none";
             if (indRec) indRec.style.display = "none";
         }
-        toast((isTeacher ? "Class" : "Session") + " started! Share your Peer ID.", "success");
+        toast((isTeacher ? "Class" : "Session") + " started! Students can now join.", "success");
+        
+        // HEARTBEAT: update class heartbeat every 10s so students know it's truly live
+        if (S.currentClassId) {
+            if (S.heartbeatInterval) clearInterval(S.heartbeatInterval);
+            S.heartbeatInterval = setInterval(function() {
+                if (S.currentClassId) {
+                    fbUpdate("classes/" + S.currentClassId, { heartbeat: Date.now() }).catch(function(){});
+                }
+            }, 10000);
+        }
     });
+    
+    // Handle incoming DATA connections from students (for media control)
+    S.peer.on("connection", function(conn) {
+        lg("Data connection from: " + conn.peer, "info");
+        S.studentConns[conn.peer] = conn;
+        conn.on("data", function(data) {
+            handleStudentData(conn.peer, data);
+        });
+        conn.on("close", function() {
+            lg("Student disconnected: " + conn.peer, "info");
+            delete S.studentConns[conn.peer];
+            updateStudentCount();
+        });
+        updateStudentCount();
+    });
+    
     navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(function(stream) {
         S.stream = stream;
         var vc = document.getElementById("videoContainer");
-        var ld = document.createElement("div"); ld.className = "local-player";
-        var lv = document.createElement("video"); lv.srcObject = stream; lv.muted = true; lv.autoplay = true; lv.playsInline = true;
-        ld.appendChild(lv);
-        var b = document.createElement("div"); b.className = "video-overlay-badge"; b.textContent = "You (Host)";
-        ld.appendChild(b); vc.appendChild(ld);
+        if (!vc.querySelector(".local-player")) {
+            var ld = document.createElement("div"); ld.className = "local-player";
+            var lv = document.createElement("video"); lv.srcObject = stream; lv.muted = true; lv.autoplay = true; lv.playsInline = true;
+            ld.appendChild(lv);
+            var b = document.createElement("div"); b.className = "video-overlay-badge"; b.textContent = "You (Host)";
+            ld.appendChild(b); vc.appendChild(ld);
+        }
         S.peer.on("call", function(call) {
-            lg("Incoming call from student", "info");
+            lg("Incoming call from student: " + call.peer, "info");
             call.answer(stream);
             call.on("stream", function(rs) {
-                var rd = document.createElement("div"); rd.className = "remote-player";
+                var vc2 = document.getElementById("videoContainer");
+                // DEDUP: check if remote player for this peer already exists
+                var existing = vc2.querySelector('[data-peer="' + call.peer + '"]');
+                if (existing) { existing.remove(); }
+                var rd = document.createElement("div"); rd.className = "remote-player"; rd.setAttribute("data-peer", call.peer);
                 var rv = document.createElement("video"); rv.srcObject = rs; rv.autoplay = true; rv.playsInline = true;
                 rd.appendChild(rv);
                 var rb = document.createElement("div"); rb.className = "video-overlay-badge"; rb.textContent = "Student";
-                rd.appendChild(rb); vc.appendChild(rd);
+                rd.appendChild(rb); vc2.appendChild(rd);
                 S.calls[call.peer] = call;
                 lg("Student connected: " + call.peer, "ok");
+                updateStudentCount();
+            });
+            call.on("close", function() {
+                var rd2 = document.querySelector('[data-peer="' + call.peer + '"]');
+                if (rd2) rd2.remove();
+                delete S.calls[call.peer];
+                updateStudentCount();
             });
         });
         // AUTO-RECORD for teachers only
@@ -2048,8 +2105,15 @@ async function startLive() {
     }).catch(function(err) { toast("Camera/mic error: " + err.message, "error"); lg("Camera error: " + err.message, "err"); });
     S.peer.on("error", function(err) { lg("Peer error: " + err.type, "err"); toast("PeerJS error: " + err.type, "error"); });
     try {
-            var classRec = await fbPush("classes", {name: name, subject: document.getElementById("liveSub").value || "", type: sessionType, createdBy: S.uid, createdByName: S.userData.name, status: "live", peerId: pid, autoRecord: isTeacher, createdAt: Date.now()});
+            var classRec = await fbPush("classes", {name: name, subject: document.getElementById("liveSub").value || "", type: sessionType, createdBy: S.uid, createdByName: S.userData.name, status: "live", peerId: pid, autoRecord: isTeacher, createdAt: Date.now(), heartbeat: Date.now()});
             S.currentClassId = classRec;
+            // Start heartbeat now that we have classId
+            if (S.heartbeatInterval) clearInterval(S.heartbeatInterval);
+            S.heartbeatInterval = setInterval(function() {
+                if (S.currentClassId) {
+                    fbUpdate("classes/" + S.currentClassId, { heartbeat: Date.now() }).catch(function(){});
+                }
+            }, 10000);
         } catch(e) {}
 }
 
@@ -2146,7 +2210,7 @@ var recDB = null;
 
 function initRecDB() {
     return new Promise(function(resolve, reject) {
-        var req = indexedDB.open("EduManageRecordings", 1);
+        var req = indexedDB.open("sachin3projectRecordings", 1);
         req.onupgradeneeded = function(e) {
             var db = e.target.result;
             if (!db.objectStoreNames.contains("recordings")) {
@@ -2452,10 +2516,12 @@ async function stopScreenShare() {
 function endLive() {
     if (S.isRecording) { stopRecording(); }
     if (S.isScreenShare) { stopScreenShare(); }
+    if (S.heartbeatInterval) { clearInterval(S.heartbeatInterval); S.heartbeatInterval = null; }
     if (S.peer) { try { S.peer.destroy(); } catch(e) {} S.peer = null; }
     if (S.stream) { S.stream.getTracks().forEach(function(t) { t.stop(); }); S.stream = null; }
     if (S.screenStream) { S.screenStream.getTracks().forEach(function(t) { t.stop(); }); S.screenStream = null; }
     S.calls = {};
+    S.studentConns = {};
     S.peerId = null;
     S.isScreenShare = false;
     
@@ -2463,9 +2529,9 @@ function endLive() {
     if (S.currentClassId) {
         var isTeacher = (S.userData.role === "teacher");
         if (isTeacher) {
-            // Teacher classes: keep record, mark as "ended"
-            fbUpdate("classes/" + S.currentClassId, { status: "ended", endedAt: Date.now() }).catch(function(e){});
-            toast("Live class ended. Record saved.", "info");
+            // Teacher classes: keep record, mark as "ended" (goes to Recordings)
+            fbUpdate("classes/" + S.currentClassId, { status: "ended", endedAt: Date.now(), heartbeat: null }).catch(function(e){});
+            toast("Live class ended. Recording saved.", "info");
         } else {
             // Admin/Principal sessions: delete (one-time)
             fbWrite("classes/" + S.currentClassId, null).catch(function(e){});
@@ -2481,35 +2547,62 @@ function endLive() {
 async function joinLive() {
     var hpid = document.getElementById("joinPeerId").value.trim();
     if (!hpid) { toast("Enter teacher Peer ID.", "error"); return; }
+    await joinLiveByPeerId(hpid);
+}
+
+async function joinLiveByPeerId(peerId) {
+    if (!peerId) { toast("No Peer ID found.", "error"); return; }
     toast("Loading PeerJS...", "info");
     try { await loadPeerJS(); } catch(e) { toast("PeerJS failed to load.", "error"); return; }
     toast("Joining live class...", "info");
-    lg("Joining live class: " + hpid, "info");
+    lg("Joining live class: " + peerId, "info");
+    S.teacherPeerId = peerId;
     var spid = "edu-s-" + S.uid.substring(0, 10);
     if (S.peer) { try { S.peer.destroy(); } catch(e) {} }
     S.peer = new Peer(spid);
     S.peer.on("open", function(id) {
         lg("Student peer opened: " + id, "ok");
-        navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(function(stream) {
+        S.peerId = id;
+        
+        // Establish DATA connection with teacher (for media control)
+        var conn = S.peer.connect(peerId, { reliable: true });
+        S.dataConn = conn;
+        conn.on("open", function() {
+            lg("Data channel established with teacher", "ok");
+            // Send student info
+            conn.send({ type: "student_join", name: S.userData.name, uid: S.uid, role: S.userData.role });
+        });
+        conn.on("data", function(data) {
+            handleTeacherData(data);
+        });
+        conn.on("close", function() {
+            lg("Data channel closed", "info");
+        });
+        
+        // Student does NOT send camera/mic by default — only audio (so teacher can hear)
+        // Camera/mic/screen shared only when teacher requests via media control
+        navigator.mediaDevices.getUserMedia({video: false, audio: false}).then(function(stream) {
             S.stream = stream;
-            var call = S.peer.call(hpid, stream);
+            var call = S.peer.call(peerId, stream);
             call.on("stream", function(rs) {
                 document.getElementById("studentVideoWrap").style.display = "block";
-                var vc = document.getElementById("videoContainer"); vc.innerHTML = "";
+                var vc = document.getElementById("videoContainer"); 
+                // DEDUP: remove existing remote player if any
+                var existing = vc.querySelector(".remote-player");
+                if (existing) existing.remove();
+                vc.innerHTML = "";
                 var rd = document.createElement("div"); rd.className = "remote-player";
                 var rv = document.createElement("video"); rv.srcObject = rs; rv.autoplay = true; rv.playsInline = true;
                 rd.appendChild(rv);
                 var b = document.createElement("div"); b.className = "video-overlay-badge"; b.textContent = "Teacher";
                 rd.appendChild(b); vc.appendChild(rd);
-                var ld = document.createElement("div"); ld.className = "local-player";
-                var lv = document.createElement("video"); lv.srcObject = stream; lv.muted = true; lv.autoplay = true; lv.playsInline = true;
-                ld.appendChild(lv);
-                var lb = document.createElement("div"); lb.className = "video-overlay-badge"; lb.textContent = "You";
-                ld.appendChild(lb); vc.appendChild(ld);
                 toast("Connected to live class!", "success");
                 lg("Connected to live class", "ok");
             });
-        }).catch(function(err) { toast("Camera/mic error: " + err.message, "error"); lg("Camera error: " + err.message, "err"); });
+        }).catch(function(err) { 
+            toast("Could not connect: " + err.message, "error"); 
+            lg("Connection error: " + err.message, "err"); 
+        });
     });
     S.peer.on("error", function(err) { lg("Peer error: " + err.type, "err"); toast("PeerJS error: " + err.type, "error"); });
 }
@@ -2517,37 +2610,228 @@ async function joinLive() {
 function leaveLive() {
     if (S.peer) { try { S.peer.destroy(); } catch(e) {} S.peer = null; }
     if (S.stream) { S.stream.getTracks().forEach(function(t) { t.stop(); }); S.stream = null; }
+    if (S.studentScreenStream) { S.studentScreenStream.getTracks().forEach(function(t) { t.stop(); }); S.studentScreenStream = null; }
+    if (S.studentMediaStream) { S.studentMediaStream.getTracks().forEach(function(t) { t.stop(); }); S.studentMediaStream = null; }
+    S.dataConn = null;
+    S.teacherPeerId = null;
+    S.studentCamEnabled = false;
+    S.studentMicEnabled = false;
+    S.studentScreenEnabled = false;
     showPage("live");
     toast("Left live class.", "info");
     lg("Left live class", "info");
+}
+
+// ============================================================
+// STUDENT COUNT + STUDENT LIST (teacher view)
+// ============================================================
+function updateStudentCount() {
+    var count = Object.keys(S.calls).length;
+    var badge = document.getElementById("studentCountBadge");
+    if (badge) { badge.textContent = count + (count === 1 ? " student" : " students"); }
+    var listEl = document.getElementById("studentListContainer");
+    if (listEl) {
+        if (count === 0) {
+            listEl.innerHTML = '<div class="text-muted" style="padding:10px;text-align:center">No students connected yet.</div>';
+        } else {
+            var h = "";
+            var idx = 0;
+            for (var peerId in S.calls) {
+                idx++;
+                var studentName = S.studentConns[peerId] && S.studentConns[peerId]._studentName ? S.studentConns[peerId]._studentName : ("Student " + idx);
+                h += '<div class="list-item" style="flex-wrap:wrap">';
+                h += '<div><div class="name">' + escapeHtml(studentName) + '</div>';
+                h += '<div class="sub">Peer: ' + escapeHtml(peerId.substring(0, 16)) + '...</div></div>';
+                h += '<div style="display:flex;gap:4px;align-items:center">';
+                // Three media control buttons: Screen, Camera, Microphone
+                h += '<button class="btn-sm btn-outline" style="font-size:11px;padding:4px 8px" id="btnScreen_' + peerId + '" onclick="toggleStudentMedia(\'' + peerId + '\',\'screen\')" title="Request Screen Share">&#128187;</button>';
+                h += '<button class="btn-sm btn-outline" style="font-size:11px;padding:4px 8px" id="btnCam_' + peerId + '" onclick="toggleStudentMedia(\'' + peerId + '\',\'camera\')" title="Request Camera">&#128247;</button>';
+                h += '<button class="btn-sm btn-outline" style="font-size:11px;padding:4px 8px" id="btnMic_' + peerId + '" onclick="toggleStudentMedia(\'' + peerId + '\',\'mic\')" title="Request Microphone">&#127908;</button>';
+                h += '</div></div>';
+            }
+            listEl.innerHTML = h;
+        }
+    }
+}
+
+// ============================================================
+// TEACHER MEDIA CONTROL — send commands to student via data channel
+// ============================================================
+function toggleStudentMedia(peerId, mediaType) {
+    var conn = S.studentConns[peerId];
+    if (!conn || !conn.open) { toast("Student not connected.", "error"); return; }
+    var btnId = "btn" + (mediaType === "screen" ? "Screen" : mediaType === "camera" ? "Cam" : "Mic") + "_" + peerId;
+    var btn = document.getElementById(btnId);
+    var isOn = btn && btn.classList.contains("btn-success");
+    if (isOn) {
+        // Turn OFF — tell student to stop sharing this media
+        conn.send({ type: "media_control", media: mediaType, action: "off" });
+        if (btn) { btn.classList.remove("btn-success"); btn.classList.add("btn-outline"); btn.style.color = ""; }
+        toast("Asked student to stop " + mediaType, "info");
+    } else {
+        // Turn ON — tell student to start sharing this media
+        conn.send({ type: "media_control", media: mediaType, action: "on" });
+        if (btn) { btn.classList.remove("btn-outline"); btn.classList.add("btn-success"); btn.style.color = "#fff"; }
+        toast("Asked student to share " + mediaType, "info");
+    }
+}
+
+// ============================================================
+// TEACHER SIDE: handle data from student
+// ============================================================
+function handleStudentData(peerId, data) {
+    if (!data || !data.type) return;
+    if (data.type === "student_join") {
+        // Store student name
+        if (S.studentConns[peerId]) { S.studentConns[peerId]._studentName = data.name; }
+        lg("Student joined: " + data.name, "ok");
+        updateStudentCount();
+    } else if (data.type === "media_status") {
+        lg("Student " + peerId + " media status: " + data.media + " = " + data.action, "info");
+    } else if (data.type === "media_error") {
+        toast("Student media error: " + data.error, "error");
+        // Reset button state
+        var btnId = "btn" + (data.media === "screen" ? "Screen" : data.media === "camera" ? "Cam" : "Mic") + "_" + peerId;
+        var btn = document.getElementById(btnId);
+        if (btn) { btn.classList.remove("btn-success"); btn.classList.add("btn-outline"); btn.style.color = ""; }
+    }
+}
+
+// ============================================================
+// STUDENT SIDE: handle data from teacher (media control commands)
+// ============================================================
+function handleTeacherData(data) {
+    if (!data || !data.type) return;
+    if (data.type === "media_control") {
+        var media = data.media;
+        var action = data.action;
+        lg("Teacher requested " + media + " " + action, "info");
+        if (action === "on") {
+    enableStudentMedia(media);
+        } else if (action === "off") {
+    disableStudentMedia(media);
+        }
+    }
+}
+
+// ============================================================
+// STUDENT MEDIA: enable/disable camera, mic, screen share on teacher's request
+// ============================================================
+async function enableStudentMedia(media) {
+    try {
+        if (media === "camera") {
+            if (S.studentMediaStream) { S.studentMediaStream.getVideoTracks().forEach(function(t) { t.enabled = true; }); }
+            else {
+                S.studentMediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                // Add video track to existing call
+                var videoTrack = S.studentMediaStream.getVideoTracks()[0];
+                for (var pid in S.calls) {
+                    var sender = S.calls[pid].peerConnection ?
+                        S.calls[pid].peerConnection.getSenders().find(function(s) { return s.track && s.track.kind === "video"; }) : null;
+                    if (sender) { try { sender.replaceTrack(videoTrack); } catch(e) {} }
+                }
+            }
+            S.studentCamEnabled = true;
+            toast("Teacher enabled your camera", "info");
+            if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_status", media: "camera", action: "on" });
+        } else if (media === "mic") {
+            if (S.studentMediaStream) { S.studentMediaStream.getAudioTracks().forEach(function(t) { t.enabled = true; }); }
+            else {
+                S.studentMediaStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+                var audioTrack = S.studentMediaStream.getAudioTracks()[0];
+                for (var pid2 in S.calls) {
+                    var sender2 = S.calls[pid2].peerConnection ?
+                        S.calls[pid2].peerConnection.getSenders().find(function(s) { return s.track && s.track.kind === "audio"; }) : null;
+                    if (sender2) { try { sender2.replaceTrack(audioTrack); } catch(e) {} }
+                }
+            }
+            S.studentMicEnabled = true;
+            toast("Teacher enabled your microphone", "info");
+            if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_status", media: "mic", action: "on" });
+        } else if (media === "screen") {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_error", media: "screen", error: "Not supported" });
+                toast("Screen share not supported", "error");
+                return;
+            }
+            S.studentScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+            S.studentScreenEnabled = true;
+            var screenTrack = S.studentScreenStream.getVideoTracks()[0];
+            for (var pid3 in S.calls) {
+                var sender3 = S.calls[pid3].peerConnection ?
+                    S.calls[pid3].peerConnection.getSenders().find(function(s) { return s.track && s.track.kind === "video"; }) : null;
+                if (sender3) { try { sender3.replaceTrack(screenTrack); } catch(e) {} }
+            }
+            S.studentScreenStream.getVideoTracks()[0].onended = function() {
+                disableStudentMedia("screen");
+            };
+            toast("Teacher requested screen share", "info");
+            if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_status", media: "screen", action: "on" });
+        }
+    } catch(e) {
+        lg("Student media enable error: " + e.message, "err");
+        if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_error", media: media, error: e.message });
+        toast("Could not enable " + media + ": " + e.message, "error");
+    }
+}
+
+function disableStudentMedia(media) {
+    try {
+        if (media === "camera") {
+            if (S.studentMediaStream) { S.studentMediaStream.getVideoTracks().forEach(function(t) { t.enabled = false; }); }
+            S.studentCamEnabled = false;
+            toast("Teacher disabled your camera", "info");
+        } else if (media === "mic") {
+            if (S.studentMediaStream) { S.studentMediaStream.getAudioTracks().forEach(function(t) { t.enabled = false; }); }
+            S.studentMicEnabled = false;
+            toast("Teacher disabled your microphone", "info");
+        } else if (media === "screen") {
+            if (S.studentScreenStream) { S.studentScreenStream.getTracks().forEach(function(t) { t.stop(); }); S.studentScreenStream = null; }
+            S.studentScreenEnabled = false;
+            toast("Screen share stopped", "info");
+        }
+        if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_status", media: media, action: "off" });
+    } catch(e) { lg("Student media disable error: " + e.message, "err"); }
 }
 
 async function loadLiveList() {
     var el = document.getElementById("liveList");
     if (!el) return;
     el.innerHTML = '<div class="text-muted">Loading...</div>';
-    fbRead("classes").then(function(data) {
+    try {
+        var data = await fbRead("classes");
+        var now = Date.now();
         var items = [];
         if (data) for (var k in data) {
             var v = data[k];
-            if (v.status === "live") items.push(Object.assign({id: k}, v));
+            if (v.status !== "live") continue;
+            // HEARTBEAT CHECK: if no heartbeat in last 30s, class is stale — skip it
+            if (v.heartbeat && (now - v.heartbeat) > 30000) continue;
+            // STUDENT FILTER: only show classes by their own teacher
+            if (S.userData.role === "student" || S.userData.role === "monitor") {
+                if (v.createdBy !== S.userData.teacherId) continue;
+            }
+            items.push(Object.assign({id: k}, v));
         }
         items.sort(function(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
         var h = "";
-        if (items.length === 0) { el.innerHTML = '<div class="text-muted">No live classes right now.</div>'; return; }
+        if (items.length === 0) {
+            if (S.userData.role === "student" || S.userData.role === "monitor") {
+                h = '<div class="text-muted" style="padding:20px;text-align:center">No live class right now. When your teacher starts a class, it will appear here automatically.</div>';
+            } else {
+                h = '<div class="text-muted">No live classes right now.</div>';
+            }
+            el.innerHTML = h; return;
+        }
         items.forEach(function(v) {
             var isAdmin = S.userData.role === "admin";
             h += '<div class="list-item"><div><div class="name">' + escapeHtml(v.name || "Class") + ' <span class="tag tag-live"><span class="live-dot"></span>LIVE</span></div>';
             h += '<div class="sub">By: ' + escapeHtml(v.createdByName || "-") + (v.type === "class" ? " (Class)" : " (Session)") + '</div></div>';
-            if (isAdmin) {
-                h += '<button class="btn btn-sm" onclick="joinLiveByPeerId(\'' + escapeHtml(v.peerId || "") + '\')">Join Class</button>';
-            } else {
-                h += '<button class="btn btn-sm" onclick="joinLive(\'' + escapeHtml(v.peerId || v.id) + '\')">Join</button>';
-            }
+            h += '<button class="btn btn-sm" onclick="joinLiveByPeerId(\'' + escapeHtml(v.peerId || "") + '\')">Join Class</button>';
             h += '</div>';
         });
         el.innerHTML = h;
-    }).catch(function(e) { el.innerHTML = '<div class="text-muted">Error loading classes.</div>'; });
+    } catch(e) { el.innerHTML = '<div class="text-muted">Error loading classes.</div>'; }
 }
 
 function usePeerId(pid) {
@@ -2626,7 +2910,6 @@ async function loadMyClasses() {
 // ============================================================
 // ALL LIVE CLASSES (Super Admin)
 // ============================================================
-async 
 // ============================================================
 // RECORDED CLASSES PAGE (all roles can see)
 // ============================================================
@@ -2745,10 +3028,13 @@ async function pgAllLive() {
     try {
         var classes = await fbRead("classes");
         var users = await fbRead("users");
+        var now = Date.now();
         var items = [];
         if (classes) for (var k in classes) {
             var v = classes[k];
             if (v.status === "live") {
+                // HEARTBEAT CHECK: skip stale classes
+                if (v.heartbeat && (now - v.heartbeat) > 30000) continue;
                 var creator = users && users[v.createdBy] ? users[v.createdBy] : null;
                 items.push(Object.assign({id: k}, v, {
                     creatorName: creator ? creator.name : v.createdByName || "-",
@@ -2789,39 +3075,7 @@ async function pgAllLive() {
     }
 }
 
-// Admin can join any live class by Peer ID
-async function joinLiveByPeerId(peerId) {
-    if (!peerId) { toast("No Peer ID found.", "error"); return; }
-    toast("Joining live class...", "info");
-    try { await loadPeerJS(); } catch(e) { toast("PeerJS failed to load.", "error"); return; }
-    var studentPid = "edu-stu-" + S.uid.substring(0, 10);
-    if (S.peer) { try { S.peer.destroy(); } catch(e) {} }
-    S.peer = new Peer(studentPid);
-    S.peer.on("open", function(id) {
-        S.peerId = id;
-        var conn = S.peer.connect(peerId);
-        navigator.mediaDevices.getUserMedia({video: false, audio: true}).then(function(stream) {
-            S.stream = stream;
-            var call = S.peer.call(peerId, stream);
-            call.on("stream", function(remoteStream) {
-                var vc = document.getElementById("videoContainer");
-                if (!vc) {
-                    document.getElementById("pageContent").innerHTML = '<div class="video-wrapper" style="min-height:300px"><div id="videoContainer"></div><div class="video-controls"><button class="danger" onclick="leaveLive()">Leave</button></div></div>';
-                    vc = document.getElementById("videoContainer");
-                }
-                vc.innerHTML = "";
-                var rd = document.createElement("div"); rd.className = "remote-player";
-                var rv = document.createElement("video"); rv.srcObject = remoteStream; rv.autoplay = true; rv.playsInline = true;
-                rd.appendChild(rv);
-                var rb = document.createElement("div"); rb.className = "video-overlay-badge"; rb.textContent = "Host";
-                rd.appendChild(rb); vc.appendChild(rd);
-                toast("Joined live class!", "success");
-            });
-        }).catch(function(e) {
-            toast("Mic access needed to join. Error: " + e.message, "error");
-        });
-    });
-}
+// (Old joinLiveByPeerId removed — replaced by the new version above)
 
 
 function pgProfile() {
@@ -2948,7 +3202,7 @@ function pgSettings() {
         ) +
         card("About",
             '<div class="settings-card">' +
-            '<div class="settings-title">&#8505; EduManage v8</div>' +
+            '<div class="settings-title">&#8505; sachin\'3 project</div>' +
             '<div class="settings-row"><span class="lbl">Version:</span><span class="val">8.0</span></div>' +
             '<div class="settings-row"><span class="lbl">Technology:</span><span class="val">Firebase REST API + PeerJS</span></div>' +
             '<div class="settings-row"><span class="lbl">External scripts:</span><span class="val">None (PeerJS loads on demand)</span></div>' +
@@ -2992,7 +3246,7 @@ document.addEventListener("click", function(e) {
 // ============================================================
 // INIT
 // ============================================================
-lg("EduManage v8 loaded. No external scripts in head.", "ok");
+lg("sachin'3 project loaded.", "ok");
 lg("Ready. Click Login to test.", "ok");
 
 // Check URL for invite
