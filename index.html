@@ -495,17 +495,20 @@ var NAVS = {
         {i:"\u2709",p:"notifications",t:"Notifications"},
         {i:"\u25B6",p:"live",t:"Live Class"},
         {i:"\u23FA",p:"recorded",t:"Recorded"},
+        {i:"\u2756",p:"material",t:"Study Material"},
         {i:"\u2709",p:"invitations",t:"Invitations"}
     ],
     monitor: [
         {i:"\u2302",p:"dashboard",t:"Dashboard"},
         {i:"\u270E",p:"homework",t:"Homework"},
+        {i:"\u2756",p:"material",t:"Study Material"},
         {i:"!",p:"complaint",t:"Complaint"}
     ],
     student: [
         {i:"\u2302",p:"dashboard",t:"Dashboard"},
         {i:"\u25B6",p:"live",t:"Live Class"},
         {i:"\u23FA",p:"recorded",t:"Recorded"},
+        {i:"\u2756",p:"material",t:"Study Material"},
         {i:"\u270E",p:"homework",t:"Homework"}
     ]
 };
@@ -966,6 +969,7 @@ function showPage(p) {
         add_member: pgAddMember,
         add_student: pgAddStudent,
         class: pgLive, live: pgLive, all_live: pgAllLive, recorded: pgRecorded,
+        material: pgMaterial,
         profile: pgProfile,
         homework: pgHomework,
         complaint: pgComplaint,
@@ -1661,8 +1665,15 @@ async function loadClassLive() {
         if (data) for (var k in data) {
             var v = data[k];
             if (v.status !== "live") continue;
-            // HEARTBEAT CHECK: skip stale classes
-            if (v.heartbeat && (now - v.heartbeat) > 30000) continue;
+            // STALE CHECK: skip and auto-cleanup classes without recent heartbeat
+            var isStale = false;
+            if (!v.heartbeat) { isStale = true; }
+            else if ((now - v.heartbeat) > 30000) { isStale = true; }
+            if (v.createdAt && (now - v.createdAt) > 14400000) { isStale = true; }
+            if (isStale) {
+                try { await fbUpdate("classes/" + k, { status: "ended", endedAt: now, heartbeat: null }); } catch(e) {}
+                continue;
+            }
             var item = '<div class="list-item"><div><div class="name">' + escapeHtml(v.name || v.topic || "Untitled") + '</div><div class="sub">' + escapeHtml(v.createdByName || "-") + '</div></div><span class="tag-live"><span class="live-dot"></span> LIVE</span></div>';
             if (v.type === "session") sessHTML += item; else clsHTML += item;
         }
@@ -2579,9 +2590,11 @@ async function joinLiveByPeerId(peerId) {
             lg("Data channel closed", "info");
         });
         
-        // Student does NOT send camera/mic by default — only audio (so teacher can hear)
-        // Camera/mic/screen shared only when teacher requests via media control
-        navigator.mediaDevices.getUserMedia({video: false, audio: false}).then(function(stream) {
+        // Student does NOT send camera/mic by default — teacher requests via media control
+        // Browser requires at least one of audio/video to be true, so request audio but disable it
+        navigator.mediaDevices.getUserMedia({video: false, audio: true}).then(function(stream) {
+            // Disable audio track so teacher can't hear student unless they request it
+            stream.getAudioTracks().forEach(function(t) { t.enabled = false; });
             S.stream = stream;
             var call = S.peer.call(peerId, stream);
             call.on("stream", function(rs) {
@@ -2805,8 +2818,19 @@ async function loadLiveList() {
         if (data) for (var k in data) {
             var v = data[k];
             if (v.status !== "live") continue;
-            // HEARTBEAT CHECK: if no heartbeat in last 30s, class is stale — skip it
-            if (v.heartbeat && (now - v.heartbeat) > 30000) continue;
+            // STALE CHECK: class is stale if ANY of these are true:
+            // 1. No heartbeat field (old class started before heartbeat system)
+            // 2. Heartbeat older than 30 seconds (teacher closed browser without ending)
+            // 3. Class created more than 4 hours ago (safety net)
+            var isStale = false;
+            if (!v.heartbeat) { isStale = true; }
+            else if ((now - v.heartbeat) > 30000) { isStale = true; }
+            if (v.createdAt && (now - v.createdAt) > 14400000) { isStale = true; } // 4 hours
+            if (isStale) {
+                // AUTO-CLEANUP: mark stale class as "ended" in Firebase so it never shows again
+                try { await fbUpdate("classes/" + k, { status: "ended", endedAt: now, heartbeat: null }); } catch(e) {}
+                continue;
+            }
             // STUDENT FILTER: only show classes by their own teacher
             if (S.userData.role === "student" || S.userData.role === "monitor") {
                 if (v.createdBy !== S.userData.teacherId) continue;
@@ -2909,6 +2933,289 @@ async function loadMyClasses() {
 
 // ============================================================
 // ALL LIVE CLASSES (Super Admin)
+// ============================================================
+// STUDY MATERIAL PAGE (teacher/monitor upload, student download)
+// ============================================================
+var materialDB = null;
+
+function initMaterialDB() {
+    return new Promise(function(resolve, reject) {
+        var req = indexedDB.open("sachin3projectMaterials", 1);
+        req.onupgradeneeded = function(e) {
+            var db = e.target.result;
+            if (!db.objectStoreNames.contains("materials")) {
+                db.createObjectStore("materials", { keyPath: "id" });
+            }
+        };
+        req.onsuccess = function(e) { materialDB = e.target.result; resolve(materialDB); };
+        req.onerror = function(e) { reject(e.target.error); };
+    });
+}
+
+function saveMaterialToDB(id, blob, meta) {
+    return new Promise(function(resolve, reject) {
+        if (!materialDB) { reject(new Error("DB not ready")); return; }
+        var tx = materialDB.transaction(["materials"], "readwrite");
+        var store = tx.objectStore("materials");
+        var record = { id: id, blob: blob, meta: meta, savedAt: Date.now() };
+        var req = store.put(record);
+        req.onsuccess = function() { resolve(true); };
+        req.onerror = function(e) { reject(e.target.error); };
+    });
+}
+
+function getMaterialFromDB(id) {
+    return new Promise(function(resolve, reject) {
+        if (!materialDB) { reject(new Error("DB not ready")); return; }
+        var tx = materialDB.transaction(["materials"], "readonly");
+        var store = tx.objectStore("materials");
+        var req = store.get(id);
+        req.onsuccess = function(e) { if (e.target.result) { resolve(e.target.result); } else { resolve(null); } };
+        req.onerror = function(e) { reject(e.target.error); };
+    });
+}
+
+function getAllMaterialsFromDB() {
+    return new Promise(function(resolve, reject) {
+        if (!materialDB) { reject(new Error("DB not ready")); return; }
+        var tx = materialDB.transaction(["materials"], "readonly");
+        var store = tx.objectStore("materials");
+        var req = store.getAll();
+        req.onsuccess = function(e) { resolve(e.target.result || []); };
+        req.onerror = function(e) { reject(e.target.error); };
+    });
+}
+
+function deleteMaterialFromDB(id) {
+    return new Promise(function(resolve, reject) {
+        if (!materialDB) { reject(new Error("DB not ready")); return; }
+        var tx = materialDB.transaction(["materials"], "readwrite");
+        var store = tx.objectStore("materials");
+        var req = store.delete(id);
+        req.onsuccess = function() { resolve(true); };
+        req.onerror = function(e) { reject(e.target.error); };
+    });
+}
+
+function pgMaterial() {
+    setHead("Study Material", "Study Material");
+    var role = S.userData.role;
+    var canUpload = (role === "teacher" || role === "monitor");
+    var uploadHTML = canUpload ?
+        card("Upload Study Material",
+            '<input type="text" class="input-field mb-10" id="matTitle" placeholder="Title (e.g. Chapter 5 Notes)">' +
+            '<select class="input-field mb-10" id="matType"><option value="pdf">PDF</option><option value="image">Image (Photo)</option><option value="video">Video</option><option value="recording">Recorded Class Video</option></select>' +
+            '<input type="file" class="input-field mb-10" id="matFile" accept=".pdf,image/*,video/*">' +
+            '<div id="matProgress" style="display:none;margin-bottom:8px"><div style="background:rgba(255,255,255,0.1);border-radius:8px;height:6px;overflow:hidden"><div id="matProgressBar" style="background:var(--pg);height:100%;width:0%;transition:width 0.3s"></div></div><div id="matProgressText" class="text-muted text-xs mt-6">Uploading...</div></div>' +
+            '<button class="btn btn-success" id="matUploadBtn" onclick="uploadMaterial()">Upload</button>'
+        ) : '';
+    document.getElementById("pageContent").innerHTML =
+        '<div style="background:rgba(96,165,250,0.08);padding:10px 14px;border-radius:10px;margin-bottom:10px;font-size:12px;color:#93c5fd">' +
+        (canUpload ? 'Upload PDF, photos, or videos from your device. Students can download them to their device.' : 'Download study materials shared by your teacher. Files save to your device.') +
+        '</div>' +
+        uploadHTML +
+        card("Study Materials", '<div id="materialList">Loading...</div>');
+    loadMaterialList();
+}
+
+async function uploadMaterial() {
+    var title = document.getElementById("matTitle").value.trim();
+    var type = document.getElementById("matType").value;
+    var fileInput = document.getElementById("matFile");
+    if (!title) { toast("Enter a title.", "error"); return; }
+    if (!fileInput.files || fileInput.files.length === 0) { toast("Select a file.", "error"); return; }
+    var file = fileInput.files[0];
+    var maxSize = 200 * 1024 * 1024; // 200MB limit
+    if (file.size > maxSize) { toast("File too large (max 200MB).", "error"); return; }
+    var btn = document.getElementById("matUploadBtn");
+    var progDiv = document.getElementById("matProgress");
+    var progBar = document.getElementById("matProgressBar");
+    var progText = document.getElementById("matProgressText");
+    btn.disabled = true;
+    progDiv.style.display = "block";
+    progBar.style.width = "10%";
+    progText.textContent = "Reading file...";
+    try {
+        progBar.style.width = "30%";
+        progText.textContent = "Saving to browser storage...";
+        await initMaterialDB();
+        var matId = "mat_" + Date.now();
+        var fileBlob = file;
+        var fileSize = (file.size / 1024 / 1024).toFixed(2);
+        var meta = {
+            title: title,
+            type: type,
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: fileSize + " MB",
+            uploadedBy: S.uid,
+            uploadedByName: S.userData.name,
+            uploadedByRole: S.userData.role,
+            teacherId: S.userData.teacherId || S.uid,
+            createdAt: Date.now()
+        };
+        await saveMaterialToDB(matId, fileBlob, meta);
+        progBar.style.width = "70%";
+        progText.textContent = "Saving metadata to cloud...";
+        // Save metadata to Firebase so other devices can see it
+        try {
+            await fbPush("materials", meta);
+        } catch(e) { lg("Material metadata save error: " + e.message, "err"); }
+        progBar.style.width = "100%";
+        progText.textContent = "Done!";
+        toast("Study material uploaded!", "success");
+        setTimeout(function() {
+            document.getElementById("matTitle").value = "";
+            fileInput.value = "";
+            progDiv.style.display = "none";
+            btn.disabled = false;
+            loadMaterialList();
+        }, 800);
+    } catch(e) {
+        toast("Upload error: " + e.message, "error");
+        progDiv.style.display = "none";
+        btn.disabled = false;
+    }
+}
+
+async function loadMaterialList() {
+    var el = document.getElementById("materialList");
+    if (!el) return;
+    el.innerHTML = '<div class="text-muted">Loading...</div>';
+    try {
+        await initMaterialDB();
+        var localMats = {};
+        try {
+            var allMats = await getAllMaterialsFromDB();
+            allMats.forEach(function(r) { localMats[r.id] = r; });
+        } catch(e) {}
+        // Get metadata from Firebase
+        var data = await fbRead("materials");
+        var items = [];
+        if (data) for (var k in data) {
+            var v = data[k];
+            // Students only see materials from their teacher
+            if (S.userData.role === "student" || S.userData.role === "monitor") {
+                if (v.teacherId && v.teacherId !== S.userData.teacherId) continue;
+            }
+            items.push(Object.assign({id: k}, v));
+        }
+        // Also include locally stored materials that might not be in Firebase
+        for (var localId in localMats) {
+            var alreadyExists = items.some(function(it) { return it.id === localId; });
+            if (!alreadyExists && localMats[localId].meta) {
+                items.push(Object.assign({id: localId}, localMats[localId].meta));
+            }
+        }
+        items.sort(function(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+        var role = S.userData.role;
+        var canDelete = (role === "teacher" || role === "monitor" || role === "admin");
+        var h = "";
+        if (items.length === 0) {
+            h = '<div class="text-muted" style="padding:20px;text-align:center">No study materials yet.</div>';
+            el.innerHTML = h; return;
+        }
+        items.forEach(function(v) {
+            var dt = v.createdAt ? formatDate(v.createdAt) : "-";
+            var typeIcon = v.type === "pdf" ? "&#128196;" : v.type === "image" ? "&#128247;" : v.type === "recording" ? "&#128249;" : "&#127909;";
+            var typeLabel = v.type === "pdf" ? "PDF" : v.type === "image" ? "Image" : v.type === "recording" ? "Recording" : "Video";
+            var sz = v.fileSize ? " &middot; " + v.fileSize : "";
+            var hasLocal = localMats[v.id] ? true : false;
+            h += '<div class="list-item" style="flex-direction:column;align-items:stretch">';
+            h += '<div style="display:flex;justify-content:space-between;align-items:center">';
+            h += '<div><div class="name">' + typeIcon + " " + escapeHtml(v.title || "Untitled") + ' <span class="tag tag-teacher">' + typeLabel + '</span></div>';
+            h += '<div class="sub">' + dt + " &middot; " + escapeHtml(v.uploadedByName || "-") + sz + '</div></div>';
+            h += '<div style="display:flex;gap:4px">';
+            // Preview button (for local files)
+            if (hasLocal || (v.uploadedBy === S.uid)) {
+                h += '<button class="btn btn-sm btn-success" onclick="previewMaterial(\'' + v.id + '\')">View</button>';
+                h += '<button class="btn btn-sm btn-outline" onclick="downloadMaterial(\'' + v.id + '\')">&#8595; Save</button>';
+            } else {
+                h += '<button class="btn btn-sm btn-outline" onclick="downloadMaterial(\'' + v.id + '\')">&#8595; Download</button>';
+            }
+            if (canDelete && (v.uploadedBy === S.uid || role === "admin")) {
+                h += '<button class="btn btn-sm" style="color:#f87171" onclick="deleteMaterial(\'' + v.id + '\')">&#128465;</button>';
+            }
+            h += '</div></div>';
+            // Preview area
+            h += '<div id="preview_' + v.id + '" style="display:none;margin-top:8px"></div>';
+            h += '</div>';
+        });
+        el.innerHTML = h;
+    } catch(e) {
+        el.innerHTML = '<div class="text-muted">Error loading materials: ' + e.message + '</div>';
+    }
+}
+
+function downloadMaterial(matId) {
+    getMaterialFromDB(matId).then(function(record) {
+        if (!record || !record.blob) {
+            toast("File not found on this device. It was uploaded from another device.", "error");
+            return;
+        }
+        var url = URL.createObjectURL(record.blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = record.meta.fileName || ("material-" + matId);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function() { URL.revokeObjectURL(url); }, 2000);
+        toast("Download started!", "success");
+    }).catch(function(e) {
+        toast("Download error: " + e.message, "error");
+    });
+}
+
+function previewMaterial(matId) {
+    var previewEl = document.getElementById("preview_" + matId);
+    if (!previewEl) return;
+    if (previewEl.style.display === "block") { previewEl.style.display = "none"; previewEl.innerHTML = ""; return; }
+    getMaterialFromDB(matId).then(function(record) {
+        if (!record || !record.blob) {
+            toast("File not on this device.", "error");
+            return;
+        }
+        var url = URL.createObjectURL(record.blob);
+        var meta = record.meta;
+        var type = meta.type || meta.fileType || "";
+        previewEl.innerHTML = "";
+        if (type === "image" || (meta.fileType && meta.fileType.startsWith("image/"))) {
+            var img = document.createElement("img");
+            img.src = url; img.style.cssText = "width:100%;max-width:500px;border-radius:12px;margin-top:8px";
+            previewEl.appendChild(img);
+        } else if (type === "video" || type === "recording" || (meta.fileType && meta.fileType.startsWith("video/"))) {
+            var vid = document.createElement("video");
+            vid.src = url; vid.controls = true; vid.style.cssText = "width:100%;max-width:600px;border-radius:12px;margin-top:8px";
+            previewEl.appendChild(vid);
+        } else if (type === "pdf" || (meta.fileType && meta.fileType === "application/pdf")) {
+            var iframe = document.createElement("iframe");
+            iframe.src = url; iframe.style.cssText = "width:100%;height:400px;border-radius:12px;margin-top:8px;border:1px solid var(--border)";
+            previewEl.appendChild(iframe);
+        } else {
+            var dl = document.createElement("a");
+            dl.href = url; dl.download = meta.fileName || "material"; dl.textContent = "Download " + (meta.fileName || "file");
+            dl.className = "btn btn-sm";
+            previewEl.appendChild(dl);
+        }
+        previewEl.style.display = "block";
+    }).catch(function(e) {
+        toast("Preview error: " + e.message, "error");
+    });
+}
+
+async function deleteMaterial(matId) {
+    if (!confirm("Delete this study material?")) return;
+    try {
+        try { await deleteMaterialFromDB(matId); } catch(e) {}
+        try { await fbWrite("materials/" + matId, null); } catch(e) {}
+        toast("Material deleted.", "success");
+        loadMaterialList();
+    } catch(e) {
+        toast("Delete error: " + e.message, "error");
+    }
+}
+
 // ============================================================
 // ============================================================
 // RECORDED CLASSES PAGE (all roles can see)
@@ -3033,8 +3340,15 @@ async function pgAllLive() {
         if (classes) for (var k in classes) {
             var v = classes[k];
             if (v.status === "live") {
-                // HEARTBEAT CHECK: skip stale classes
-                if (v.heartbeat && (now - v.heartbeat) > 30000) continue;
+                // STALE CHECK: skip and auto-cleanup classes without recent heartbeat
+                var isStale = false;
+                if (!v.heartbeat) { isStale = true; }
+                else if ((now - v.heartbeat) > 30000) { isStale = true; }
+                if (v.createdAt && (now - v.createdAt) > 14400000) { isStale = true; }
+                if (isStale) {
+                    try { await fbUpdate("classes/" + k, { status: "ended", endedAt: now, heartbeat: null }); } catch(e) {}
+                    continue;
+                }
                 var creator = users && users[v.createdBy] ? users[v.createdBy] : null;
                 items.push(Object.assign({id: k}, v, {
                     creatorName: creator ? creator.name : v.createdByName || "-",
