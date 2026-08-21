@@ -2057,7 +2057,7 @@ async function startLive() {
     lg("Starting " + sessionType + ": " + name, "info");
     var pid = "edu-" + S.uid.substring(0, 12);
     if (S.peer) { try { S.peer.destroy(); } catch(e) {} }
-    S.peer = new Peer(pid);
+    S.peer = new Peer(pid, { debug: 0, config: { iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }] } });
     S.studentConns = {};
     S.peer.on("open", function(id) {
         lg("Peer opened: " + id, "ok");
@@ -2469,15 +2469,28 @@ async function toggleScreenShare() {
 
 async function startScreenShare() {
     if (!S.peer || !S.stream) { toast("Start live class first.", "error"); return; }
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-        toast("Screen share not supported in this browser. Use Chrome on HTTPS.", "error");
-        return;
+    // Try getDisplayMedia (desktop), fallback to back camera (mobile)
+    var screenStream = null;
+    try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+            screenStream = await navigator.mediaDevices.getDisplayMedia({
+                video: { mediaSource: "screen" },
+                audio: false
+            });
+        } else {
+            toast("Screen share not available on mobile. Using back camera.", "info");
+            screenStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+        }
+    } catch(screenErr) {
+        lg("getDisplayMedia failed, trying back camera: " + screenErr.message, "warn");
+        try {
+            screenStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+        } catch(camErr) {
+            toast("Screen share failed: " + camErr.message, "error");
+            return;
+        }
     }
     try {
-        var screenStream = await navigator.mediaDevices.getDisplayMedia({
-            video: { mediaSource: "screen" },
-            audio: false
-        });
         S.screenStream = screenStream;
         S.isScreenShare = true;
         
@@ -2627,13 +2640,13 @@ async function joinLiveByPeerId(peerId) {
     S.teacherPeerId = peerId;
     var spid = "edu-s-" + S.uid.substring(0, 10);
     if (S.peer) { try { S.peer.destroy(); } catch(e) {} }
-    S.peer = new Peer(spid);
+    S.peer = new Peer(spid, { debug: 0, config: { iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }] } });
     S.peer.on("open", function(id) {
         lg("Student peer opened: " + id, "ok");
         S.peerId = id;
         
-        // Establish DATA connection with teacher (for media control)
-        var conn = S.peer.connect(peerId, { reliable: true });
+        // Establish DATA connection with teacher (for media control) — unreliable = low latency, no retries
+        var conn = S.peer.connect(peerId, { reliable: false, serialization: "json" });
         S.dataConn = conn;
         conn.on("open", function() {
             lg("Data channel established with teacher", "ok");
@@ -2829,14 +2842,28 @@ async function enableStudentMedia(media) {
             toast("Teacher enabled your microphone", "info");
             if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_status", media: "mic", action: "on" });
         } else if (media === "screen") {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-                if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_error", media: "screen", error: "Not supported" });
-                toast("Screen share not supported", "error");
-                return;
+            // Screen share: try getDisplayMedia first (desktop), fallback to back camera (mobile)
+            try {
+                if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+                    S.studentScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+                } else {
+                    // Mobile fallback: use back camera as "screen" share
+                    toast("Screen share not available on mobile. Using back camera instead.", "info");
+                    S.studentScreenStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+                }
+            } catch(screenErr) {
+                // If getDisplayMedia fails (e.g. user cancels or not supported), try back camera
+                lg("getDisplayMedia failed, trying back camera: " + screenErr.message, "warn");
+                try {
+                    S.studentScreenStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+                } catch(camErr) {
+                    if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_error", media: "screen", error: camErr.message });
+                    toast("Could not start screen share: " + camErr.message, "error");
+                    return;
+                }
             }
-            S.studentScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
             S.studentScreenEnabled = true;
-            // Replace camera video track with screen track in the call
+            // Replace camera video track with screen/back-camera track in the call
             var screenTrack = S.studentScreenStream.getVideoTracks()[0];
             for (var pid3 in S.calls) {
                 var sender3 = S.calls[pid3].peerConnection ?
@@ -2846,7 +2873,7 @@ async function enableStudentMedia(media) {
             S.studentScreenStream.getVideoTracks()[0].onended = function() {
                 disableStudentMedia("screen");
             };
-            toast("Teacher requested screen share", "info");
+            toast("Screen share started", "info");
             if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_status", media: "screen", action: "on" });
         }
     } catch(e) {
