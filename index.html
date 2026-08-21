@@ -254,6 +254,24 @@ select.input-field{appearance:none;cursor:pointer}
 .video-controls button.danger{color:var(--danger)}
 .video-controls button.danger:hover{background:rgba(248,113,113,0.15)}
 
+/* LIVE CHAT OVERLAY (during live class) */
+.chat-overlay{position:absolute;bottom:0;left:0;right:0;height:90%;display:flex;flex-direction:column;background:rgba(11,17,32,0.95);backdrop-filter:blur(16px);z-index:50;border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform 0.3s ease}
+.chat-overlay.open{transform:translateY(0)}
+.chat-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.chat-header .title{font-size:14px;font-weight:600;color:var(--text)}
+.chat-header .close-btn{background:none;border:none;color:var(--tm);font-size:20px;cursor:pointer;padding:4px 8px}
+.chat-messages{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.chat-msg{padding:6px 12px;border-radius:12px;font-size:13px;max-width:80%;word-break:break-word}
+.chat-msg.from-me{background:rgba(167,139,250,0.15);color:#a78bfa;align-self:flex-end;text-align:right}
+.chat-msg.from-other{background:rgba(255,255,255,0.06);color:var(--text);align-self:flex-start}
+.chat-msg .sender{font-size:10px;color:var(--tm);margin-bottom:2px}
+.chat-input-bar{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0;background:rgba(0,0,0,0.3)}
+.chat-input-bar input{flex:1;padding:10px 16px;border-radius:24px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:#fff;outline:none;font-size:13px}
+.chat-input-bar input:focus{border-color:rgba(167,139,250,0.4)}
+.chat-input-bar button{background:var(--pg);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-toggle-btn{position:absolute;bottom:16px;right:16px;background:rgba(167,139,250,0.2);border:1px solid rgba(167,139,250,0.4);color:#a78bfa;width:44px;height:44px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;z-index:40;backdrop-filter:blur(8px)}
+.chat-toggle-btn:hover{background:rgba(167,139,250,0.3)}
+
 /* LIVE BADGE */
 .live-dot{display:inline-block;width:8px;height:8px;background:var(--danger);border-radius:50%;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
@@ -2001,7 +2019,11 @@ function pgLive() {
         document.getElementById("pageContent").innerHTML =
             '<div style="background:rgba(34,197,94,0.1);padding:10px 14px;border-radius:10px;display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="width:10px;height:10px;background:#22c55e;border-radius:50%;animation:blink 1s infinite"></span><span style="color:#22c55e;font-weight:600;font-size:14px">LIVE</span>' + studentCountBadge + '</div>' +
             (isTeacher ? card("Your Class is Live", '<div class="text-muted text-sm">Students from your class can see and join this live class automatically.</div>') : '') +
-            '<div class="video-wrapper" style="min-height:300px"><div id="videoContainer"></div><div class="video-controls" id="vidControls" style="display:flex"><button id="btnMute" onclick="toggleMute()">Mic On</button><button id="btnCam" onclick="toggleCam()">Cam On</button>' + (isTeacher ? '<button id="btnFlip" onclick="flipCamera()" style="font-size:16px" title="Flip Camera">&#x21BB;</button><button id="btnScreen" onclick="toggleScreenShare()" style="font-size:16px" title="Share Screen">&#128187;</button>' : '') + recBtnHtml + '<div id="recIndicator" style="display:' + recIndDisplay + ';background:#dc2626;color:#fff;padding:2px 10px;border-radius:6px;font-size:11px;font-weight:700;animation:blink 1s infinite">REC 00:00</div><button class="danger" onclick="' + (isStudent ? 'leaveLive()' : 'endLive()') + '">' + (isStudent ? 'Leave' : 'End') + '</button></div></div>' +
+            '<div class="video-wrapper" style="min-height:300px;flex:1"><div id="videoContainer"></div><div class="video-controls" id="vidControls" style="display:flex"><button id="btnMute" onclick="toggleMute()">Mic On</button><button id="btnCam" onclick="toggleCam()">Cam On</button>' + (isTeacher ? '<button id="btnFlip" onclick="flipCamera()" style="font-size:16px" title="Flip Camera">&#x21BB;</button><button id="btnScreen" onclick="toggleScreenShare()" style="font-size:16px" title="Share Screen">&#128187;</button>' : '') + recBtnHtml + '<div id="recIndicator" style="display:' + recIndDisplay + ';background:#dc2626;color:#fff;padding:2px 10px;border-radius:6px;font-size:11px;font-weight:700;animation:blink 1s infinite">REC 00:00</div><button class="danger" onclick="' + (isStudent ? 'leaveLive()' : 'endLive()') + '">' + (isStudent ? 'Leave' : 'End') + '</button></div>' +
+            // Chat toggle button + chat overlay
+            '<button class="chat-toggle-btn" onclick="toggleChat()" title="Chat">&#128172;</button>' +
+            '<div class="chat-overlay" id="chatOverlay"><div class="chat-header"><span class="title">Live Chat</span><button class="close-btn" onclick="toggleChat()">&times;</button></div><div class="chat-messages" id="chatMessages"></div><div class="chat-input-bar"><input type="text" id="chatInput" placeholder="Type your message..." onkeydown="if(event.key===\'Enter\')sendChatMsg()"><button onclick="sendChatMsg()">&#9658;</button></div></div>' +
+            '</div>' +
             studentListCard;
         
         // Re-attach existing stream to new video container
@@ -2041,7 +2063,10 @@ function pgLive() {
         // STUDENT: No Peer ID input. Auto-show teacher's live class.
         document.getElementById("pageContent").innerHTML =
             card("Live Class", '<div id="liveList" style="margin-top:4px">Loading live classes...</div>') +
-            '<div class="video-wrapper" style="min-height:300px;display:none" id="studentVideoWrap"><div id="videoContainer"></div><div class="video-controls"><button class="danger" onclick="leaveLive()">Leave</button></div></div>';
+            '<div class="video-wrapper" style="min-height:300px;display:none;flex:1" id="studentVideoWrap"><div id="videoContainer"></div><div class="video-controls"><button class="danger" onclick="leaveLive()">Leave</button></div>' +
+            '<button class="chat-toggle-btn" onclick="toggleChat()" title="Chat">&#128172;</button>' +
+            '<div class="chat-overlay" id="chatOverlay"><div class="chat-header"><span class="title">Live Chat</span><button class="close-btn" onclick="toggleChat()">&times;</button></div><div class="chat-messages" id="chatMessages"></div><div class="chat-input-bar"><input type="text" id="chatInput" placeholder="Type your message..." onkeydown="if(event.key===\'Enter\')sendChatMsg()"><button onclick="sendChatMsg()">&#9658;</button></div></div>' +
+            '</div>';
         loadLiveList();
     }
 }
@@ -2469,28 +2494,17 @@ async function toggleScreenShare() {
 
 async function startScreenShare() {
     if (!S.peer || !S.stream) { toast("Start live class first.", "error"); return; }
-    // Try getDisplayMedia (desktop), fallback to back camera (mobile)
-    var screenStream = null;
-    try {
-        if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-            screenStream = await navigator.mediaDevices.getDisplayMedia({
-                video: { mediaSource: "screen" },
-                audio: false
-            });
-        } else {
-            toast("Screen share not available on mobile. Using back camera.", "info");
-            screenStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-        }
-    } catch(screenErr) {
-        lg("getDisplayMedia failed, trying back camera: " + screenErr.message, "warn");
-        try {
-            screenStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-        } catch(camErr) {
-            toast("Screen share failed: " + camErr.message, "error");
-            return;
-        }
+    // Screen share requires getDisplayMedia — works on desktop Chrome/Firefox/Edge + Android Chrome
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        toast("Screen share needs Chrome browser on HTTPS. Open app via https:// link, not file.", "error");
+        lg("getDisplayMedia not available. Protocol: " + location.protocol, "err");
+        return;
     }
     try {
+        var screenStream = await navigator.mediaDevices.getDisplayMedia({
+            video: { mediaSource: "screen" },
+            audio: false
+        });
         S.screenStream = screenStream;
         S.isScreenShare = true;
         
@@ -2800,6 +2814,10 @@ function handleStudentData(peerId, data) {
         var btnId = "btn" + (data.media === "screen" ? "Screen" : data.media === "camera" ? "Cam" : "Mic") + "_" + peerId;
         var btn = document.getElementById(btnId);
         if (btn) { btn.classList.remove("btn-success"); btn.classList.add("btn-outline"); btn.style.color = ""; }
+    } else if (data.type === "chat") {
+        // Student sent a chat message — display it
+        var senderName = S.studentConns[peerId] && S.studentConns[peerId]._studentName ? S.studentConns[peerId]._studentName : "Student";
+        displayChatMsg(senderName, data.text, false);
     }
 }
 
@@ -2817,6 +2835,9 @@ function handleTeacherData(data) {
         } else if (action === "off") {
     disableStudentMedia(media);
         }
+    } else if (data.type === "chat") {
+        // Teacher sent a chat message — display it
+        displayChatMsg("Teacher", data.text, false);
     }
 }
 
@@ -2842,25 +2863,18 @@ async function enableStudentMedia(media) {
             toast("Teacher enabled your microphone", "info");
             if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_status", media: "mic", action: "on" });
         } else if (media === "screen") {
-            // Screen share: try getDisplayMedia first (desktop), fallback to back camera (mobile)
+            // Screen share requires getDisplayMedia — works on desktop Chrome + Android Chrome on HTTPS
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_error", media: "screen", error: "Screen share needs Chrome on HTTPS" });
+                toast("Screen share needs Chrome browser on HTTPS link.", "error");
+                return;
+            }
             try {
-                if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-                    S.studentScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
-                } else {
-                    // Mobile fallback: use back camera as "screen" share
-                    toast("Screen share not available on mobile. Using back camera instead.", "info");
-                    S.studentScreenStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-                }
+                S.studentScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
             } catch(screenErr) {
-                // If getDisplayMedia fails (e.g. user cancels or not supported), try back camera
-                lg("getDisplayMedia failed, trying back camera: " + screenErr.message, "warn");
-                try {
-                    S.studentScreenStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-                } catch(camErr) {
-                    if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_error", media: "screen", error: camErr.message });
-                    toast("Could not start screen share: " + camErr.message, "error");
-                    return;
-                }
+                if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_error", media: "screen", error: screenErr.message });
+                toast("Screen share failed: " + screenErr.message, "error");
+                return;
             }
             S.studentScreenEnabled = true;
             // Replace camera video track with screen/back-camera track in the call
@@ -2881,6 +2895,68 @@ async function enableStudentMedia(media) {
         if (S.dataConn && S.dataConn.open) S.dataConn.send({ type: "media_error", media: media, error: e.message });
         toast("Could not enable " + media + ": " + e.message, "error");
     }
+}
+
+// ============================================================
+// LIVE CHAT FUNCTIONS (temporary chat during live class)
+// ============================================================
+function toggleChat() {
+    var overlay = document.getElementById("chatOverlay");
+    if (!overlay) return;
+    if (overlay.classList.contains("open")) {
+        overlay.classList.remove("open");
+    } else {
+        overlay.classList.add("open");
+        // Scroll to bottom
+        var msgs = document.getElementById("chatMessages");
+        if (msgs) { msgs.scrollTop = msgs.scrollHeight; }
+        // Focus input
+        setTimeout(function() {
+            var input = document.getElementById("chatInput");
+            if (input) input.focus();
+        }, 300);
+    }
+}
+
+function sendChatMsg() {
+    var input = document.getElementById("chatInput");
+    if (!input) return;
+    var text = input.value.trim();
+    if (!text) return;
+    input.value = "";
+    
+    // Display my own message
+    displayChatMsg(S.userData.name || "You", text, true);
+    
+    // Send via data channel
+    var msg = { type: "chat", text: text, from: S.userData.name };
+    if (S.dataConn && S.dataConn.open) {
+        // Student sending to teacher
+        S.dataConn.send(msg);
+    } else if (S.studentConns) {
+        // Teacher sending to all students
+        for (var pid in S.studentConns) {
+            if (S.studentConns[pid] && S.studentConns[pid].open) {
+                try { S.studentConns[pid].send(msg); } catch(e) { lg("Chat send error: " + e.message, "err"); }
+            }
+        }
+    }
+}
+
+function displayChatMsg(sender, text, isMe) {
+    var msgs = document.getElementById("chatMessages");
+    if (!msgs) return;
+    var div = document.createElement("div");
+    div.className = "chat-msg " + (isMe ? "from-me" : "from-other");
+    if (!isMe) {
+        var s = document.createElement("div");
+        s.className = "sender";
+        s.textContent = sender;
+        div.appendChild(s);
+    }
+    div.appendChild(document.createTextNode(text));
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
 }
 
 function disableStudentMedia(media) {
